@@ -1,8 +1,8 @@
 # vlabs models
 3D meshes and textures, embedded animations, etc.
 
-===============
 folder structure
+===============
 
     |--models/
        |--[vlab name]/                 -- [vlab name] = [science name]-[science chapter]-[subject] (see /README.md for short name)
@@ -14,4 +14,10 @@ folder structure
           |--prod/                     -- resources needed for production stage
              |--textures/              -- compressed / resized textures
              |--[vlab name].zip        -- zipped [vlab name].json
-                         
+
+             
+Blender setup
+===============
+1) Y-axis positive direction is towards monitor depth
+2) X-axis positive direction is to the right side of monitor
+3) Units Millimeters
