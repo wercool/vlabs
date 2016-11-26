@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <title>Friction coefficient measurement</title>
+    <meta charset="utf-8">
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100% }
+    </style>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/dev/build/three.min.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/dev/examples/js/libs/stats.min.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/dev/examples/js/libs/dat.gui.min.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/dev/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/dev/examples/js/Detector.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/dev/examples/js/loaders/ColladaLoader.js"></script>
+
+    <script src="physi.js"></script>
+
+    <!-- vlabs js -->
+    <script src="initwebgl.js"></script>
+    <script src="loadscene.js"></script>
+    <script src="initscene.js"></script>
+    <!-- Friction coefficient measurement VLab specific -->
+    <script src="ph-mpd-fcm.js"></script>
+
+</head>
+<body>
+    <script>
+
+    Physijs.scripts.worker = "physijs_worker.js";
+    Physijs.scripts.ammo = "ammo.js";
+
+    initWebGL();
+    loadScene("ph-mpd-fcm.json", addObjects);
+
+    </script>
+</body>
+</html>
+
