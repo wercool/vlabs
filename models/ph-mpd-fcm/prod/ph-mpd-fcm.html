@@ -47,12 +47,22 @@
 
     init();
 
-    var audio = new Audio('sounds/578551_SOUNDDOGS__ch.mp3');
-    audio.loop = false;
+    var contactAudio = new Audio('sounds/contact.mp3');
+    contactAudio.loop = false;
+    contactAudio.autoplay = false;
+    contactAudio.preload = "auto";
+    var contactAudioPlayed = false;
+
+    var slipAudio = new Audio('sounds/slip.mp3');
+    slipAudio.loop = false;
+    slipAudio.autoplay = false;
+    slipAudio.preload = "auto";
+    var slipAudioPlayed = false;
 
     var physijsReady = false;
 
     var slopingSurface;
+    var slopingBody;
     var plumbMesh;
 
     // - Functions -
@@ -68,8 +78,8 @@
         camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 2000 );
 
 
-        scene = new Physijs.Scene({ fixedTimeStep: 1 / 60 });
-        scene.setGravity(new THREE.Vector3( 0, -9.81, 0 ));
+        scene = new Physijs.Scene({ fixedTimeStep: 1 / 120 });
+        scene.setGravity(new THREE.Vector3( 0, -30, 0 ));
         scene.addEventListener(
             'update',
             function() 
@@ -132,10 +142,21 @@
             {
                 slopingSurface.rotation.set(0, 0, slopingSurfaceZRot);
                 slopingSurface.__dirtyRotation = true;
-                slopingSurfaceZRot -= 0.0005;
+                slopingSurfaceZRot -= 0.001;
                 scene.simulate(undefined, 1);
                 physijsReady = false;
                 plumbMesh.rotation.set(0, 0, -slopingSurfaceZRot);
+
+                var slopingBodyLinSpeed = slopingBody.getLinearVelocity();
+//                console.log(slopingBodyLinSpeed);
+                if (slopingBodyLinSpeed.x > 1)
+                {
+                    if (!slipAudioPlayed)
+                    {
+                        slipAudio.play();
+                        slipAudioPlayed = true;
+                    }
+                }
             }
         }
 
@@ -202,7 +223,7 @@
                 case "slopingSurface":
                     physijsMaterial = Physijs.createMaterial(
                         mesh.material,
-                        0.5, // friction
+                        0.2, // friction
                         0.0  // restitution
                     );
                     shape = new Physijs.ConvexMesh(
@@ -239,7 +260,7 @@
                     physijsMaterial = Physijs.createMaterial(
                         mesh.material,
                         0.8, // friction
-                        0.0  // restitution
+                        0.4  // restitution
                     );
                     shape = new Physijs.ConvexMesh(
                         mesh.geometry,
@@ -252,8 +273,8 @@
                 case "slopingBody":
                     physijsMaterial = Physijs.createMaterial(
                         mesh.material,
-                        0.2, // friction
-                        0.0  // restitution
+                        0.4, // friction
+                        0.2  // restitution
                     );
                     shape = new Physijs.BoxMesh(
                         mesh.geometry,
@@ -266,9 +287,14 @@
                         console.log(other_object.name);
                         if (other_object.name == 'slopingSurfaceFixture')
                         {
-                            audio.play();
+                            if (!contactAudioPlayed)
+                            {
+                                contactAudio.play();
+                                contactAudioPlayed = true;
+                            }
                         }
                     });
+                    slopingBody = shape;
                 break;
                 case "plumb":
                     plumbMesh = mesh;

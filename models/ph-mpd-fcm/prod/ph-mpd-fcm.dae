@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.78.0 commit date:2016-10-24, commit time:12:20, hash:e8299c8</authoring_tool>
     </contributor>
-    <created>2016-11-28T01:30:07</created>
-    <modified>2016-11-28T01:30:07</modified>
+    <created>2016-11-28T17:36:43</created>
+    <modified>2016-11-28T17:36:43</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -473,7 +473,7 @@
         <instance_light url="#Lamp-light"/>
       </node>
       <node id="slopingBody" name="slopingBody" type="NODE">
-        <matrix sid="transform">0.9848077 0 0.1736482 -7.108243 0 1 0 -1.6589e-7 -0.1736482 0 0.9848077 1.669738 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 -10.97214 0 1 0 -1.57361e-7 0 0 1 0.3904279 0 0 0 1</matrix>
         <instance_geometry url="#Cube_001-mesh" name="slopingBody">
           <bind_material>
             <technique_common>
@@ -483,7 +483,7 @@
         </instance_geometry>
       </node>
       <node id="slopingSurface" name="slopingSurface" type="NODE">
-        <matrix sid="transform">0.9848077 0 0.1736482 0 0 1 0 0 -0.1736482 0 0.9848077 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 -3.647498 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Cube-mesh" name="slopingSurface">
           <bind_material>
             <technique_common>
@@ -492,7 +492,7 @@
           </bind_material>
         </instance_geometry>
         <node id="plumb" name="plumb" type="NODE">
-          <matrix sid="transform">0.9848077 0 -0.1736482 -8.251369 0 1 0 -2.146095 0.1736482 0 0.9848077 0.08844948 0 0 0 1</matrix>
+          <matrix sid="transform">1 0 0 -8.251369 0 1 0 -2.146095 0 0 1 0.08844951 0 0 0 1</matrix>
           <instance_geometry url="#Cylinder-mesh" name="plumb">
             <bind_material>
               <technique_common>
@@ -517,7 +517,7 @@
         <instance_light url="#Lamp_001-light"/>
       </node>
       <node id="slopingSurfaceFixture" name="slopingSurfaceFixture" type="NODE">
-        <matrix sid="transform">1 0 0 0.0215901 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 -3.625908 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Cube_005-mesh" name="slopingSurfaceFixture">
           <bind_material>
             <technique_common>
