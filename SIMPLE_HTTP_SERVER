@@ -1,0 +1,6 @@
+1. cd to the folder with files (/home/maska/git/vlab/models/valter)
+2. python -m SimpleHTTPServer
+3. http://localhost:8000/viewer.html
+
+
+python -c 'import BaseHTTPServer as bhs, SimpleHTTPServer as shs; bhs.HTTPServer(("0.0.0.0", 8000), shs.SimpleHTTPRequestHandler).serve_forever()'
