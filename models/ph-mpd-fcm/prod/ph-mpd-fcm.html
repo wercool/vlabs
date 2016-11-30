@@ -64,6 +64,9 @@
     var slopingSurface;
     var slopingBody;
     var plumbMesh;
+    var frameMesh;
+    var framePivotMesh;
+    var rope;
 
     // - Functions -
     function init()
@@ -78,7 +81,7 @@
         camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 2000 );
 
 
-        scene = new Physijs.Scene({ fixedTimeStep: 1 / 120 });
+        scene = new Physijs.Scene({ fixedTimeStep: 1 / 100 });
         scene.setGravity(new THREE.Vector3( 0, -30, 0 ));
         scene.addEventListener(
             'update',
@@ -133,6 +136,8 @@
         renderer.setSize( window.innerWidth, window.innerHeight );
     }
 
+
+    var dAngle = 0.001;
     var slopingSurfaceZRot = 0.0;
     function render()
     {
@@ -142,10 +147,28 @@
             {
                 slopingSurface.rotation.set(0, 0, slopingSurfaceZRot);
                 slopingSurface.__dirtyRotation = true;
-                slopingSurfaceZRot -= 0.001;
+                slopingSurfaceZRot -= dAngle;
                 scene.simulate(undefined, 1);
                 physijsReady = false;
-                plumbMesh.rotation.set(0, 0, -slopingSurfaceZRot);
+                plumbMesh.rotation.z = -slopingSurfaceZRot;
+                frameMesh.rotation.z += dAngle - 0.0002;
+
+                //Rope
+                slopingSurface.updateMatrixWorld();
+                var framePivot_pos = new THREE.Vector3();
+                framePivot_pos.setFromMatrixPosition(scene.getObjectByName("framePivot").matrixWorld);
+                var pulley_pos = new THREE.Vector3().copy(scene.getObjectByName("pulley").position);
+                pulley_pos.y += 0.3;
+                var rope_spline = new THREE.CatmullRomCurve3([framePivot_pos, pulley_pos]);
+                var rope_geometry = new THREE.Geometry();
+                rope_geometry.vertices = rope_spline.getPoints(5);
+                var p;
+                for ( var i = 0; i < 5; i ++ )
+                {
+                    p = rope.geometry.vertices[i];
+                    p.copy(rope_geometry.vertices[i]);
+                }
+                rope.geometry.verticesNeedUpdate = true;
 
                 var slopingBodyLinSpeed = slopingBody.getLinearVelocity();
 //                console.log(slopingBodyLinSpeed);
@@ -273,8 +296,8 @@
                 case "slopingBody":
                     physijsMaterial = Physijs.createMaterial(
                         mesh.material,
-                        0.4, // friction
-                        0.2  // restitution
+                        0.2, // friction
+                        0.5  // restitution
                     );
                     shape = new Physijs.BoxMesh(
                         mesh.geometry,
@@ -296,10 +319,36 @@
                     });
                     slopingBody = shape;
                 break;
+                case "support":
+                    physijsMaterial = Physijs.createMaterial(
+                        mesh.material);
+                    shape = new Physijs.ConvexMesh(
+                        mesh.geometry,
+                        physijsMaterial
+                    );
+                    shape.name = mesh.name;
+                    shape.mass = 0;
+                    physijsShapeAdded = true;
+                break;
                 case "plumb":
                     plumbMesh = mesh;
                     plumbMesh.receiveShadow = false;
                     plumbMesh.castShadow = true;
+                break;
+                case "frame":
+                    frameMesh = mesh;
+                    frameMesh.receiveShadow = false;
+                    frameMesh.castShadow = true;
+                break;
+                case "framePivot":
+                    framePivotMesh = mesh;
+                    framePivotMesh.receiveShadow = false;
+                    framePivotMesh.castShadow = true;
+                break;
+                case "pulley":
+                    mesh.receiveShadow = false;
+                    mesh.castShadow = false;
+                    scene.add(mesh);
                 break;
                 default:
                     mesh.receiveShadow = true;
@@ -332,26 +381,33 @@
             scene.add( light );
         }
 
-/*
-        var material = Physijs.createMaterial(
-            new THREE.MeshLambertMaterial(),
-            .6, // medium friction
-            1.3 // low restitution
-        );
-        var ball = new Physijs.SphereMesh(
-            new THREE.SphereGeometry( 0.5 ),
-            material
-        );
-        ball.addEventListener( 'collision', function(other_object, linear_velocity, angular_velocity) {
-            console.log("!!!!!!!!!!!!!!!!!!!");
-        });
-        ball.position.x = -1;
-        ball.position.y = 3;
-        ball.position.z = 0;
-        scene.add(ball);
-*/
-
         scene.getObjectByName("slopingSurface").add(plumbMesh);
+        frameMesh.add(framePivotMesh);
+        scene.getObjectByName("slopingSurface").add(frameMesh);
+
+
+        //Rope
+        var framePivot_pos = new THREE.Vector3();
+        scene.getObjectByName("slopingSurface").updateMatrixWorld();
+        framePivot_pos.setFromMatrixPosition(scene.getObjectByName("framePivot").matrixWorld);
+
+        var frame_pos  = framePivot_pos;
+        var pulley_pos = new THREE.Vector3().copy(scene.getObjectByName("pulley").position);
+        pulley_pos.y += 0.3;
+
+        var rope_spline = new THREE.CatmullRomCurve3([frame_pos, pulley_pos]);
+        var rope_geometry = new THREE.Geometry();
+        rope_geometry.vertices = rope_spline.getPoints(5);
+        rope_spline.type = 'chordal';
+        rope_spline.mesh = new THREE.Line(rope_geometry.clone(), new THREE.LineBasicMaterial( {
+                            color: 0x352d2d,
+                            opacity: 1.0,
+                            linewidth: 2
+                            } ) );
+        rope_spline.mesh.castShadow = true;
+        rope = rope_spline.mesh;
+        scene.add(rope);
+
 
         scene.simulate();
     }
