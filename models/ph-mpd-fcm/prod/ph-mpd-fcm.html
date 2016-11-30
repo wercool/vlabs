@@ -53,6 +53,18 @@
     contactAudio.preload = "auto";
     var contactAudioPlayed = false;
 
+    var contact1Audio = new Audio('sounds/contact1.mp3');
+    contact1Audio.loop = false;
+    contact1Audio.autoplay = false;
+    contact1Audio.preload = "auto";
+    var contact1AudioPlayed = false;
+
+    var contact2Audio = new Audio('sounds/contact2.mp3');
+    contact2Audio.loop = false;
+    contact2Audio.autoplay = false;
+    contact2Audio.preload = "auto";
+    var contact2AudioPlayed = false;
+
     var slipAudio = new Audio('sounds/slip.mp3');
     slipAudio.loop = false;
     slipAudio.autoplay = false;
@@ -81,7 +93,7 @@
         camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 2000 );
 
 
-        scene = new Physijs.Scene({ fixedTimeStep: 1 / 100 });
+        scene = new Physijs.Scene({ fixedTimeStep: 1 / 120 });
         scene.setGravity(new THREE.Vector3( 0, -30, 0 ));
         scene.addEventListener(
             'update',
@@ -158,7 +170,7 @@
                 var framePivot_pos = new THREE.Vector3();
                 framePivot_pos.setFromMatrixPosition(scene.getObjectByName("framePivot").matrixWorld);
                 var pulley_pos = new THREE.Vector3().copy(scene.getObjectByName("pulley").position);
-                pulley_pos.y += 0.3;
+                pulley_pos.y += 0.25;
                 var rope_spline = new THREE.CatmullRomCurve3([framePivot_pos, pulley_pos]);
                 var rope_geometry = new THREE.Geometry();
                 rope_geometry.vertices = rope_spline.getPoints(5);
@@ -246,7 +258,7 @@
                 case "slopingSurface":
                     physijsMaterial = Physijs.createMaterial(
                         mesh.material,
-                        0.2, // friction
+                        0.5, // friction
                         0.0  // restitution
                     );
                     shape = new Physijs.ConvexMesh(
@@ -282,7 +294,7 @@
                 case "slopingSurfaceFixture":
                     physijsMaterial = Physijs.createMaterial(
                         mesh.material,
-                        0.8, // friction
+                        0.5, // friction
                         0.4  // restitution
                     );
                     shape = new Physijs.ConvexMesh(
@@ -296,7 +308,7 @@
                 case "slopingBody":
                     physijsMaterial = Physijs.createMaterial(
                         mesh.material,
-                        0.2, // friction
+                        0.1, // friction
                         0.5  // restitution
                     );
                     shape = new Physijs.BoxMesh(
@@ -304,7 +316,7 @@
                         physijsMaterial
                     );
                     shape.name = mesh.name;
-                    shape.mass = 0.15;
+                    shape.mass = 0.2;
                     physijsShapeAdded = true;
                     shape.addEventListener( 'collision', function(other_object, linear_velocity, angular_velocity) {
                         console.log(other_object.name);
@@ -314,6 +326,24 @@
                             {
                                 contactAudio.play();
                                 contactAudioPlayed = true;
+                            }
+                        }
+                        if (other_object.name == 'tableTop')
+                        {
+                            if (!contact1AudioPlayed)
+                            {
+                                contact1Audio.volume = 0.7;
+                                contact1Audio.play();
+                                contact1AudioPlayed = true;
+                            }
+                        }
+                        if (other_object.name == 'support')
+                        {
+                            if (!contact2AudioPlayed)
+                            {
+                                contact2Audio.volume = 0.4;
+                                contact2Audio.play();
+                                contact2AudioPlayed = true;
                             }
                         }
                     });
@@ -393,7 +423,7 @@
 
         var frame_pos  = framePivot_pos;
         var pulley_pos = new THREE.Vector3().copy(scene.getObjectByName("pulley").position);
-        pulley_pos.y += 0.3;
+        pulley_pos.y += 0.25;
 
         var rope_spline = new THREE.CatmullRomCurve3([frame_pos, pulley_pos]);
         var rope_geometry = new THREE.Geometry();
