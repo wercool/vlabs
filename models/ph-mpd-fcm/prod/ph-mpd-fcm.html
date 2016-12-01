@@ -171,15 +171,21 @@
                 framePivot_pos.setFromMatrixPosition(scene.getObjectByName("framePivot").matrixWorld);
                 var pulley_pos = new THREE.Vector3().copy(scene.getObjectByName("pulley").position);
                 pulley_pos.y += 0.25;
-                var rope_spline = new THREE.CatmullRomCurve3([framePivot_pos, pulley_pos]);
+                var pulleyMotor_pos = new THREE.Vector3().copy(scene.getObjectByName("pulleyMotor").position);
+                pulleyMotor_pos.y += 0.3;
+
                 var rope_geometry = new THREE.Geometry();
-                rope_geometry.vertices = rope_spline.getPoints(5);
+                rope_geometry.vertices.push(framePivot_pos);
+                rope_geometry.vertices.push(pulley_pos);
+                rope_geometry.vertices.push(pulleyMotor_pos);
+
                 var p;
-                for ( var i = 0; i < 5; i ++ )
+                for ( var i = 0; i < 3; i ++ )
                 {
                     p = rope.geometry.vertices[i];
                     p.copy(rope_geometry.vertices[i]);
                 }
+
                 rope.geometry.verticesNeedUpdate = true;
 
                 var slopingBodyLinSpeed = slopingBody.getLinearVelocity();
@@ -407,8 +413,8 @@
         for ( var i = 0, il = lights.length; i < il; i++ )
         {
             var light = lights[ i ];
-            light.castShadow = true;
-            scene.add( light );
+            light.castShadow = light.name == "Lamp";
+            scene.add(light);
         }
 
         scene.getObjectByName("slopingSurface").add(plumbMesh);
@@ -425,17 +431,21 @@
         var pulley_pos = new THREE.Vector3().copy(scene.getObjectByName("pulley").position);
         pulley_pos.y += 0.25;
 
-        var rope_spline = new THREE.CatmullRomCurve3([frame_pos, pulley_pos]);
+        var pulleyMotor_pos = new THREE.Vector3().copy(scene.getObjectByName("pulleyMotor").position);
+        pulleyMotor_pos.y += 0.3;
+
         var rope_geometry = new THREE.Geometry();
-        rope_geometry.vertices = rope_spline.getPoints(5);
-        rope_spline.type = 'chordal';
-        rope_spline.mesh = new THREE.Line(rope_geometry.clone(), new THREE.LineBasicMaterial( {
+        rope_geometry.vertices.push(framePivot_pos);
+        rope_geometry.vertices.push(pulley_pos);
+        rope_geometry.vertices.push(pulleyMotor_pos);
+
+        var material = new THREE.LineBasicMaterial({
                             color: 0x352d2d,
                             opacity: 1.0,
                             linewidth: 2
-                            } ) );
-        rope_spline.mesh.castShadow = true;
-        rope = rope_spline.mesh;
+        });
+        rope = new THREE.Line(rope_geometry, material);
+
         scene.add(rope);
 
 
