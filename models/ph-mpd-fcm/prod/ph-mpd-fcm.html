@@ -77,6 +77,7 @@
     var slopingBody;
     var plumbMesh;
     var frameMesh;
+    var scaleMesh;
     var framePivotMesh;
     var rope;
 
@@ -396,6 +397,11 @@
                     mesh.castShadow = false;
                     scene.add(mesh);
                 break;
+                case "scale":
+                    scaleMesh = mesh;
+                    scaleMesh.receiveShadow = false;
+                    scaleMesh.castShadow = true;
+                break;
                 default:
                     mesh.receiveShadow = true;
                     mesh.castShadow = true;
@@ -430,6 +436,7 @@
         scene.getObjectByName("slopingSurface").add(plumbMesh);
         frameMesh.add(framePivotMesh);
         scene.getObjectByName("slopingSurface").add(frameMesh);
+        scene.getObjectByName("slopingSurface").add(scaleMesh);
 
 
         //Rope
