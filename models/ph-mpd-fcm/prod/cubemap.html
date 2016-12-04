@@ -43,6 +43,15 @@
 		var renderer;
 		var scene;
 
+        var textureURLs = [  // URLs of the six faces of the cube map 
+                "cubemap/posx.png",   // Note:  The order in which
+                "cubemap/negx.png",   //   the images are listed is
+                "cubemap/posy.png",   //   important.
+                "cubemap/negy.png",  
+                "cubemap/posz.png",   
+                "cubemap/negz.png"
+           ];
+
 		init();
 		animate();
 
@@ -64,58 +73,22 @@
 			controls.enableZoom = false;
 			controls.enablePan = false;
 
-			var textures = getTexturesFromAtlasFile( "cubemap/sun_temple_stripe.jpg", 6 );
+            var materials = [];
+            for (var i = 0; i < 6; i++) {
+                var tex = THREE.ImageUtils.loadTexture( textureURLs[i] );
+                materials.push( new THREE.MeshBasicMaterial( {
+                    color: "white",
+                    side: THREE.BackSide,  // IMPORTANT: To see the inside of the cube, back faces must be rendered!
+                    map: tex
+                } ) );
 
-			var materials = [];
+            }
 
-			for ( var i = 0; i < 6; i ++ ) {
-
-				materials.push( new THREE.MeshBasicMaterial( { map: textures[ i ] } ) );
-
-			}
-
-			var skyBox = new THREE.Mesh( new THREE.CubeGeometry( 1, 1, 1 ), new THREE.MeshFaceMaterial( materials ) );
-			skyBox.applyMatrix( new THREE.Matrix4().makeScale( 1, 1, -1 ) );
+			var skyBox = new THREE.Mesh( new THREE.CubeGeometry( 100, 100, 100 ), new THREE.MeshFaceMaterial( materials ) );
+			//skyBox.applyMatrix( new THREE.Matrix4().makeScale( 1, 1, -1 ) );
 			scene.add( skyBox );
 
 			window.addEventListener( 'resize', onWindowResize, false );
-
-		}
-
-		function getTexturesFromAtlasFile( atlasImgUrl, tilesNum ) {
-
-			var textures = [];
-
-			for ( var i = 0; i < tilesNum; i ++ ) {
-
-				textures[ i ] = new THREE.Texture();
-
-			}
-
-			var imageObj = new Image();
-
-			imageObj.onload = function() {
-
-				var canvas, context;
-				var tileWidth = imageObj.height;
-
-				for ( var i = 0; i < textures.length; i ++ ) {
-
-					canvas = document.createElement( 'canvas' );
-					context = canvas.getContext( '2d' );
-					canvas.height = tileWidth;
-					canvas.width = tileWidth;
-					context.drawImage( imageObj, tileWidth * i, 0, tileWidth, tileWidth, 0, 0, tileWidth, tileWidth );
-					textures[ i ].image = canvas
-					textures[ i ].needsUpdate = true;
-
-				}
-
-			};
-
-			imageObj.src = atlasImgUrl;
-
-			return textures;
 
 		}
 

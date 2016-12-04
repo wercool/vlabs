@@ -73,6 +73,15 @@
 
     var physijsReady = false;
 
+    var textureURLs = [  // URLs of the six faces of the cube map 
+            "cubemap/posx.png",   // Note:  The order in which
+            "cubemap/negx.png",   //   the images are listed is
+            "cubemap/posy.png",   //   important.
+            "cubemap/negy.png",  
+            "cubemap/posz.png",   
+            "cubemap/negz.png"
+       ];
+
     var slopingSurface;
     var slopingBody;
     var plumbMesh;
@@ -91,7 +100,7 @@
     function initGraphics()
     {
         container = document.getElementById( "container" );
-        camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 2000 );
+        camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 2000 );
 
 
         scene = new Physijs.Scene({ fixedTimeStep: 1 / 120 });
@@ -107,10 +116,13 @@
 
         camera.position.x = 0;
         camera.position.y = 5;
-        camera.position.z = 15;
+        camera.position.z = 10;
 
         controls = new THREE.OrbitControls( camera );
-        controls.target.y = 2;
+//        controls.target.y = 2;
+        controls.maxPolarAngle = Math.PI/2 - 0.5; 
+        controls.minDistance = 5;
+        controls.maxDistance = 15;
 
         renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         renderer.setClearColor( 0xbfd1e5 );
@@ -217,8 +229,8 @@
         var deltaTime = clock.getDelta();
 
         stats.update();
-        controls.update( deltaTime );
-        renderer.render( scene, camera );
+        controls.update(deltaTime);
+        renderer.render(scene, camera);
     }
 
     function loadColladaScene()
@@ -476,6 +488,19 @@
 
 
         scene.simulate();
+
+        var materials = [];
+        for (var i = 0; i < 6; i++)
+        {
+            var tex = THREE.ImageUtils.loadTexture( textureURLs[i] );
+            materials.push( new THREE.MeshBasicMaterial( {
+                color: "white",
+                side: THREE.BackSide,  // IMPORTANT: To see the inside of the cube, back faces must be rendered!
+                map: tex
+            } ) );
+        }
+		var envBox = new THREE.Mesh( new THREE.CubeGeometry( 500, 500, 500 ), new THREE.MeshFaceMaterial( materials ) );
+		scene.add(envBox);
     }
     </script>
 </body>
