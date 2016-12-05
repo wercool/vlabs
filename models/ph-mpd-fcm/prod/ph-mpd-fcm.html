@@ -82,6 +82,12 @@
             "cubemap/negz.png"
        ];
 
+    //mouse interactions
+    var toIntersect = [];
+    var mouseCoords = new THREE.Vector2();
+    var raycaster = new THREE.Raycaster();
+    var clickRequest = false;
+
     var slopingSurface;
     var slopingBody;
     var plumbMesh;
@@ -89,6 +95,8 @@
     var scaleMesh;
     var framePivotMesh;
     var rope;
+
+    var plumbLookAt = false;
 
     // - Functions -
     function init()
@@ -100,8 +108,11 @@
     function initGraphics()
     {
         container = document.getElementById( "container" );
-        camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 2000 );
+        camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 2000 );
 
+        document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+        document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+        document.addEventListener( 'mouseup', onDocumentMouseUp, false );
 
         scene = new Physijs.Scene({ fixedTimeStep: 1 / 120 });
         scene.setGravity(new THREE.Vector3( 0, -30, 0 ));
@@ -115,14 +126,15 @@
         );
 
         camera.position.x = 0;
-        camera.position.y = 5;
-        camera.position.z = 10;
+        camera.position.y = 4;
+        camera.position.z = 15;
 
-        controls = new THREE.OrbitControls( camera );
+        controls = new THREE.OrbitControls(camera);
 //        controls.target.y = 2;
-        controls.maxPolarAngle = Math.PI/2 - 0.5; 
+        controls.maxPolarAngle = Math.PI/2 - 0.3; 
         controls.minDistance = 5;
         controls.maxDistance = 15;
+        controls.enableKeys = false;
 
         renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         renderer.setClearColor( 0xbfd1e5 );
@@ -182,32 +194,7 @@
                 slopingSurface.updateMatrixWorld();
                 var framePivot_pos = new THREE.Vector3();
                 framePivot_pos.setFromMatrixPosition(scene.getObjectByName("framePivot").matrixWorld);
-/*
-                var pulley_pos = new THREE.Vector3().copy(scene.getObjectByName("pulley").position);
-                pulley_pos.y += 0.25;
-                var pulley_pos1 = new THREE.Vector3().copy(pulley_pos);
-                pulley_pos1.x += 0.1;
-                var pulley_pos2 = new THREE.Vector3().copy(pulley_pos1);
-                pulley_pos2.x += 0.1;
-                pulley_pos2.y -= 0.1;
-                var pulleyMotor_pos = new THREE.Vector3().copy(scene.getObjectByName("pulleyMotor").position);
-                pulleyMotor_pos.y += 0.3;
-                pulleyMotor_pos.x += 0.3;
 
-                var rope_geometry = new THREE.Geometry();
-                rope_geometry.vertices.push(framePivot_pos);
-                rope_geometry.vertices.push(pulley_pos);
-                rope_geometry.vertices.push(pulley_pos1);
-                rope_geometry.vertices.push(pulley_pos2);
-                rope_geometry.vertices.push(pulleyMotor_pos);
-
-                var p;
-                for ( var i = 0; i < rope_geometry.vertices.length; i ++ )
-                {
-                    p = rope.geometry.vertices[i];
-                    p.copy(rope_geometry.vertices[i]);
-                }
-*/
                 rope.geometry.vertices[0].set(framePivot_pos.x, framePivot_pos.y, framePivot_pos.z);
                 rope.geometry.verticesNeedUpdate = true;
 
@@ -221,6 +208,21 @@
                         slipAudioPlayed = true;
                     }
                 }
+            }
+
+            processClick();
+
+            if (plumbLookAt)
+            {
+                controls.maxPolarAngle = Math.PI/2; 
+                var plumb_pos = new THREE.Vector3();
+                camera.up = new THREE.Vector3(0,1,0);
+                plumb_pos.setFromMatrixPosition(scene.getObjectByName("plumb").matrixWorld);
+                camera.position.x = plumb_pos.x;
+                camera.position.y = plumb_pos.y - 0.1;
+                camera.position.z = plumb_pos.z + 1.75;
+                controls.target.copy(plumb_pos);
+                controls.minDistance = 1.0;
             }
         }
 
@@ -499,9 +501,99 @@
                 map: tex
             } ) );
         }
-		var envBox = new THREE.Mesh( new THREE.CubeGeometry( 500, 500, 500 ), new THREE.MeshFaceMaterial( materials ) );
-		scene.add(envBox);
+        var envBox = new THREE.Mesh( new THREE.CubeGeometry( 150, 150, 150 ), new THREE.MeshFaceMaterial( materials ) );
+        scene.add(envBox);
+
+        // SUPER SIMPLE GLOW EFFECT
+        // use sprite because it appears the same from all angles
+        var spriteMaterial = new THREE.SpriteMaterial( 
+        { 
+            map: new THREE.ImageUtils.loadTexture( 'glow/magnifierglass.png' ), 
+            useScreenCoordinates: false, color: 0xfdff45, transparent: true, blending: THREE.AdditiveBlending
+        });
+        var sprite = new THREE.Sprite( spriteMaterial );
+        sprite.scale.set(2.0, 2.0, 2.0);
+        sprite.name = "plumbInfo";
+        plumbMesh.add(sprite); // this centers the glow at the mesh
+
+        toIntersect.push(plumbMesh);
+        toIntersect.push(sprite);
     }
+
+    function onDocumentMouseMove( e )
+    {
+        mouseCoords.set(
+        ( event.clientX / window.innerWidth ) * 2 - 1,
+        - ( event.clientY / window.innerHeight ) * 2 + 1
+        );
+
+        event.preventDefault();
+
+        raycaster.setFromCamera( mouseCoords, camera );
+
+        var intersects = raycaster.intersectObjects( toIntersect ); 
+
+
+        if ( intersects.length > 0 ) 
+        {
+//            if (typeof(intersects[0].object.callback) == "function")
+            if (intersects[0].object.name == 'plumbInfo')
+            {
+                container.style.cursor = 'pointer';
+            }
+            else
+            {
+                container.style.cursor = 'auto';
+            }
+        }
+        else
+        {
+            container.style.cursor = 'auto';
+        }
+    }
+
+    function onDocumentMouseDown( e )
+    {
+        if ( ! clickRequest && e.button == 0)
+        {
+            mouseCoords.set(
+                ( e.clientX / window.innerWidth ) * 2 - 1,
+                - ( e.clientY / window.innerHeight ) * 2 + 1
+            );
+            clickRequest = true;
+        }
+    }
+
+    function processClick() 
+    {
+        if ( clickRequest ) 
+        {
+            raycaster.setFromCamera( mouseCoords, camera );
+
+            var intersects = raycaster.intersectObjects( toIntersect ); 
+            if ( intersects.length > 0 ) 
+            {
+                //if (typeof(intersects[0].object.callback) == "function")
+                if (intersects[0].object.name == 'plumbInfo')
+                {
+                    //var softVol = intersects[0].object.callback();
+                    console.log("plumbInfo clicked!");
+                    plumbLookAt = true;
+                }
+            }
+            clickRequest = false;
+        }
+    }
+
+    function onDocumentMouseUp(e)
+    {
+        if (plumbLookAt)
+        {
+            controls.reset();
+        }
+        plumbLookAt = false;
+    }
+
     </script>
 </body>
 </html>
