@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Title of the document</title>
+</head
+<body>
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <!-- Include jQuery Popup Overlay -->
+    <script src="https://cdn.rawgit.com/vast-engineering/jquery-popup-overlay/1.7.13/jquery.popupoverlay.js"></script>
+
+    <!-- WebGL includes -->
+    <script src="js/three.js/build/three.min.js"></script>
+    <script src="js/stats.js/build/stats.min.js"></script>
+    <script src="js/three.js/examples/js/controls/OrbitControls.js"></script>
+    <script src="js/three.js/examples/js/loaders/ColladaLoader.js"></script>
+
+    <!-- Include VLab generic modules -->
+    <script src="utils.js"></script>
+    <script src="vlab.js"></script>
+
+
+    <div id="container" style="width:300px; height:300px; background-color:blue;"></div>
+    <div id="notificationPopup"></div>
+
+    <script>
+        $(document).ready(function() {
+            $("#no_webglcontainerdefined_popup").popup({
+                opacity: 0.2
+            });
+
+            var vlab = new VLab("Friction coefficient measurement");
+            vlab.initialize("container");
+        });
+    </script>
+</body>
+</html>

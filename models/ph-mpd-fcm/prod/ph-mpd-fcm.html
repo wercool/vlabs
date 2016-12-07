@@ -226,13 +226,13 @@
             }
         }
 
-        requestAnimationFrame( render );
-
         var deltaTime = clock.getDelta();
 
         stats.update();
         controls.update(deltaTime);
         renderer.render(scene, camera);
+
+        requestAnimationFrame( render );
     }
 
     function loadColladaScene()
