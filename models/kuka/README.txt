@@ -1,0 +1,1 @@
+http://www.turbosquid.com/3d-models/robot-arm-kuka-3d-model/776502
