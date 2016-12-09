@@ -1,12 +1,13 @@
 "use strict";
 
-function VLab(argsObj)
+function VLab(constructorArgs)
 {
     var self = this;
     var logging = true;
 
-    var title            = argsObj.title;
-    var colladaSceneFile = argsObj.colladaSceneFile;
+    var title            = constructorArgs.title;
+    var sceneFile        = constructorArgs.sceneFile;
+    var showAxis         = constructorArgs.showAxis;
 
     // DOM container element
     var webglContainerDOM = null;
@@ -18,16 +19,28 @@ function VLab(argsObj)
 
     self.WebGLRenderer = null;
 
+    var sceneLoadedEvent = new Event("sceneLoaded");
     var vlabScene = null;
     var vlabPhysijsSceneReady = false;
 
     var defaultCamera = null;
+
+    var meshObjects = new Object();
+    var lights = [];
 
     self.clickResponsiveObjects = [];
     self.hoverResponsiveObjects = [];
 
     self.clickedObjects = [];
     self.hoveredObjects = [];
+
+    self.trace = function()
+    {
+        if (logging)
+        {
+            console.log.apply(console, arguments);
+        }
+    };
 
     self.initialize = function(webglContainerId)
     {
@@ -65,22 +78,135 @@ function VLab(argsObj)
 
         defaultCamera = new THREE.PerspectiveCamera(70, webglContainer.width() / webglContainer.height(), 0.1, 2000);
 
-        webglContainerDOM.addEventListener('mousemove', mouseMove, false);
-        webglContainerDOM.addEventListener('mousedown', mouseDown, false);
-        webglContainerDOM.addEventListener('mouseup', mouseUp, false);
-        webglContainerDOM.addEventListener('mousewheel', mouseWheel, false);
+        webglContainerDOM.addEventListener("mousemove", mouseMove, false);
+        webglContainerDOM.addEventListener("mousedown", mouseDown, false);
+        webglContainerDOM.addEventListener("mouseup", mouseUp, false);
 
-        $(window).on('resize', webglContainerResized);
+        $(window).on("resize", webglContainerResized);
 
-        loadColladaScene(colladaSceneFile);
+        loadScene(sceneFile);
     };
 
-    self.trace = function()
+    var loadScene = function(sceneFile)
     {
-        if (logging)
+        var loader = new THREE.ColladaLoader();
+        loader.options.convertUpAxis = true;
+        loader.load(sceneFile, onSceneLoaded, onSceneLoadProgress);
+    };
+
+    var onSceneLoaded = function(collada)
+    {
+        var sceneObject = collada.scene;
+        sceneObject.traverse(function(object){
+            if(object.type == "Object3D")
+            {
+
+                var position = new THREE.Vector3();
+                var quaternion = new THREE.Quaternion();
+                quaternion.copy(object.quaternion);
+                position.copy(object.position);
+
+                if (object.children[0].type == "Mesh")
+                {
+                    var mesh = object.children[0];
+                    mesh.name = object.name;
+                    mesh.quaternion.copy(quaternion);
+                    mesh.position.copy(position);
+
+                    if (meshObjects[mesh.name] == undefined)
+                    {
+                        meshObjects[mesh.name] = new Object();
+                        meshObjects[mesh.name].isRoot = true;
+                    }
+
+                    meshObjects[mesh.name].mesh = mesh;
+                    meshObjects[mesh.name].childMeshes = [];
+
+                    for (var i = 1; i < object.children.length; i++)
+                    {
+                        if (meshObjects[object.children[i].name] == undefined)
+                        {
+                            meshObjects[object.children[i].name] = new Object();
+                            meshObjects[object.children[i].name].isRoot = false;
+                        }
+                        meshObjects[mesh.name].childMeshes.push(object.children[i].name);
+                    }
+                }
+                else if (object.children[0].type == "PointLight")
+                {
+                    var light = object.children[0];
+                    light.name = object.name;
+                    light.quaternion.copy(quaternion);
+                    light.position.copy(position);
+
+                    lights.push(object);
+                }
+            }
+        });
+
+        dispatchEvent(sceneLoadedEvent);
+    };
+
+    var onSceneLoadProgress = function(request)
+    {
+        self.trace(Math.round(request.loaded/request.total) * 100 + "%", "[" + request.loaded + "/" + request.total + "]");
+    };
+
+    this.buildScene = function()
+    {
+        for (var meshObjectName in meshObjects)
         {
-            console.log.apply(console, arguments);
+            if(meshObjects[meshObjectName].childMeshes.length > 0)
+            {
+                for (var key in meshObjects[meshObjectName].childMeshes)
+                {
+                    console.log(meshObjects[meshObjectName].mesh, meshObjects[meshObjectName].childMeshes[key]);
+                }
+            }
         }
+/*
+vlabScene.add(meshes[1]);
+vlabScene.add(lights[0]);
+*/
+        if (showAxis)
+        {
+            var axisHelper = new THREE.AxisHelper(100.0);
+            vlabScene.add(axisHelper);
+        }
+        render();
+    }
+
+    var render = function()
+    {
+        self.WebGLRenderer.render(vlabScene, defaultCamera);
+        requestAnimationFrame(render);
+    };
+
+    self.setVlabScene = function(scene)
+    {
+        vlabScene = scene;
+        if (vlabScene.isPhysijsScene)
+        {
+            vlabScene.addEventListener(
+                "update",
+                function() 
+                {
+                    self.vlabPhysijsSceneReady = true;
+                }
+            );
+        }
+    };
+
+    var webglContainerResized = function(event)
+    {
+        if (self.webglContainerWidth != webglContainer.width() || self.webglContainerHeight != webglContainer.height())
+        {
+            defaultCamera.aspect = webglContainer.width() / webglContainer.height();
+            defaultCamera.updateProjectionMatrix();
+            self.WebGLRenderer.setSize(webglContainer.width(), webglContainer.height());
+        }
+        self.webglContainerWidth  = webglContainer.width();
+        self.webglContainerHeight = webglContainer.height();
     };
 
     var mouseMove = function(event)
@@ -98,86 +224,8 @@ function VLab(argsObj)
         self.trace("mouseUp");
     };
 
-    var mouseWheel = function(event)
-    {
-        self.trace("mouseWheel");
-    };
-
-    var webglContainerResized = function(event)
-    {
-        if (self.webglContainerWidth != webglContainer.width() || self.webglContainerHeight != webglContainer.height())
-        {
-            defaultCamera.aspect = webglContainer.width() / webglContainer.height();
-            defaultCamera.updateProjectionMatrix();
-            self.WebGLRenderer.setSize(webglContainer.width(), webglContainer.height());
-        }
-        self.webglContainerWidth  = webglContainer.width();
-        self.webglContainerHeight = webglContainer.height();
-    };
-
-    var loadColladaScene = function(colladaFile)
-    {
-        var loader = new THREE.ColladaLoader();
-        loader.options.convertUpAxis = true;
-        loader.load(colladaFile, onColladaSceneLoaded, onColladaSceneProgress);
-    };
-
-    var onColladaSceneLoaded = function(collada)
-    {
-        var colladaScene = collada.scene;
-        colladaScene.traverse(function (object){
-            console.log(object);
-        });
-/*
-        colladaScene.traverse(function (object){
-            if (object instanceof THREE.Mesh)
-            {
-                object.name = object.parent.name;
-                object.position.x = object.parent.position.x;
-                object.position.y = object.parent.position.y;
-                object.position.z = object.parent.position.z;
-
-                object.rotation.x = object.parent.rotation.x;
-                object.rotation.y = object.parent.rotation.y;
-                object.rotation.z = object.parent.rotation.z;
-            }
-            if (object instanceof THREE.SpotLight || object instanceof THREE.PointLight)
-            {
-                object.name = object.parent.name;
-                object.position.x = object.parent.position.x;
-                object.position.y = object.parent.position.y;
-                object.position.z = object.parent.position.z;
-            }
-        });
-*/
-
-    }
-
-    var onColladaSceneProgress = function(collada)
-    {
-        console.log("onColladaSceneProgress");
-    }
-
-    var render = function()
-    {
-    };
-
     self.getWebglContainerDOM = function(){return webglContainerDOM};
     self.getWebglContainer = function(){return webglContainer};
-
-    self.setVlabScene = function(scene)
-    {
-        vlabScene = scene;
-        if (vlabScene.isPhysijsScene)
-        {
-            vlabScene.addEventListener(
-                'update',
-                function() 
-                {
-                    self.vlabPhysijsSceneReady = true;
-                }
-            );
-        }
-    };
     self.getVlabScene = function(){return vlabScene};
+    self.getDefaultCamera = function(){return defaultCamera};
 };
