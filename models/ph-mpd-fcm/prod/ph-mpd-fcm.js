@@ -5,7 +5,7 @@ function PhMpdFcm(webGLContainer)
     var self = this;
 
     VLab.apply(self, [{title: "Friction coefficient measurement",
-                       sceneFile: "scene/test.dae",
+                       sceneFile: "ph-mpd-fcm.dae",
                        showAxis: true}]);
 
     self.initialize(webGLContainer);

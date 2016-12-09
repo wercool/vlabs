@@ -20,6 +20,7 @@ function VLab(constructorArgs)
     self.WebGLRenderer = null;
 
     var sceneLoadedEvent = new Event("sceneLoaded");
+
     var vlabScene = null;
     var vlabPhysijsSceneReady = false;
 
@@ -139,7 +140,7 @@ function VLab(constructorArgs)
                     light.quaternion.copy(quaternion);
                     light.position.copy(position);
 
-                    lights.push(object);
+                    lights.push(light);
                 }
             }
         });
@@ -154,25 +155,37 @@ function VLab(constructorArgs)
 
     this.buildScene = function()
     {
+        // add children meshes to root meshes
         for (var meshObjectName in meshObjects)
         {
             if(meshObjects[meshObjectName].childMeshes.length > 0)
             {
                 for (var key in meshObjects[meshObjectName].childMeshes)
                 {
-                    console.log(meshObjects[meshObjectName].mesh, meshObjects[meshObjectName].childMeshes[key]);
+                    meshObjects[meshObjectName].mesh.add(meshObjects[meshObjects[meshObjectName].childMeshes[key]].mesh);
                 }
             }
         }
-/*
-vlabScene.add(meshes[1]);
-vlabScene.add(lights[0]);
-*/
+        // add root meshes to the scene
+        for (var meshObjectName in meshObjects)
+        {
+            if(meshObjects[meshObjectName].isRoot)
+            {
+                vlabScene.add(meshObjects[meshObjectName].mesh);
+            }
+        }
+        // add lights
+        for (var i = 0; i < lights.length; i++)
+        {
+            vlabScene.add(lights[i]);
+        }
+
         if (showAxis)
         {
             var axisHelper = new THREE.AxisHelper(100.0);
             vlabScene.add(axisHelper);
         }
+console.log(vlabScene);
         render();
     }
 

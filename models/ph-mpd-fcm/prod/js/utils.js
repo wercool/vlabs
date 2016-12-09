@@ -14,7 +14,7 @@ function UCheckWebGLCanvasContext(vlabScope)
     try
     {
         var canvas = vlabScope.getWebglContainer().find("canvas").get(0);
-        if(!canvas.getContext("experimental-webgl"))
+        if(!canvas.getContext("experimental-webgl") && !canvas.getContext("webgl"))
         {
             return [false, "Browser supports WebGL but initialization failed!"]
         }
