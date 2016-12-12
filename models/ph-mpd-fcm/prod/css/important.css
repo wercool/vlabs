@@ -16,3 +16,15 @@ html, body
     width: 100%;
     height: 100%;
 }
+
+.tooltip
+{
+    color: white;
+    position: fixed;
+    padding:5px;
+    -moz-border-radius:5px;  /* for Firefox */
+    -webkit-border-radius:5px; /* for Webkit-Browsers */
+    border-radius:5px; /* regular */
+    background-color:rgba(0,0,0,0.2);
+    max-width: 500px;
+}

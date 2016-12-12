@@ -1,0 +1,34 @@
+{
+    "title":            "Friction coefficient measurement",
+    "sceneFile":        "scene/ph-mpd-fcm.dae",
+    "isPhysijsScene":   true,
+    "showAxis":         true,
+    "showTooltips":     true,
+    "interactors":      {
+                            "button1":      {
+                                             "active":true,
+                                             "tooltip": "Press to lift sloping surface",
+                                             "press":"button1Pressed",
+                                             "release": {"callbak": "button1Released", "strict": false}
+                                            },
+                            "slopingBody":  {
+                                             "active":false,
+                                             "tooltip": "0.2 kg"
+                                            }
+                        },
+    "physijs":          {
+                            "slopingBody":      {
+                                                 "shape":"BoxMesh", 
+                                                 "mass":0.2, 
+                                                 "friction": 0.1, 
+                                                 "restitution": 0.5, 
+                                                 "collision": "slopingBodyCollision"
+                                                },
+                            "slopingSurface":   {
+                                                 "shape":"ConvexMesh", 
+                                                 "mass":0.0, "friction": 0.1, 
+                                                 "restitution": 0.5, 
+                                                 "collision": "slopingSurfaceCollision"
+                                                }
+                        }
+}
