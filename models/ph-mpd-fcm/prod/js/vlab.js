@@ -25,7 +25,7 @@ function VLab(vlabNature)
 
     var defaultCamera = null;
 
-    var meshObjects = new Object();
+    var meshObjects = {};
     var lights = [];
 
     var mouseCoords = new THREE.Vector2();
@@ -38,7 +38,7 @@ function VLab(vlabNature)
 
     var intersectedMesh     = null;
     var intersectedMeshName = "";
-    var notStrictedReleaseCallbacks = [];
+    var objectsToBeReleasedNotStrictly = {};
 
     var tooltipDiv = null;
 
@@ -76,7 +76,7 @@ function VLab(vlabNature)
         webglContainer = $("#" + webglContainerDOM.id);
 
         self.WebGLRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        self.WebGLRenderer.setClearColor(0xbfd1e5);
+        self.WebGLRenderer.setClearColor(0xbababa);
         self.WebGLRenderer.setPixelRatio(window.devicePixelRatio);
         self.WebGLRenderer.setSize(webglContainer.width(), webglContainer.height() );
         self.WebGLRenderer.shadowMap.enabled = true;
@@ -201,9 +201,9 @@ function VLab(vlabNature)
         {
             if(meshObjects[meshObjectName].childMeshes.length > 0)
             {
-                for (var key in meshObjects[meshObjectName].childMeshes)
+                for (var childMeshName in meshObjects[meshObjectName].childMeshes)
                 {
-                    meshObjects[meshObjectName].mesh.add(meshObjects[meshObjects[meshObjectName].childMeshes[key]].mesh);
+                    meshObjects[meshObjectName].mesh.add(meshObjects[meshObjects[meshObjectName].childMeshes[childMeshName]].mesh);
                 }
             }
         }
@@ -249,9 +249,9 @@ function VLab(vlabNature)
                     // add child meshesh to newly created Physijs Mesh
                     if(meshObjects[meshObjectName].childMeshes.length > 0)
                     {
-                        for (var key in meshObjects[meshObjectName].childMeshes)
+                        for (var childMeshName in meshObjects[meshObjectName].childMeshes)
                         {
-                            physijsMesh.add(meshObjects[meshObjects[meshObjectName].childMeshes[key]].mesh);
+                            physijsMesh.add(meshObjects[meshObjects[meshObjectName].childMeshes[childMeshName]].mesh);
                         }
                     }
 
@@ -462,33 +462,30 @@ function VLab(vlabNature)
                     tooltipDiv.hide();
                 }
             }
+
+            for (var objectName in objectsToBeReleasedNotStrictly)
+            {
+                objectsToBeReleasedNotStrictly[objectName].release(["outside"]);
+                delete objectsToBeReleasedNotStrictly[objectName];
+            }
         }
     };
 
     var mouseDown = function(event)
     {
         event.preventDefault();
-        if (mouseDownEvent == null)
-        {
-            mouseCoords.set((event.clientX / webglContainer.width()) * 2 - 1, 1 -(event.clientY / webglContainer.height()) * 2);
-            mouseDownEvent = event;
-        }
+
+        mouseCoords.set((event.clientX / webglContainer.width()) * 2 - 1, 1 -(event.clientY / webglContainer.height()) * 2);
+        mouseDownEvent = event;
     };
 
     var mouseUp = function(event)
     {
         event.preventDefault();
-        if (mouseUpEvent == null)
-        {
-            mouseCoords.set((event.clientX / webglContainer.width()) * 2 - 1, 1 -(event.clientY / webglContainer.height()) * 2);
-            mouseUpEvent = event;
-        }
+        mouseCoords.set((event.clientX / webglContainer.width()) * 2 - 1, 1 -(event.clientY / webglContainer.height()) * 2);
+        mouseUpEvent = event;
+        self.getDefaultCamera().controls.enabled = true;
     };
-
-    self.getWebglContainerDOM = function(){return webglContainerDOM};
-    self.getWebglContainer = function(){return webglContainer};
-    self.getVlabScene = function(){return vlabScene};
-    self.getDefaultCamera = function(){return defaultCamera};
 
     var processMouseDown = function()
     {
@@ -506,8 +503,9 @@ function VLab(vlabNature)
                 }
                 if (typeof pressedObject.release === "function" && !pressedObject.strictRelease)
                 {
-                    notStrictedReleaseCallbacks.push(pressedObject.release);
+                    objectsToBeReleasedNotStrictly[pressedObject.name] = pressedObject;
                 }
+                self.getDefaultCamera().controls.enabled = false;
             }
             mouseDownEvent = null;
         }
@@ -526,14 +524,8 @@ function VLab(vlabNature)
                 if (typeof releasedObject.release === "function")
                 {
                     releasedObject.release();
+                    delete objectsToBeReleasedNotStrictly[releasedObject.name];
                 }
-            }
-            var i = notStrictedReleaseCallbacks.length;
-            while (i--)
-            {
-                var releaseCallback = notStrictedReleaseCallbacks.pop();
-                console.log(releaseCallback);
-                releaseCallback();
             }
             mouseUpEvent = null;
         }
@@ -558,4 +550,9 @@ function VLab(vlabNature)
             y: vector.y
         };
     };
+
+    self.getWebglContainerDOM = function(){return webglContainerDOM};
+    self.getWebglContainer = function(){return webglContainer};
+    self.getVlabScene = function(){return vlabScene};
+    self.getDefaultCamera = function(){return defaultCamera};
 };

@@ -30,11 +30,16 @@ function PhMpdFcm(webGLContainer)
     self.button1Pressed = function()
     {
         self.trace(this.name + " is pressed");
+        this.released = false;
     };
 
     self.button1Released = function()
     {
-        self.trace(this.name + " is released");
+        if (!this.released)
+        {
+            self.trace(this.name + " is released " + ((arguments[0] == "outside") ? "outside" : ""));
+        }
+        this.released = true;
     };
 
     self.slopingBodyCollision = function(other_object, linear_velocity, angular_velocity)

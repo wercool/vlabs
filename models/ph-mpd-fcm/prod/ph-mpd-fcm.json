@@ -18,16 +18,17 @@
                         },
     "physijs":          {
                             "slopingBody":      {
-                                                 "shape":"BoxMesh", 
-                                                 "mass":0.2, 
-                                                 "friction": 0.1, 
-                                                 "restitution": 0.5, 
+                                                 "shape":"BoxMesh",
+                                                 "mass":0.2,
+                                                 "friction": 0.1,
+                                                 "restitution": 0.5,
                                                  "collision": "slopingBodyCollision"
                                                 },
                             "slopingSurface":   {
                                                  "shape":"ConvexMesh", 
-                                                 "mass":0.0, "friction": 0.1, 
-                                                 "restitution": 0.5, 
+                                                 "mass":0.0,
+                                                 "friction": 0.1,
+                                                 "restitution": 0.5,
                                                  "collision": "slopingSurfaceCollision"
                                                 }
                         }
