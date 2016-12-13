@@ -7,30 +7,40 @@ function ZoomHelper()
     var sprite = argsObj.sprite;
     var vlab = argsObj.vlab;
     var target = argsObj.target;
-    var direction = argsObj.direction;
 
     self.name = argsObj.target + "ZoomHelper";
-    self.halt = false;
+    self.completed = false;
 
 
     self.process = function()
     {
         var targetPos = new THREE.Vector3();
         targetPos.setFromMatrixPosition(vlab.getVlabScene().getObjectByName(target).matrixWorld);
-        targetPos.z += 1.0;
+        targetPos.x += (argsObj.xOffset != undefined) ? argsObj.xOffset : 0.0;
+        targetPos.y += (argsObj.yOffset != undefined) ? argsObj.yOffset : 0.0;
+        targetPos.z += (argsObj.zOffset != undefined) ? argsObj.zOffset : 0.0;
         vlab.getDefaultCamera().position.copy(targetPos);
         vlab.getDefaultCamera().lookAt(targetPos);
         vlab.getDefaultCamera().controls.enabled = false;
     };
 
-    self.reset = function()
+    self.reset = function(event)
     {
-        vlab.getDefaultCamera().controls.reset();
-        vlab.getDefaultCamera().controls.enabled = true;
-        sprite.visible = true;
-        removeEventListener("mouseup", self.reset);
-        self.halt = true;
+        if (event.button == 2)
+        {
+            removeEventListener("mouseup", self.reset);
+            vlab.getDefaultCamera().controls.enabled = true;
+            vlab.getDefaultCamera().position.copy(cameraPosition);
+            vlab.getDefaultCamera().quaternion.copy(cameraPQuaternion);
+            sprite.visible = true;
+            self.completed = true;
+        }
     };
+
+    var cameraPosition = new THREE.Vector3();
+    var cameraPQuaternion = new THREE.Quaternion();
+    cameraPosition.copy(vlab.getDefaultCamera().position);
+    cameraPQuaternion.copy(vlab.getDefaultCamera().quaternion);
 
 
     sprite.visible = false;

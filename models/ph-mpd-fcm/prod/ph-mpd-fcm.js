@@ -28,23 +28,26 @@ function PhMpdFcm(webGLContainer)
         self.buildScene();
     };
 
-    var sceneObjects = {};
+    var activeObjects = {};
 
     var scenePostBuilt = function()
     {
-        sceneObjects["slopingSurface"] = self.getVlabScene().getObjectByName("slopingSurface");
+        activeObjects["slopingSurface"] = self.getVlabScene().getObjectByName("slopingSurface");
+        activeObjects["slopingBody"] = self.getVlabScene().getObjectByName("slopingBody");
         self.setSceneRenderPause(false);
     };
 
     var simulationStep = function()
     {
-        sceneObjects["slopingSurface"].__dirtyRotation = true;
-        sceneObjects["slopingSurface"].__dirtyPosition = true;
-        sceneObjects["slopingSurface"].rotation.z -= 0.001;
+        if (!self.getPhysijsScenePause())
+        {
+            activeObjects["slopingSurface"].__dirtyRotation = true;
+            activeObjects["slopingSurface"].rotation.z -= 0.001;
+        }
 
         for (var processNodeName in self.processNodes)
         {
-            if (self.processNodes[processNodeName].halt)
+            if (self.processNodes[processNodeName].completed)
             {
                 delete self.processNodes[processNodeName];
             }
@@ -57,11 +60,17 @@ function PhMpdFcm(webGLContainer)
 
     self.plumbScaleZoom = function()
     {
-        new ZoomHelper({"sprite": this, "vlab":self, "target":arguments[0][0]});
+        new ZoomHelper({"sprite": this, "vlab":self, "target":"scale", "zOffset":1.2});
+    }
+
+    self.aktakomPowerSupplyZoom = function()
+    {
+        new ZoomHelper({"sprite": this, "vlab":self, "target":"aktakomPowerSupplyScreen", "zOffset":2.5, "yOffset":-1.0});
     }
 
     self.button1Pressed = function()
     {
+        self.setPhysijsScenePause(false);
         self.trace(this.name + " is pressed");
         this.released = false;
     };
