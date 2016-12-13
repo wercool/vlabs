@@ -2,34 +2,68 @@
     "title":            "Friction coefficient measurement",
     "sceneFile":        "scene/ph-mpd-fcm.dae",
     "isPhysijsScene":   true,
+    "showStatistics":   true,
     "showAxis":         true,
     "showTooltips":     true,
+    "shadows":          true,
+    "shadowsMapSize":   1024,
+    "castShadows":      [
+                            "Lamp",
+                            "slopingSurface", "slopingBody", "support", "frame", "acPlug", "acWire", "aktakomPowerSupply", 
+                            "plusWire", "plusWire1", "minusWire", "pulleyMotor", "motorFixture", "slopingSurfaceFixture",
+                            "motor", "button", "tableTop_001", "tableTop", "Circle_015", "Circle_010", "Plane_007",
+                            "Plane_010", "Plane_011", "Circle_012", "Circle_013"
+                        ],
+    "receiveShadows":   [
+                            "tableTop", "slopingSurface", "slopingBody", "slopingSurfaceFixture", "motorWoodenStand",
+                            "Cube_001", "aktakomPowerSupply", "tableTop_007", "Plane_006", "Plane_011", "Plane_005", "Plane_010"
+                        ],
+    "maps":         [
+                            {"name":"magnifier", "url":"scene/textures/magnifier.png"},
+                            {"name":"info", "url":"scene/textures/info.png"}
+                        ],
+    "spriteHelpers":    {
+                            "plumbScaleSpriteHelper": {
+                                                        "parent":"scale",
+                                                        "map":"magnifier",
+                                                        "opacity":"0.5",
+                                                        "scale":{"x":2.0, "y":2.0},
+                                                        "offset":{"x":0.2, "y":0.5, "z":0.1},
+                                                        "visible": true,
+                                                        "interactor": true
+                                                      }
+                        },
     "interactors":      {
-                            "button1":      {
-                                             "active":true,
-                                             "tooltip": "Press to lift sloping surface",
-                                             "press":"button1Pressed",
-                                             "release": {"callbak": "button1Released", "strict": false}
-                                            },
-                            "slopingBody":  {
-                                             "active":false,
-                                             "tooltip": "0.2 kg"
-                                            }
+                            "button1":                  {
+                                                            "active":true,
+                                                            "tooltip":"Press to lift sloping surface",
+                                                            "press":{"callback":"button1Pressed"},
+                                                            "release":{"callback":"button1Released", "strict":false}
+                                                        },
+                            "slopingBody":              {
+                                                            "active":false,
+                                                            "tooltip":"0.2 kg"
+                                                        },
+                            "plumbScaleSpriteHelper":   {
+                                                            "active":true,
+                                                            "tooltip":"Press to see the plumb's scale",
+                                                            "press":{"callback":"plumbScaleZoom", "arguments":["scale"]}
+                                                        }
                         },
     "physijs":          {
                             "slopingBody":      {
                                                  "shape":"BoxMesh",
                                                  "mass":0.2,
-                                                 "friction": 0.1,
-                                                 "restitution": 0.5,
-                                                 "collision": "slopingBodyCollision"
+                                                 "friction":0.1,
+                                                 "restitution":0.5,
+                                                 "collision":"slopingBodyCollision"
                                                 },
                             "slopingSurface":   {
                                                  "shape":"ConvexMesh", 
                                                  "mass":0.0,
-                                                 "friction": 0.1,
-                                                 "restitution": 0.5,
-                                                 "collision": "slopingSurfaceCollision"
+                                                 "friction":0.1,
+                                                 "restitution":0.5,
+                                                 "collision":"slopingSurfaceCollision"
                                                 }
                         }
 }

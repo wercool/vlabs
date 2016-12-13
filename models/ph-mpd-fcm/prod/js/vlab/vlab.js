@@ -15,9 +15,14 @@ function VLab(vlabNature)
     var webglContainerWidth = null;
     var webglContainerHeight = null;
 
+    var webGLStatistics = null;
+    var physijsStatistics = null;
+
     self.WebGLRenderer = null;
+    var sceneRenderPause = true;
 
     var sceneLoadedEvent    = new Event("sceneLoaded");
+    var sceneBuiltEvent    = new Event("sceneBuilt");
     var simulationStepEvent = new Event("simulationStep");
 
     var vlabScene = null;
@@ -27,6 +32,7 @@ function VLab(vlabNature)
 
     var meshObjects = {};
     var lights = [];
+    var maps = {};
 
     var mouseCoords = new THREE.Vector2();
     var raycaster = new THREE.Raycaster();
@@ -36,11 +42,13 @@ function VLab(vlabNature)
     self.clickResponsiveObjects = [];
     self.hoverResponsiveObjects = [];
 
-    var intersectedMesh     = null;
-    var intersectedMeshName = "";
+    var intersectedObject     = null;
+    var intersectedObjectName = "";
     var objectsToBeReleasedNotStrictly = {};
 
     var tooltipDiv = null;
+
+    self.processNodes = {};
 
     self.trace = function(error)
     {
@@ -85,6 +93,24 @@ function VLab(vlabNature)
 
         webglContainer.append(self.WebGLRenderer.domElement);
 
+        if (self.vlabNature.showStatistics)
+        {
+            webGLStatistics = new Stats();
+            webglContainer.append(webGLStatistics.domElement);
+            webGLStatistics.domElement.style.zIndex = 100;
+            $(webGLStatistics.domElement).css("top", webglContainer.offset().top);
+            $(webGLStatistics.domElement).css("left", webglContainer.offset().left);
+
+            if (self.vlabNature.isPhysijsScene)
+            {
+                physijsStatistics = new Stats();
+                physijsStatistics.domElement.style.zIndex = 100;
+                webglContainer.append(physijsStatistics.domElement);
+                $(physijsStatistics.domElement).css("top", webglContainer.offset().top + 50);
+                $(physijsStatistics.domElement).css("left", webglContainer.offset().left);
+            }
+        }
+
         var webGlCanvasContextCheck = UCheckWebGLCanvasContext(self);
         if(!webGlCanvasContextCheck[0])
         {
@@ -100,8 +126,8 @@ function VLab(vlabNature)
 
         $(window).on("resize", webglContainerResized);
 
-        self.webglContainerWidth  = webglContainer.width();
-        self.webglContainerHeight = webglContainer.height();
+        self.webglContainerWidth  = webglContainer.width() - webglContainer.offset().left;
+        self.webglContainerHeight = webglContainer.height() - webglContainer.offset().top;
 
         loadScene(self.vlabNature.sceneFile);
     };
@@ -163,6 +189,14 @@ function VLab(vlabNature)
             }
         });
 
+        if(self.vlabNature.maps != undefined)
+        {
+            if (self.vlabNature.maps.length > 0)
+            {
+                loadMaps();
+                return;
+            }
+        }
         dispatchEvent(sceneLoadedEvent);
     };
 
@@ -170,6 +204,27 @@ function VLab(vlabNature)
     {
         self.trace(Math.round(request.loaded/request.total) * 100 + "%", "[" + request.loaded + "/" + request.total + "]");
     };
+
+    var loadMaps = function()
+    {
+        var mapObj = self.vlabNature.maps.pop();
+        var loader = new THREE.TextureLoader();
+        loader.load(
+                    mapObj.url,
+                    function(texture)
+                    {
+                        maps[mapObj.name] = texture;
+                        if (self.vlabNature.maps.length > 0)
+                        {
+                            loadMaps();
+                        }
+                        else
+                        {
+                            dispatchEvent(sceneLoadedEvent);
+                        }
+                    }
+        );
+    }
 
     this.buildScene = function()
     {
@@ -281,6 +336,15 @@ function VLab(vlabNature)
         // add lights
         for (var i = 0; i < lights.length; i++)
         {
+            if (self.vlabNature.shadows)
+            {
+                if (self.vlabNature.castShadows.indexOf(lights[i].name) > -1)
+                {
+                    lights[i].castShadow = true;
+                    lights[i].shadow.mapSize.width  = self.vlabNature.shadowsMapSize;
+                    lights[i].shadow.mapSize.height = self.vlabNature.shadowsMapSize;
+                }
+            }
             vlabScene.add(lights[i]);
         }
 
@@ -292,7 +356,7 @@ function VLab(vlabNature)
 
         if (self.vlabNature.showTooltips)
         {
-            //tooltip
+            // tooltip
             tooltipDiv = $("<div id='tooltipDiv' class='tooltip'></div>");
             webglContainer.append(tooltipDiv);
             tooltipDiv.hide();
@@ -302,78 +366,99 @@ function VLab(vlabNature)
         {
             if (object.type == "Mesh")
             {
+                if (self.vlabNature.shadows)
+                {
+                    // manage shadows
+                    if (self.vlabNature.castShadows.indexOf(object.name) > -1)
+                    {
+                        object.castShadow = true;
+                    }
+                    if (self.vlabNature.receiveShadows.indexOf(object.name) > -1)
+                    {
+                        object.receiveShadow = true;
+                    }
+                }
                 if (self.vlabNature.interactors[object.name] != undefined)
                 {
-                    object.active = self.vlabNature.interactors[object.name].active;
-                    if (self.vlabNature.interactors[object.name].tooltip != undefined)
-                    {
-                        object.tooltip = self.vlabNature.interactors[object.name].tooltip;
-                    }
-                    self.hoverResponsiveObjects.push(object);
-                    if (object.active)
-                    {
-                        self.clickResponsiveObjects.push(object);
-                        if (self.vlabNature.interactors[object.name].press != undefined)
-                        {
-                            var objectMousePressCallback = eval("self." + self.vlabNature.interactors[object.name].press);
-                            if (typeof objectMousePressCallback === "function")
-                            {
-                                object.press = objectMousePressCallback;
-                            }
-                            else
-                            {
-                                self.error("MousePress callback [" + 
-                                            self.vlabNature.interactors[object.name].press + 
-                                            "] for [" + object.name + "] mesh is defined in VLab nature, but not implemented in VLab");
-                            }
-                        }
-                        if (self.vlabNature.interactors[object.name].release != undefined)
-                        {
-                            var objectMouseReleaseCallback = eval("self." + self.vlabNature.interactors[object.name].release.callbak);
-                            if (typeof objectMouseReleaseCallback === "function")
-                            {
-                                object.release = objectMouseReleaseCallback;
-                                if (self.vlabNature.interactors[object.name].release.strict != undefined)
-                                {
-                                    object.strictRelease = self.vlabNature.interactors[object.name].release.strict;
-                                }
-                                else
-                                {
-                                    object.strictRelease = false;
-                                }
-                            }
-                            else
-                            {
-                                self.error("MouseRelease callback [" + 
-                                            self.vlabNature.interactors[object.name].release.callbak + 
-                                            "] for [" + object.name + "] mesh is defined in VLab nature, but not implemented in VLab");
-                            }
-                        }
-                    }
+                    addInteractorToObject(object);
                 }
             }
         });
 
-        if (self.vlabNature.isPhysijsScene)
+        for (var spriteHelperName in self.vlabNature.spriteHelpers)
         {
-            vlabScene.simulate();
+            var spriteMaterial = new THREE.SpriteMaterial( 
+            { 
+                map: maps[self.vlabNature.spriteHelpers[spriteHelperName].map],
+                color: ((self.vlabNature.spriteHelpers[spriteHelperName].color != undefined) ? parseInt(self.vlabNature.spriteHelpers[spriteHelperName].color) : 0xffffff),
+                blending: THREE.AdditiveBlending
+            });
+
+            if (self.vlabNature.spriteHelpers[spriteHelperName].color == undefined)
+            {
+                if (self.vlabNature.spriteHelpers[spriteHelperName].opacity != undefined)
+                {
+                    spriteMaterial.transparent = true;
+                    spriteMaterial.opacity = self.vlabNature.spriteHelpers[spriteHelperName].opacity;
+                    spriteMaterial.blending = THREE.NormalBlending;
+                }
+            }
+
+            var sprite = new THREE.Sprite(spriteMaterial);
+
+            if (self.vlabNature.spriteHelpers[spriteHelperName].scale != undefined)
+            {
+                sprite.scale.set(self.vlabNature.spriteHelpers[spriteHelperName].scale.x, 
+                                 self.vlabNature.spriteHelpers[spriteHelperName].scale.y, 1.0);
+            }
+            if (self.vlabNature.spriteHelpers[spriteHelperName].offset != undefined)
+            {
+                sprite.position.set(self.vlabNature.spriteHelpers[spriteHelperName].offset.x, 
+                                    self.vlabNature.spriteHelpers[spriteHelperName].offset.y,
+                                    self.vlabNature.spriteHelpers[spriteHelperName].offset.z);
+            }
+            sprite.name = spriteHelperName;
+            sprite.visible = self.vlabNature.spriteHelpers[spriteHelperName].visible;
+            if (self.vlabNature.spriteHelpers[spriteHelperName].interactor != undefined)
+            {
+                var interactor = self.vlabNature.interactors[self.vlabNature.spriteHelpers[spriteHelperName].interactor];
+                addInteractorToObject(sprite);
+            }
+            vlabScene.getObjectByName(self.vlabNature.spriteHelpers[spriteHelperName].parent).add(sprite);
         }
+
+        dispatchEvent(sceneBuiltEvent);
 
         render();
     }
 
     var render = function()
     {
-        self.WebGLRenderer.render(vlabScene, defaultCamera);
-        requestAnimationFrame(render);
-        if ((self.vlabNature.isPhysijsScene && self.vlabPhysijsSceneReady) || !self.vlabNature.isPhysijsScene)
+        if (!sceneRenderPause)
         {
-            process();
-            if (self.vlabNature.isPhysijsScene)
+            self.WebGLRenderer.render(vlabScene, defaultCamera);
+            requestAnimationFrame(render);
+            if (webGLStatistics != null)
             {
-                vlabScene.simulate(undefined, 1);
-                self.vlabPhysijsSceneReady = false;
+                webGLStatistics.update();
             }
+            if ((self.vlabNature.isPhysijsScene && self.vlabPhysijsSceneReady) || !self.vlabNature.isPhysijsScene)
+            {
+                process();
+                if (self.vlabNature.isPhysijsScene)
+                {
+                    vlabScene.simulate(undefined, 1);
+                    self.vlabPhysijsSceneReady = false;
+                    if (physijsStatistics != null)
+                    {
+                        physijsStatistics.update();
+                    }
+                }
+            }
+        }
+        else
+        {
+            setTimeout(function(){ render(); }, 100);
         }
     };
 
@@ -407,40 +492,47 @@ function VLab(vlabNature)
 
     var webglContainerResized = function(event)
     {
-        if (self.webglContainerWidth != webglContainer.width() || self.webglContainerHeight != webglContainer.height())
+        if (self.webglContainerWidth != (webglContainer.width() - webglContainer.offset().left) 
+            || 
+            self.webglContainerHeight != (webglContainer.height() - webglContainer.offset().top))
         {
             defaultCamera.aspect = webglContainer.width() / webglContainer.height();
             defaultCamera.updateProjectionMatrix();
             self.WebGLRenderer.setSize(webglContainer.width(), webglContainer.height());
         }
-        self.webglContainerWidth  = webglContainer.width();
-        self.webglContainerHeight = webglContainer.height();
+        self.webglContainerWidth  = webglContainer.width() - webglContainer.offset().left;
+        self.webglContainerHeight = webglContainer.height() - webglContainer.offset().top;
+        $(webGLStatistics.domElement).css("top", webglContainer.offset().top);
+        $(webGLStatistics.domElement).css("left", webglContainer.offset().left);
+        $(physijsStatistics.domElement).css("top", webglContainer.offset().top + 50);
+        $(physijsStatistics.domElement).css("left", webglContainer.offset().left);
     };
 
     var mouseMove = function(event)
     {
         event.preventDefault();
-        mouseCoords.set((event.clientX / webglContainer.width()) * 2 - 1, 1 -(event.clientY / webglContainer.height()) * 2);
+        mouseCoords.set(((event.clientX - webglContainer.offset().left) / webglContainer.width()) * 2 - 1, 
+                        1 -((event.clientY - webglContainer.offset().top) / webglContainer.height()) * 2);
         raycaster.setFromCamera(mouseCoords, defaultCamera);
         var intersects = raycaster.intersectObjects(self.hoverResponsiveObjects); 
 
         if (intersects.length > 0) 
         {
-            if (self.intersectedMeshName != intersects[0].object.name)
+            if (self.intersectedObjectName != intersects[0].object.name)
             {
-                self.instersectedMesh = intersects[0].object;
-                self.intersectedMeshName = self.instersectedMesh.name;
-                if (self.instersectedMesh.active)
+                self.intersectedObject = intersects[0].object;
+                self.intersectedObjectName = self.intersectedObject.name;
+                if (self.intersectedObject.active)
                 {
                     webglContainerDOM.style.cursor = 'pointer';
                 }
 
                 if (self.vlabNature.showTooltips)
                 {
-                    if (self.instersectedMesh.tooltip != undefined)
+                    if (self.intersectedObject.tooltip != undefined)
                     {
-                        var tooltipPosition = toScreenPosition(self.instersectedMesh);
-                        tooltipDiv.text(self.instersectedMesh.tooltip);
+                        var tooltipPosition = toScreenPosition(self.intersectedObject);
+                        tooltipDiv.text(self.intersectedObject.tooltip);
                         tooltipDiv.show();
                         tooltipDiv.css({left: tooltipPosition.x + 10, top: tooltipPosition.y - 30});
                     }
@@ -451,10 +543,10 @@ function VLab(vlabNature)
         {
             webglContainerDOM.style.cursor = 'auto';
 
-            if (self.intersectedMeshName != null)
+            if (self.intersectedObjectName != null)
             {
-                self.intersectedMesh = null;
-                self.intersectedMeshName = null;
+                self.intersectedObject = null;
+                self.intersectedObjectName = null;
 
                 if (self.vlabNature.showTooltips)
                 {
@@ -465,7 +557,8 @@ function VLab(vlabNature)
 
             for (var objectName in objectsToBeReleasedNotStrictly)
             {
-                objectsToBeReleasedNotStrictly[objectName].release(["outside"]);
+                objectsToBeReleasedNotStrictly[objectName].releasedOutside = true;
+                objectsToBeReleasedNotStrictly[objectName].release();
                 delete objectsToBeReleasedNotStrictly[objectName];
             }
         }
@@ -474,15 +567,16 @@ function VLab(vlabNature)
     var mouseDown = function(event)
     {
         event.preventDefault();
-
-        mouseCoords.set((event.clientX / webglContainer.width()) * 2 - 1, 1 -(event.clientY / webglContainer.height()) * 2);
+        mouseCoords.set(((event.clientX - webglContainer.offset().left) / webglContainer.width()) * 2 - 1, 
+                        1 -((event.clientY - webglContainer.offset().top) / webglContainer.height()) * 2);
         mouseDownEvent = event;
     };
 
     var mouseUp = function(event)
     {
         event.preventDefault();
-        mouseCoords.set((event.clientX / webglContainer.width()) * 2 - 1, 1 -(event.clientY / webglContainer.height()) * 2);
+        mouseCoords.set(((event.clientX - webglContainer.offset().left) / webglContainer.width()) * 2 - 1, 
+                        1 -((event.clientY - webglContainer.offset().top) / webglContainer.height()) * 2);
         mouseUpEvent = event;
         self.getDefaultCamera().controls.enabled = true;
     };
@@ -531,19 +625,83 @@ function VLab(vlabNature)
         }
     };
 
+    var addInteractorToObject = function(object)
+    {
+        object.active = self.vlabNature.interactors[object.name].active;
+        if (self.vlabNature.interactors[object.name].tooltip != undefined)
+        {
+            object.tooltip = self.vlabNature.interactors[object.name].tooltip;
+        }
+        self.hoverResponsiveObjects.push(object);
+        if (object.active)
+        {
+            self.clickResponsiveObjects.push(object);
+            if (self.vlabNature.interactors[object.name].press != undefined)
+            {
+                var objectMousePressCallback = eval("self." + self.vlabNature.interactors[object.name].press.callback);
+                if (typeof objectMousePressCallback === "function")
+                {
+                    if (self.vlabNature.interactors[object.name].press.arguments != undefined)
+                    {
+                        object.press = partial(objectMousePressCallback, self.vlabNature.interactors[object.name].press.arguments);
+                    }
+                    else
+                    {
+                        object.press = objectMousePressCallback;
+                    }
+                }
+                else
+                {
+                    self.error("MousePress callback [" + 
+                                self.vlabNature.interactors[object.name].press + 
+                                "] for [" + object.name + "] mesh is defined in VLab nature, but not implemented in VLab");
+                }
+            }
+            if (self.vlabNature.interactors[object.name].release != undefined)
+            {
+                var objectMouseReleaseCallback = eval("self." + self.vlabNature.interactors[object.name].release.callback);
+                if (typeof objectMouseReleaseCallback === "function")
+                {
+                    if (self.vlabNature.interactors[object.name].release.arguments != undefined)
+                    {
+                        object.release = partial(objectMouseReleaseCallback, self.vlabNature.interactors[object.name].release.arguments);
+                    }
+                    else
+                    {
+                        object.release = objectMouseReleaseCallback;
+                    }
+                    if (self.vlabNature.interactors[object.name].release.strict != undefined)
+                    {
+                        object.strictRelease = self.vlabNature.interactors[object.name].release.strict;
+                    }
+                    else
+                    {
+                        object.strictRelease = false;
+                    }
+                }
+                else
+                {
+                    self.error("MouseRelease callback [" + 
+                                self.vlabNature.interactors[object.name].release.callback + 
+                                "] for [" + object.name + "] mesh is defined in VLab nature, but not implemented in VLab");
+                }
+            }
+        }
+    };
+
     var toScreenPosition = function(obj)
     {
         var vector = new THREE.Vector3();
 
-        var widthHalf = 0.5 * self.webglContainerWidth;
-        var heightHalf = 0.5 * self.webglContainerHeight;
+        var widthHalf = 0.5 * (self.webglContainerWidth + webglContainer.offset().left);
+        var heightHalf = 0.5 * (self.webglContainerHeight + webglContainer.offset().top);
 
         obj.updateMatrixWorld();
         vector.setFromMatrixPosition(obj.matrixWorld);
         vector.project(defaultCamera);
 
-        vector.x = ( vector.x * widthHalf ) + widthHalf;
-        vector.y = - ( vector.y * heightHalf ) + heightHalf;
+        vector.x = (vector.x * widthHalf) + widthHalf + webglContainer.offset().left;
+        vector.y = - (vector.y * heightHalf) + heightHalf + webglContainer.offset().top;
 
         return { 
             x: vector.x,
@@ -555,4 +713,14 @@ function VLab(vlabNature)
     self.getWebglContainer = function(){return webglContainer};
     self.getVlabScene = function(){return vlabScene};
     self.getDefaultCamera = function(){return defaultCamera};
+    self.setSceneRenderPause = function(pause)
+    {
+        sceneRenderPause = pause;
+        if (self.vlabNature.isPhysijsScene)
+        {
+            vlabScene.simulate();
+        }
+    };
+    self.getSceneRenderPause = function(){return sceneRenderPause};
+
 };

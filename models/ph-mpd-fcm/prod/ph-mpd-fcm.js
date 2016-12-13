@@ -5,6 +5,7 @@ function PhMpdFcm(webGLContainer)
     var self = this;
 
     addEventListener("sceneLoaded", function (event) { sceneLoaded(); }, false);
+    addEventListener("sceneBuilt", function (event) { scenePostBuilt(); }, false);
     addEventListener("simulationStep", function (event) { simulationStep(); }, false);
 
     $.getJSON("ph-mpd-fcm.json", function(jsonObj) {
@@ -27,6 +28,38 @@ function PhMpdFcm(webGLContainer)
         self.buildScene();
     };
 
+    var sceneObjects = {};
+
+    var scenePostBuilt = function()
+    {
+        sceneObjects["slopingSurface"] = self.getVlabScene().getObjectByName("slopingSurface");
+        self.setSceneRenderPause(false);
+    };
+
+    var simulationStep = function()
+    {
+        sceneObjects["slopingSurface"].__dirtyRotation = true;
+        sceneObjects["slopingSurface"].__dirtyPosition = true;
+        sceneObjects["slopingSurface"].rotation.z -= 0.001;
+
+        for (var processNodeName in self.processNodes)
+        {
+            if (self.processNodes[processNodeName].halt)
+            {
+                delete self.processNodes[processNodeName];
+            }
+            else
+            {
+                self.processNodes[processNodeName].process();
+            }
+        }
+    }
+
+    self.plumbScaleZoom = function()
+    {
+        new ZoomHelper({"sprite": this, "vlab":self, "target":arguments[0][0]});
+    }
+
     self.button1Pressed = function()
     {
         self.trace(this.name + " is pressed");
@@ -37,8 +70,9 @@ function PhMpdFcm(webGLContainer)
     {
         if (!this.released)
         {
-            self.trace(this.name + " is released " + ((arguments[0] == "outside") ? "outside" : ""));
+            self.trace(this.name + " is released " + (this.releasedOutside ? "outside" : ""));
         }
+        delete this.releasedOutside;
         this.released = true;
     };
 
@@ -52,7 +86,4 @@ function PhMpdFcm(webGLContainer)
         self.trace(this.name + " [collided with] " + other_object.name);
     };
 
-    var simulationStep = function()
-    {
-    }
 }
