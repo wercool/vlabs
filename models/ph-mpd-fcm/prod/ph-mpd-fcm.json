@@ -88,10 +88,10 @@
     {
         "slopingBody":
         {
-            "shape":"ConvexMesh",
+            "shape":"BoxMesh",
             "mass":0.2,
             "friction":0.4,
-            "restitution":0.5,
+            "restitution":0.2,
             "collision":"physijsCollision"
         },
         "slopingSurface":

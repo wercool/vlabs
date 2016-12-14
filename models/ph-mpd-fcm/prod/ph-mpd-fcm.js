@@ -6,7 +6,6 @@ function PhMpdFcm(webGLContainer)
 
     addEventListener("sceneLoaded", function (event) { sceneLoaded(); }, false);
     addEventListener("sceneBuilt", function (event) { scenePostBuilt(); }, false);
-    addEventListener("simulationStep", function (event) { simulationStep(); }, false);
 
     $.getJSON("ph-mpd-fcm.json", function(jsonObj) {
         VLab.apply(self, [jsonObj]);
@@ -31,6 +30,10 @@ function PhMpdFcm(webGLContainer)
     var activeObjects = {};
     var activeProperties = {};
 
+    // this VLab constants
+    var origin = new THREE.Vector3(0, 0, 0);
+    var pulleyPos;
+
     var scenePostBuilt = function()
     {
         activeObjects["slopingSurface"] = self.getVlabScene().getObjectByName("slopingSurface");
@@ -42,6 +45,10 @@ function PhMpdFcm(webGLContainer)
         activeObjects["pulleyMotor"] = self.getVlabScene().getObjectByName("pulleyMotor");
         activeObjects["magnet"] = self.getVlabScene().getObjectByName("magnet");
 
+        // this VLab constants
+        pulleyPos = activeObjects["pulley"].position.clone();
+        pulleyPos.y += 0.25;
+
         // position frame
         new slopingSurfaceFrameAnimaiton().process();
 
@@ -49,13 +56,11 @@ function PhMpdFcm(webGLContainer)
         var framePivotPos = new THREE.Vector3();
         activeObjects["slopingSurface"].updateMatrixWorld();
         framePivotPos.setFromMatrixPosition(activeObjects["framePivot"].matrixWorld);
-        var pulleyPos = new THREE.Vector3().copy(activeObjects["pulley"].position);
-        pulleyPos.y += 0.25;
-        var pulleyPos1 = new THREE.Vector3().copy(pulleyPos);
+        var pulleyPos1 = pulleyPos.clone();
         pulleyPos1.x += 0.1;
-        var pulleyPos2 = new THREE.Vector3().copy(pulleyPos1);
+        var pulleyPos2 = pulleyPos1.clone();
         pulleyPos2.x += 0.1;
-        var pulleyMotorPos = new THREE.Vector3().copy(activeObjects["pulleyMotor"].position);
+        var pulleyMotorPos = activeObjects["pulleyMotor"].position.clone();
         pulleyMotorPos.y += 0.3;
         pulleyMotorPos.x += 0.3;
         var ropeGeometry = new THREE.Geometry();
@@ -74,18 +79,19 @@ function PhMpdFcm(webGLContainer)
         self.getVlabScene().add(activeObjects["rope"]);
 
         // position magnet
-//        activeObjects["magnet"].position.copy(pulleyPos2);
+        activeObjects["magnet"].geometry.rotateX(Math.PI / 2);
+        activeObjects["magnet"].position.copy(pulleyPos2);
+/*
+        activeObjects["arrowHelper"] = new THREE.ArrowHelper(pulleyMotorPosDirection.clone().normalize(), pulleyPos2, pulleyMotorPosDirection.length(), 0xffffff, 1.0, 0.25);
+        self.getVlabScene().add(activeObjects["arrowHelper"]);
+*/
         activeObjects["magnet"].lookAt(pulleyMotorPos);
-//        activeObjects["magnet"].translateY(-0.5);
+        activeObjects["magnet"].translateZ(4.0);
 
+        // actually start VLab
         self.setPhysijsScenePause(false);
         self.setSceneRenderPause(false);
     };
-
-    var simulationStep = function()
-    {
-
-    }
 
     var ropeAnimation = function()
     {
@@ -107,83 +113,20 @@ function PhMpdFcm(webGLContainer)
     var slopingSurfaceFrameAnimaiton = function()
     {
         this.completed = false;
+        var framePos, framePosY, frameAngle;
 
-        var origin = new THREE.Vector3(0, 0, 0);
-        var pulleyPos, framePos, framePosY, frameAngle;
-/*
-        var frameDirection = framePos.clone().sub(origin);
-        var frameVectorlength = frameDirection.length();
-        
-        var pulleyDirection = pulleyPos.clone().sub(origin);
-        var pulleyVectorlength = pulleyDirection.length();
-
-
-        var frameYDirection = framePosY.clone().sub(origin);
-        var frameYVectorLength = frameYDirection.length();
-
-        var frameYFrameDirection = framePos.clone().sub(framePosY);
-
-        if (activeObjects["framePosArrowHelper"] == undefined)
-        {
-            activeObjects["framePosArrowHelper"] = new THREE.ArrowHelper(frameDirection.normalize(), origin, frameVectorlength, 0xffffff, 1.0, 0.25);
-            self.getVlabScene().add(activeObjects["framePosArrowHelper"]);
-            activeObjects["pulleyPosArrowHelper"] = new THREE.ArrowHelper(pulleyDirection.normalize(), origin, pulleyVectorlength, 0xffffff, 1.0, 0.25);
-            self.getVlabScene().add(activeObjects["pulleyPosArrowHelper"]);
-            activeObjects["pulleyToframeArrowHelper"] = new THREE.ArrowHelper(frameDirection.normalize(), pulleyPos, pulleyPos.distanceTo(framePos), 0xffff00, 1.0, 0.25);
-            self.getVlabScene().add(activeObjects["pulleyToframeArrowHelper"]);
-            activeObjects["frameYArrowHelper"] = new THREE.ArrowHelper(frameYDirection.normalize(), origin, frameYVectorLength, 0xffffff, 1.0, 0.25);
-            self.getVlabScene().add(activeObjects["frameYArrowHelper"]);
-            activeObjects["frameYToframeArrowHelper"] = new THREE.ArrowHelper(frameYFrameDirection.normalize(), framePosY, framePosY.distanceTo(framePos), 0xffff00, 1.0, 0.25);
-            self.getVlabScene().add(activeObjects["frameYToframeArrowHelper"]);
-        }
-*/
         this.process = function()
         {
-/*
-            activeObjects["slopingSurface"].updateMatrixWorld();
-            framePos.setFromMatrixPosition(activeObjects["frame"].matrixWorld);
-
-            var frameDirection = framePos.clone().sub(origin);
-            var frameVectorlength = frameDirection.length();
-
-            var frameDirectionFromPulley = framePos.clone().sub(pulleyPos);
-            var framePulleyVectorlength = frameDirectionFromPulley.length();
-
-            var framePosY = new THREE.Vector3(0, 0, 0);
-            framePosY.y = framePos.y;
-            var frameYDirection = framePosY.clone().sub(origin);
-            var frameYVectorLength = frameYDirection.length();
-
-            var frameYFrameDirection = framePos.clone().sub(framePosY);
-
-            activeObjects["framePosArrowHelper"].setDirection(frameDirection.normalize());
-            activeObjects["framePosArrowHelper"].setLength(frameVectorlength, 1.0, 0.25);
-
-            activeObjects["pulleyToframeArrowHelper"].setDirection(frameDirectionFromPulley.normalize());
-            activeObjects["pulleyToframeArrowHelper"].setLength(pulleyPos.distanceTo(framePos), 1.0, 0.25);
-
-            activeObjects["frameYArrowHelper"].setDirection(frameYDirection.normalize());
-            activeObjects["frameYArrowHelper"].setLength(frameYVectorLength, 1.0, 0.25);
-
-            activeObjects["frameYToframeArrowHelper"].position.copy(framePosY);
-            activeObjects["frameYToframeArrowHelper"].setDirection(frameYFrameDirection.normalize());
-            activeObjects["frameYToframeArrowHelper"].setLength(framePosY.distanceTo(framePos), 1.0, 0.25);
-*/
-
             activeObjects["slopingBody"].__dirtyPosition = true;
             activeObjects["slopingBody"].__dirtyRotation = true;
             activeObjects["slopingSurface"].__dirtyRotation = true;
             activeObjects["slopingSurface"].rotation.z -= 0.001;
 
-            pulleyPos = new THREE.Vector3();
-            pulleyPos.copy(activeObjects["pulley"].position);
-            pulleyPos.y += 0.25;
-
             framePos = new THREE.Vector3();
             activeObjects["slopingSurface"].updateMatrixWorld();
             framePos.setFromMatrixPosition(activeObjects["frame"].matrixWorld);
 
-            framePosY = new THREE.Vector3(0, 0, 0);
+            framePosY = new THREE.Vector3();
             framePosY.y = framePos.y;
 
             frameAngle = Math.asin( ( pulleyPos.length() * Math.sin( pulleyPos.angleTo(framePos) ) ) / pulleyPos.distanceTo(framePos));
@@ -196,6 +139,49 @@ function PhMpdFcm(webGLContainer)
         return this;
     };
 
+    var magnetAnimation = function()
+    {
+        this.completed = false;
+
+        var prevPulleyFramePivotVector;
+
+        this.process = function()
+        {
+            activeObjects["slopingSurface"].updateMatrixWorld();
+            var framePivotPos = new THREE.Vector3();
+            framePivotPos.setFromMatrixPosition(activeObjects["framePivot"].matrixWorld);
+            var pulleyFramePivotVector = framePivotPos.clone().sub(pulleyPos);
+            if (prevPulleyFramePivotVector != undefined)
+            {
+                var dZmagnet = Math.abs(prevPulleyFramePivotVector - pulleyFramePivotVector.length());
+                activeObjects["magnet"].translateZ(dZmagnet);
+            }
+            prevPulleyFramePivotVector = pulleyFramePivotVector.length();
+        }
+
+        return this;
+    };
+
+    self.button1Pressed = function()
+    {
+        self.addProcessNode("ropeAnimation", new ropeAnimation());
+        self.addProcessNode("slopingSurfaceFrameAnimaiton", new slopingSurfaceFrameAnimaiton());
+        self.addProcessNode("magnetAnimation", new magnetAnimation());
+    };
+
+    self.button1Released = function()
+    {
+        self.setProcessNodeCompleted("ropeAnimation");
+        self.setProcessNodeCompleted("slopingSurfaceFrameAnimaiton");
+        self.setProcessNodeCompleted("magnetAnimation");
+    };
+
+    self.physijsCollision = function(other_object, linear_velocity, angular_velocity)
+    {
+        self.trace(this.name + " [collided with] " + other_object.name);
+    };
+
+    // helpers
     self.plumbScaleZoom = function()
     {
        new ZoomHelper({"sprite": this, "vlab":self, "target":"scale", "zOffset":1.2});
@@ -205,22 +191,5 @@ function PhMpdFcm(webGLContainer)
     {
         new ZoomHelper({"sprite": this, "vlab":self, "target":"aktakomPowerSupplyScreen", "zOffset":2.5, "yOffset":-1.0});
     }
-
-    self.button1Pressed = function()
-    {
-        self.addProcessNode("ropeAnimation", new ropeAnimation());
-        self.addProcessNode("slopingSurfaceFrameAnimaiton", new slopingSurfaceFrameAnimaiton());
-    };
-
-    self.button1Released = function()
-    {
-        self.setProcessNodeCompleted("ropeAnimation");
-        self.setProcessNodeCompleted("slopingSurfaceFrameAnimaiton");
-    };
-
-    self.physijsCollision = function(other_object, linear_velocity, angular_velocity)
-    {
-        self.trace(this.name + " [collided with] " + other_object.name);
-    };
 
 }

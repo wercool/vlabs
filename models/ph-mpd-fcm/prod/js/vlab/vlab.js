@@ -24,7 +24,6 @@ function VLab(vlabNature)
 
     var sceneLoadedEvent    = new Event("sceneLoaded");
     var sceneBuiltEvent    = new Event("sceneBuilt");
-    var simulationStepEvent = new Event("simulationStep");
 
     var vlabScene = null;
     var vlabPhysijsSceneReady = false;
@@ -492,7 +491,6 @@ function VLab(vlabNature)
                     processNodes[processNodeName].process();
                 }
             }
-            dispatchEvent(simulationStepEvent);
         }
     }
 
@@ -750,6 +748,6 @@ function VLab(vlabNature)
     self.setPhysijsScenePause = function(state){physijsScenePause = state};
     self.getPhysijsScenePause = function(){return physijsScenePause};
     self.addProcessNode = function(nodeName, node){processNodes[nodeName] = node};
-    self.setProcessNodeCompleted = function(nodeName){processNodes[nodeName].completed = true};
+    self.setProcessNodeCompleted = function(nodeName){if (processNodes[nodeName] != undefined) processNodes[nodeName].completed = true};
 
 };
