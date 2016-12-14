@@ -49,7 +49,7 @@ function VLab(vlabNature)
 
     var tooltipDiv = null;
 
-    self.processNodes = {};
+    var processNodes = {};
 
     self.trace = function(error)
     {
@@ -299,6 +299,12 @@ function VLab(vlabNature)
                                                     physijsMaterial
                                                 );
                         break;
+                        case "ConcaveMesh":
+                            physijsMesh = new Physijs.ConcaveMesh(
+                                                    meshObjects[meshObjectName].mesh.geometry,
+                                                    physijsMaterial
+                                                );
+                        break;
                     }
                     physijsMesh.quaternion.copy(quaternion);
                     physijsMesh.position.copy(position);
@@ -475,6 +481,17 @@ function VLab(vlabNature)
         }
         if ((self.vlabNature.isPhysijsScene && self.vlabPhysijsSceneReady) || !self.vlabNature.isPhysijsScene)
         {
+            for (var processNodeName in processNodes)
+            {
+                if (processNodes[processNodeName].completed)
+                {
+                    delete processNodes[processNodeName];
+                }
+                else
+                {
+                    processNodes[processNodeName].process();
+                }
+            }
             dispatchEvent(simulationStepEvent);
         }
     }
@@ -732,5 +749,7 @@ function VLab(vlabNature)
     self.getSceneRenderPause = function(){return sceneRenderPause};
     self.setPhysijsScenePause = function(state){physijsScenePause = state};
     self.getPhysijsScenePause = function(){return physijsScenePause};
+    self.addProcessNode = function(nodeName, node){processNodes[nodeName] = node};
+    self.setProcessNodeCompleted = function(nodeName){processNodes[nodeName].completed = true};
 
 };

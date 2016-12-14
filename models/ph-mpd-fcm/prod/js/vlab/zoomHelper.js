@@ -46,7 +46,7 @@ function ZoomHelper()
     sprite.visible = false;
     $("#tooltipDiv").hide();
 
-    vlab.processNodes[self.name] = self;
+    vlab.addProcessNode(self.name, self);
 
     addEventListener("mouseup", self.reset);
 

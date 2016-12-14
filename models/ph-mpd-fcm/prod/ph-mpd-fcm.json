@@ -3,13 +3,13 @@
     "sceneFile":        "scene/ph-mpd-fcm.dae",
     "isPhysijsScene":   true,
     "showStatistics":   true,
-    "showAxis":         false,
+    "showAxis":         true,
     "showTooltips":     true,
     "shadows":          true,
-    "shadowsMapSize":   1024,
+    "shadowsMapSize":   512,
     "castShadows":
     [
-        "Lamp",
+        "Lamp2",
         "slopingSurface", "slopingBody", "support", "frame", "acPlug", "acWire", "aktakomPowerSupply", 
         "plusWire", "plusWire1", "minusWire", "pulleyMotor", "motorFixture", "slopingSurfaceFixture",
         "motor", "button", "tableTop_001", "tableTop", "Circle_015", "Circle_010", "Plane_007",
@@ -17,8 +17,9 @@
     ],
     "receiveShadows":
     [
-        "tableTop", "slopingSurface", "slopingBody", "slopingSurfaceFixture", "motorWoodenStand",
-        "Cube_001", "aktakomPowerSupply", "tableTop_007", "Plane_006", "Plane_011", "Plane_005", "Plane_010"
+        "tableTop", "slopingSurface", "slopingBody", "slopingSurfaceFixture", "motorWoodenStand", "Plane_007",
+        "Cube_001", "aktakomPowerSupply", "tableTop_007", "Plane_006", "Plane_011", "Plane_005", "Plane_010",
+        "motor"
     ],
     "maps":
     [
@@ -61,7 +62,7 @@
         "button1":
         {
             "active":true,
-            "tooltip":"Press to lift sloping surface",
+            "tooltip":"Press to lift the sloping surface",
             "press":{"callback":"button1Pressed"},
             "release":{"callback":"button1Released", "strict":false}
         },
@@ -89,25 +90,41 @@
         {
             "shape":"ConvexMesh",
             "mass":0.2,
-            "friction":0.1,
+            "friction":0.4,
             "restitution":0.5,
-            "collision":"slopingBodyCollision"
+            "collision":"physijsCollision"
         },
         "slopingSurface":
         {
             "shape":"ConvexMesh", 
             "mass":0.0,
-            "friction":0.1,
-            "restitution":0.5,
-            "collision":"slopingSurfaceCollision"
+            "friction":0.5,
+            "restitution":0.0,
+            "collision":"physijsCollision"
         },
         "slopingSurfaceFixture":
         {
             "shape":"ConvexMesh", 
             "mass":0.0,
+            "friction":0.5,
+            "restitution":0.1,
+            "collision":"physijsCollision"
+        },
+        "tableTop":
+        {
+            "shape":"BoxMesh", 
+            "mass":0.0,
+            "friction":0.5,
+            "restitution":0.1,
+            "collision":"physijsCollision"
+        },
+        "support":
+        {
+            "shape":"BoxMesh", 
+            "mass":0.0,
             "friction":0.1,
             "restitution":0.5,
-            "collision":"slopingSurfaceCollision"
+            "collision":"physijsCollision"
         }
     }
 }
