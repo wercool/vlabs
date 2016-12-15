@@ -13,7 +13,7 @@
         "slopingSurface", "slopingBody", "support", "frame", "acPlug", "acWire", "aktakomPowerSupply", 
         "plusWire", "plusWire1", "minusWire", "pulleyMotor", "motorFixture", "slopingSurfaceFixture",
         "motor", "button", "tableTop_001", "tableTop", "Circle_015", "Circle_010", "Plane_007",
-        "Plane_010", "Plane_011", "Circle_012", "Circle_013"
+        "Plane_010", "Plane_011", "Circle_012", "Circle_013", "herconPlate2", "herconPlate2Fixture"
     ],
     "receiveShadows":
     [
@@ -62,7 +62,6 @@
         "button1":
         {
             "active":true,
-            "tooltip":"Press to lift the sloping surface",
             "press":{"callback":"button1Pressed"},
             "release":{"callback":"button1Released", "strict":false}
         },
@@ -82,6 +81,11 @@
             "active":true,
             "tooltip":"Press to see the power supply front panel",
             "press":{"callback":"aktakomPowerSupplyZoom", "arguments":[]}
+        },
+        "button1Helper":
+        {
+            "active":false,
+            "tooltip":"Press to lift the sloping surface"
         }
     },
     "physijs":

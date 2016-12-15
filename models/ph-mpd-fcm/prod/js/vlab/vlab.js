@@ -144,6 +144,16 @@ function VLab(vlabNature)
 
     var onSceneLoaded = function(collada)
     {
+        // fix transparent materials
+        for (var effectName in collada.dae.effects)
+        {
+            if(collada.dae.effects[effectName].shader.transparent != undefined)
+            {
+                collada.dae.effects[effectName].shader.material.transparent = true;
+                collada.dae.effects[effectName].shader.material.opacity = collada.dae.effects[effectName].shader.transparent.color.a;
+            }
+        }
+
         var sceneObject = collada.scene;
         sceneObject.traverse(function(object){
             if(object.type == "Object3D")

@@ -77,6 +77,7 @@ function PhMpdFcm(webGLContainer)
         activeObjects["rope"] = new THREE.Line(ropeGeometry, ropeMaterial);
         activeObjects["rope"].castShadow = true;
         self.getVlabScene().add(activeObjects["rope"]);
+console.log(activeObjects["rope"]);
 
         // position magnet
         activeObjects["magnet"].geometry.rotateX(Math.PI / 2);
