@@ -80,7 +80,7 @@
             "map":"magnifier",
             "opacity":"0.5",
             "scale":{"x":0.75, "y":0.75},
-            "offset":{"x":-0.2, "y":0.5 , "z":0.5},
+            "offset":{"x":-0.2, "y":0.5 , "z":-0.5},
             "visible": true
         }
     },
@@ -127,7 +127,7 @@
         "labSwitchHelper":
         {
             "active":true,
-            "press":{"callback":"helperZoom", "arguments":[{"target":"labSwitch", "xOffset":-0.75, "yOffset":1.5, "zOffset":3.0}]}
+            "press":{"callback":"helperZoom", "arguments":[{"target":"labSwitch", "xOffset":-0.8, "yOffset":2.5, "zOffset":5.0}]}
         }
     },
     "physijs":

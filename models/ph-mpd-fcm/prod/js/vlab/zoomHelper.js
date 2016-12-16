@@ -34,7 +34,7 @@ function ZoomHelper()
             vlab.getDefaultCamera().position.copy(initialCameraPosition);
 
             cameraPosTween = new TWEEN.Tween(vlab.getDefaultCamera().position);
-            cameraPosTween.to({x:targetPos.x, y:targetPos.y, z:targetPos.z}, 500);
+            cameraPosTween.to({x:targetPos.x, y:targetPos.y, z:targetPos.z}, 300);
             cameraPosTween.onComplete(function(){
             if (typeof vlab.cameraControlsEvent === "function")
             {
@@ -43,7 +43,7 @@ function ZoomHelper()
             cameraPosTween.start();
 
             cameraRotTween = new TWEEN.Tween(vlab.getDefaultCamera().quaternion);
-            cameraRotTween.to({x:cameraLookAtQuaternion.x, y:cameraLookAtQuaternion.y, z:cameraLookAtQuaternion.z}, 500);
+            cameraRotTween.to({x:cameraLookAtQuaternion.x, y:cameraLookAtQuaternion.y, z:cameraLookAtQuaternion.z}, 300);
             cameraRotTween.onComplete(function(){
             if (typeof vlab.cameraControlsEvent === "function")
             {
