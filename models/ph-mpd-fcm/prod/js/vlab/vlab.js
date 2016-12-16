@@ -23,7 +23,8 @@ function VLab(vlabNature)
     var physijsScenePause = true;
 
     var sceneLoadedEvent    = new Event("sceneLoaded");
-    var sceneBuiltEvent    = new Event("sceneBuilt");
+    var sceneBuiltEvent     = new Event("sceneBuilt");
+    var simulationStepEvent = new Event("simulationStep");
 
     var vlabScene = null;
     var vlabPhysijsSceneReady = false;
@@ -49,6 +50,8 @@ function VLab(vlabNature)
     var tooltipDiv = null;
 
     var processNodes = {};
+
+    self.interactionHelpers = {};
 
     self.trace = function(error)
     {
@@ -404,40 +407,49 @@ function VLab(vlabNature)
             }
         });
 
-        // sprite helpers
-        for (var spriteHelperName in self.vlabNature.interactionHelpers)
+        // interaction helpers
+        for (var interactionHelperName in self.vlabNature.interactionHelpers)
         {
-            var spriteMaterial = new THREE.SpriteMaterial( 
-            { 
-                map: maps[self.vlabNature.interactionHelpers[spriteHelperName].map],
-                color: ((self.vlabNature.interactionHelpers[spriteHelperName].color != undefined) ? parseInt(self.vlabNature.interactionHelpers[spriteHelperName].color) : 0xffffff),
-                blending: THREE.AdditiveBlending
-            });
-
-            if (self.vlabNature.interactionHelpers[spriteHelperName].opacity != undefined)
+            if (vlabScene.getObjectByName(self.vlabNature.interactionHelpers[interactionHelperName].parent) != undefined) // check parent for helpers existence
             {
-                spriteMaterial.transparent = true;
-                spriteMaterial.opacity = self.vlabNature.interactionHelpers[spriteHelperName].opacity;
-                spriteMaterial.blending = THREE.NormalBlending;
-            }
+                var spriteMaterial = new THREE.SpriteMaterial( 
+                { 
+                    map: maps[self.vlabNature.interactionHelpers[interactionHelperName].map],
+                    color: ((self.vlabNature.interactionHelpers[interactionHelperName].color != undefined) ? parseInt(self.vlabNature.interactionHelpers[interactionHelperName].color) : 0xffffff),
+                    blending: THREE.AdditiveBlending
+                });
 
-            var sprite = new THREE.Sprite(spriteMaterial);
+                if (self.vlabNature.interactionHelpers[interactionHelperName].opacity != undefined)
+                {
+                    spriteMaterial.transparent = true;
+                    spriteMaterial.opacity = self.vlabNature.interactionHelpers[interactionHelperName].opacity;
+                    spriteMaterial.blending = THREE.NormalBlending;
+                }
 
-            if (self.vlabNature.interactionHelpers[spriteHelperName].scale != undefined)
-            {
-                sprite.scale.set(self.vlabNature.interactionHelpers[spriteHelperName].scale.x, 
-                                 self.vlabNature.interactionHelpers[spriteHelperName].scale.y, 1.0);
+                var sprite = new THREE.Sprite(spriteMaterial);
+
+                if (self.vlabNature.interactionHelpers[interactionHelperName].scale != undefined)
+                {
+                    sprite.scale.set(self.vlabNature.interactionHelpers[interactionHelperName].scale.x, 
+                                     self.vlabNature.interactionHelpers[interactionHelperName].scale.y, 1.0);
+                }
+                if (self.vlabNature.interactionHelpers[interactionHelperName].offset != undefined)
+                {
+                    sprite.position.set(self.vlabNature.interactionHelpers[interactionHelperName].offset.x, 
+                                        self.vlabNature.interactionHelpers[interactionHelperName].offset.y,
+                                        self.vlabNature.interactionHelpers[interactionHelperName].offset.z);
+                }
+                sprite.name = interactionHelperName;
+                sprite.visible = self.vlabNature.interactionHelpers[interactionHelperName].visible;
+                addInteractorToObject(sprite);
+                vlabScene.getObjectByName(self.vlabNature.interactionHelpers[interactionHelperName].parent).add(sprite);
+
+                self.interactionHelpers[interactionHelperName] = sprite;
             }
-            if (self.vlabNature.interactionHelpers[spriteHelperName].offset != undefined)
+            else
             {
-                sprite.position.set(self.vlabNature.interactionHelpers[spriteHelperName].offset.x, 
-                                    self.vlabNature.interactionHelpers[spriteHelperName].offset.y,
-                                    self.vlabNature.interactionHelpers[spriteHelperName].offset.z);
+                self.error("Non-existing parent object [" + self.vlabNature.interactionHelpers[interactionHelperName].parent + "] is defined in VLab nature for " + interactionHelperName + " interaction helper");
             }
-            sprite.name = spriteHelperName;
-            sprite.visible = self.vlabNature.interactionHelpers[spriteHelperName].visible;
-            addInteractorToObject(sprite);
-            vlabScene.getObjectByName(self.vlabNature.interactionHelpers[spriteHelperName].parent).add(sprite);
         }
 
         dispatchEvent(sceneBuiltEvent);
@@ -445,7 +457,7 @@ function VLab(vlabNature)
         render();
     }
 
-    var render = function()
+    var render = function(time)
     {
         if (!sceneRenderPause)
         {
@@ -471,6 +483,7 @@ function VLab(vlabNature)
                     }
                 }
             }
+            TWEEN.update(time);
         }
         else
         {
@@ -490,6 +503,7 @@ function VLab(vlabNature)
         }
         if ((self.vlabNature.isPhysijsScene && self.vlabPhysijsSceneReady) || !self.vlabNature.isPhysijsScene)
         {
+            dispatchEvent(simulationStepEvent);
             for (var processNodeName in processNodes)
             {
                 if (processNodes[processNodeName].completed)
@@ -759,5 +773,11 @@ function VLab(vlabNature)
     self.getPhysijsScenePause = function(){return physijsScenePause};
     self.addProcessNode = function(nodeName, node){processNodes[nodeName] = node};
     self.setProcessNodeCompleted = function(nodeName){if (processNodes[nodeName] != undefined) processNodes[nodeName].completed = true};
-
+    self.interactionHelpersVisibility = function(visibility)
+    {
+        for (var interactionHelperName in self.interactionHelpers)
+        {
+            self.interactionHelpers[interactionHelperName].visible = visibility;
+        }
+    };
 };

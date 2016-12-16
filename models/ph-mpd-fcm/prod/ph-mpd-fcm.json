@@ -11,7 +11,7 @@
     [
         "Lamp2",
         "slopingSurface", "slopingBody", "support", "frame", "acPlug", "acWire", "aktakomPowerSupply", 
-        "plusWire", "plusWire1", "minusWire", "pulleyMotor", "motorFixture", "slopingSurfaceFixture",
+        "minusWire", "pulleyMotor", "motorFixture", "slopingSurfaceFixture",
         "motor", "button", "tableTop_001", "tableTop", "Circle_015", "Circle_010", "Plane_007",
         "Plane_010", "Plane_011", "Circle_012", "Circle_013", "pusher"
     ],
@@ -43,8 +43,8 @@
             "parent":"aktakomPowerSupply",
             "map":"settings",
             "opacity":"0.5",
-            "scale":{"x":2.0, "y":2.0},
-            "offset":{"x":-2.0, "y":2.0, "z":-1.5},
+            "scale":{"x":1.0, "y":1.0},
+            "offset":{"x":-2.5, "y":1.5, "z":0.0},
             "visible": true
         },
         "button1Helper":
@@ -62,7 +62,25 @@
             "map":"magnifier",
             "opacity":"0.5",
             "scale":{"x":0.75, "y":0.75},
-            "offset":{"x":0.5, "y":-0.1 , "z":0.5},
+            "offset":{"x":0.5, "y":-0.1 , "z":-0.5},
+            "visible": true
+        },
+        "stopbuttonBottomPlateHelper":
+        {
+            "parent":"stopbuttonBottomPlate",
+            "map":"magnifier",
+            "opacity":"0.5",
+            "scale":{"x":0.75, "y":0.75},
+            "offset":{"x":0.5, "y":0.2 , "z":-0.5},
+            "visible": true
+        },
+        "labSwitchHelper":
+        {
+            "parent":"labSwitch",
+            "map":"magnifier",
+            "opacity":"0.5",
+            "scale":{"x":0.75, "y":0.75},
+            "offset":{"x":-0.2, "y":0.5 , "z":0.5},
             "visible": true
         }
     },
@@ -83,13 +101,13 @@
         {
             "active":true,
             "tooltip":"Press to see the plumb's scale",
-            "press":{"callback":"plumbScaleZoom", "arguments":[]}
+            "press":{"callback":"helperZoom ", "arguments":[{"target":"scale", "zOffset":1.2, "xOffset":0.5, "yOffset":-0.5}]}
         },
         "aktakomPowerSupplyHelper":
         {
             "active":true,
             "tooltip":"Press to see the power supply front panel",
-            "press":{"callback":"aktakomPowerSupplyZoom", "arguments":[]}
+            "press":{"callback":"helperZoom", "arguments":[{"target":"aktakomPowerSupplyScreen", "zOffset":2.5, "yOffset":-1.0}]}
         },
         "button1Helper":
         {
@@ -99,7 +117,17 @@
         "stopbuttonTopPlateHelper":
         {
             "active":true,
-            "press":{"callback":"stopButtonPlatesZoom", "arguments":[]}
+            "press":{"callback":"helperZoom", "arguments":[{"target":"stopbuttonTopPlate", "xOffset":0.2, "yOffset":-0.4, "zOffset":1.5}]}
+        },
+        "stopbuttonBottomPlateHelper":
+        {
+            "active":true,
+            "press":{"callback":"helperZoom", "arguments":[{"target":"stopbuttonBottomPlate", "xOffset":-0.5, "yOffset":0.5, "zOffset":1.5}]}
+        },
+        "labSwitchHelper":
+        {
+            "active":true,
+            "press":{"callback":"helperZoom", "arguments":[{"target":"labSwitch", "xOffset":-0.75, "yOffset":1.5, "zOffset":3.0}]}
         }
     },
     "physijs":

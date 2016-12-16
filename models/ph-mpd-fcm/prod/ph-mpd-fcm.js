@@ -6,6 +6,7 @@ function PhMpdFcm(webGLContainer)
 
     addEventListener("sceneLoaded", function (event) { sceneLoaded(); }, false);
     addEventListener("sceneBuilt", function (event) { scenePostBuilt(); }, false);
+    addEventListener("simulationStep", function (event) { simulationStep(); }, false);
 
     $.getJSON("ph-mpd-fcm.json", function(jsonObj) {
         VLab.apply(self, [jsonObj]);
@@ -17,16 +18,17 @@ function PhMpdFcm(webGLContainer)
         self.getDefaultCamera().position.set(0.0, 4.0, 14.0);
 
         self.getDefaultCamera().controls = new THREE.OrbitControls(self.getDefaultCamera(), self.getWebglContainerDOM());
+        self.getDefaultCamera().controls.addEventListener("change", self.cameraControlsEvent);
         self.getDefaultCamera().controls.autoRotate = false;
         self.getDefaultCamera().controls.enableKeys = false;
         // test mode
-/*
+
         self.getDefaultCamera().controls.minDistance = 5;
         self.getDefaultCamera().controls.maxDistance = 15;
         self.getDefaultCamera().controls.maxPolarAngle = Math.PI/2 - 0.2; 
         self.getDefaultCamera().controls.minPolarAngle = 0.85;
-*/
-        self.getDefaultCamera().controls.testMode = true;
+
+//        self.getDefaultCamera().controls.testMode = true;
 
         self.buildScene();
     };
@@ -37,6 +39,7 @@ function PhMpdFcm(webGLContainer)
     // this VLab constants
     var origin = new THREE.Vector3(0, 0, 0);
     var pulleyPos;
+    var initialDefaultCameraPosVectorLength;
 
     var scenePostBuilt = function()
     {
@@ -60,6 +63,7 @@ function PhMpdFcm(webGLContainer)
         // this VLab constants
         pulleyPos = activeObjects["pulley"].position.clone();
         pulleyPos.y += 0.25;
+        initialDefaultCameraPosVectorLength = self.getDefaultCamera().position.length();
 
         // position frame
         new slopingSurfaceFrameAnimaiton().process();
@@ -109,6 +113,32 @@ activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.
         // actually start VLab
         self.setPhysijsScenePause(false);
         self.setSceneRenderPause(false);
+    };
+
+    var simulationStep = function()
+    {
+        
+    };
+
+    self.cameraControlsEvent = function()
+    {
+        var cameraRelativeDistance = initialDefaultCameraPosVectorLength / self.getDefaultCamera().position.length();
+        if (3 * cameraRelativeDistance < 5)
+        {
+            activeObjects["rope"].material.linewidth = 3 * cameraRelativeDistance;
+        }
+
+        if (self.getDefaultCamera().controls.enabled)
+        {
+            if (self.getDefaultCamera().quaternion.y < -0.7 || self.getDefaultCamera().quaternion.y > 0.7)
+            {
+                self.interactionHelpersVisibility(false);
+            }
+            else
+            {
+                self.interactionHelpersVisibility(true);
+            }
+        }
     };
 
     var ropeAnimation = function()
@@ -229,19 +259,14 @@ console.log(activeObjects["pusher"].position.y);
     };
 
     // helpers
-    self.plumbScaleZoom = function()
+    self.helperZoom = function()
     {
-       new ZoomHelper({"sprite": this, "vlab":self, "target":"scale", "zOffset":1.2});
-    }
-
-    self.aktakomPowerSupplyZoom = function()
-    {
-        new ZoomHelper({"sprite": this, "vlab":self, "target":"aktakomPowerSupplyScreen", "zOffset":2.5, "yOffset":-1.0});
-    }
-
-    self.stopButtonPlatesZoom = function()
-    {
-        new ZoomHelper({"sprite": this, "vlab":self, "target":"stopbuttonTopPlate", "xOffset":0.2, "yOffset":-0.4, "zOffset":1.5});
+        var zoomArgs = Object.assign({"sprite": this, "vlab":self}, arguments[0][0]);
+        if (zoomArgs.target.indexOf("stopbutton") > -1)
+        {
+            activeObjects["rope"].material.linewidth = 6;
+        }
+        new ZoomHelper(zoomArgs);
     }
 
 }
