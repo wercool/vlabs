@@ -13,7 +13,7 @@
         "slopingSurface", "slopingBody", "support", "frame", "acPlug", "acWire", "aktakomPowerSupply", 
         "plusWire", "plusWire1", "minusWire", "pulleyMotor", "motorFixture", "slopingSurfaceFixture",
         "motor", "button", "tableTop_001", "tableTop", "Circle_015", "Circle_010", "Plane_007",
-        "Plane_010", "Plane_011", "Circle_012", "Circle_013", "herconPlate2", "herconPlate2Fixture"
+        "Plane_010", "Plane_011", "Circle_012", "Circle_013", "pusher"
     ],
     "receiveShadows":
     [
@@ -55,6 +55,15 @@
             "scale":{"x":0.75, "y":0.75},
             "offset":{"x":-0.5, "y":0.4, "z":0.0},
             "visible": true
+        },
+        "stopbuttonTopPlateHelper":
+        {
+            "parent":"stopbuttonTopPlate",
+            "map":"magnifier",
+            "opacity":"0.5",
+            "scale":{"x":0.75, "y":0.75},
+            "offset":{"x":0.5, "y":-0.1 , "z":0.5},
+            "visible": true
         }
     },
     "interactors":
@@ -86,6 +95,11 @@
         {
             "active":false,
             "tooltip":"Press to lift the sloping surface"
+        },
+        "stopbuttonTopPlateHelper":
+        {
+            "active":true,
+            "press":{"callback":"stopButtonPlatesZoom", "arguments":[]}
         }
     },
     "physijs":

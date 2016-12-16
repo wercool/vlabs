@@ -85,6 +85,8 @@ THREE.OrbitControls = function ( object, domElement ) {
     this.maxYPan  = 2;
     this.minYPan  = -2;
 
+    this.testMode = false;
+
 	//
 	// public methods
 	//
@@ -163,15 +165,28 @@ THREE.OrbitControls = function ( object, domElement ) {
 			// restrict radius to be between desired limits
 			spherical.radius = Math.max( scope.minDistance, Math.min( scope.maxDistance, spherical.radius ) );
 
-			// move target to panned location
-            var newX = scope.target.x + panOffset.x;
-            var newY = scope.target.y + panOffset.y;
+// ******************************
+// modified for VLabs
+// ******************************
 
-            if (newX <= scope.maxXPan && newX >= scope.minXPan && newY <= scope.maxYPan && newY >= scope.minYPan)
+            if (!this.testMode)
+            {
+                // move target to panned location
+                var newX = scope.target.x + panOffset.x;
+                var newY = scope.target.y + panOffset.y;
+
+                if (newX <= scope.maxXPan && newX >= scope.minXPan && newY <= scope.maxYPan && newY >= scope.minYPan)
+                {
+                    scope.target.add( panOffset );
+                }
+            }
+            else
             {
                 scope.target.add( panOffset );
             }
-			//scope.target.add( panOffset );
+// ******************************
+// modified for VLabs
+// ******************************
 
 			offset.setFromSpherical( spherical );
 
