@@ -6,20 +6,32 @@
     "showAxis":         true,
     "showTooltips":     true,
     "shadows":          true,
+    "forceShadows":     true,
     "shadowsMapSize":   512,
     "castShadows":
     [
         "Lamp2",
-        "slopingSurface", "slopingBody", "support", "frame", "acPlug", "acWire", "aktakomPowerSupply", 
+        "slopingBody", "slopingSurface", "support", "frame", "acPlug", "acWire", "aktakomPowerSupply", 
         "minusWire", "pulleyMotor", "motorFixture", "slopingSurfaceFixture",
-        "motor", "button", "tableTop_001", "tableTop", "Circle_015", "Circle_010", "Plane_007",
-        "Plane_010", "Plane_011", "Circle_012", "Circle_013", "pusher"
+        "motor", "button", "tableTop", "tableTop_001", "Circle_015", "Circle_010", "Plane_007",
+        "Plane_010", "Plane_011", "Circle_012", "Circle_013", "pusher", "framePivot", "BezierCurve_009",
+        "BezierCurve_010", "BezierCurve_008", "BezierCurve_007", "stopbuttonBottomPlate",
+        "herconPlate2Fixture", "BezierCurve_006", "labSwitchHandler", "Plane_025", "labSwitchHandlerBase",
+        "BezierCurve_004", "BezierCurve_002", "BezierCurve_003"
     ],
     "receiveShadows":
     [
         "tableTop", "slopingSurface", "slopingBody", "slopingSurfaceFixture", "motorWoodenStand", "Plane_007",
-        "Cube_001", "aktakomPowerSupply", "tableTop_007", "Plane_006", "Plane_011", "Plane_005", "Plane_010",
-        "motor"
+        "Cube_001", "aktakomPowerSupply", "tableTop_007", "Plane_011", "Plane_005", "Plane_010",
+        "motor", "support", "slopingSurfacePin", "labSwitch"
+    ],
+    "castShadowsExecptions":
+    [
+        "scale"
+    ],
+    "receiveShadowsExecptions":
+    [
+        "scale"
     ],
     "maps":
     [
@@ -128,6 +140,12 @@
         {
             "active":true,
             "press":{"callback":"helperZoom", "arguments":[{"target":"labSwitch", "xOffset":-0.8, "yOffset":2.5, "zOffset":5.0}]}
+        },
+        "labSwitchHandler":
+        {
+            "active":true,
+            "tooltip":"Use [Ctrl] keyboard key to invert mouse action",
+            "press":{"callback":"labSwitchHandler"}
         }
     },
     "physijs":

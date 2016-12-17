@@ -39,7 +39,11 @@ function PhMpdFcm(webGLContainer)
     // this VLab constants
     var origin = new THREE.Vector3(0, 0, 0);
     var pulleyPos;
+    var ropeLineWidth = 3.0;
     var initialDefaultCameraPosVectorLength;
+    var labSwitchState = 1;
+    var stopButtonTopState = true;
+    var stopButtonLowerState = false;
 
     var scenePostBuilt = function()
     {
@@ -59,6 +63,7 @@ function PhMpdFcm(webGLContainer)
         activeObjects["stopButton3Pin"] = self.getVlabScene().getObjectByName("stopButton3Pin");
         activeObjects["stopButton4Lever"] = self.getVlabScene().getObjectByName("stopButton4Lever");
         activeObjects["stopButton4Pin"] = self.getVlabScene().getObjectByName("stopButton4Pin");
+        activeObjects["labSwitchHandlerBase"] = self.getVlabScene().getObjectByName("labSwitchHandlerBase");
 
         // this VLab constants
         pulleyPos = activeObjects["pulley"].position.clone();
@@ -86,9 +91,9 @@ function PhMpdFcm(webGLContainer)
         ropeGeometry.vertices.push(pulleyPos2);
         ropeGeometry.vertices.push(pulleyMotorPos);
         var ropeMaterial = new THREE.LineBasicMaterial({
-                                     color:     0x352d2a,
+                                     color:     0x1c2123,
                                      opacity:   1.0,
-                                     linewidth: 3.0
+                                     linewidth: ropeLineWidth
         });
         activeObjects["rope"] = new THREE.Line(ropeGeometry, ropeMaterial);
         activeObjects["rope"].castShadow = true;
@@ -102,13 +107,11 @@ function PhMpdFcm(webGLContainer)
         self.getVlabScene().add(activeObjects["arrowHelper"]);
 */
         activeObjects["pusher"].lookAt(pulleyMotorPos);
-//        activeObjects["pusher"].translateZ(4.0);
-        activeObjects["pusher"].translateZ(5.0);
+        activeObjects["pusher"].translateZ(4.0);
 
-activeObjects["stopButton1Lever"].rotation.z = activeObjects["stopButton2Lever"].rotation.z = 0.15;
-activeObjects["stopButton1Pin"].scale.y = activeObjects["stopButton2Pin"].scale.y = 1.8;
-activeObjects["stopButton3Lever"].rotation.z = activeObjects["stopButton4Lever"].rotation.z = 0.15;
-activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.y = 1.8;
+        // lower stop button off-state
+        activeObjects["stopButton3Lever"].rotation.z = activeObjects["stopButton4Lever"].rotation.z = 0.15;
+        activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.y = 1.8;
 
         // actually start VLab
         self.setPhysijsScenePause(false);
@@ -125,7 +128,7 @@ activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.
         var cameraRelativeDistance = initialDefaultCameraPosVectorLength / self.getDefaultCamera().position.length();
         if (3 * cameraRelativeDistance < 5)
         {
-            activeObjects["rope"].material.linewidth = 3 * cameraRelativeDistance;
+            ropeLineWidth = activeObjects["rope"].material.linewidth = 3 * cameraRelativeDistance;
         }
 
         if (self.getDefaultCamera().controls.enabled)
@@ -147,12 +150,23 @@ activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.
 
         this.process = function()
         {
-            activeObjects["slopingSurface"].updateMatrixWorld();
-            var framePivotPos = new THREE.Vector3();
-            framePivotPos.setFromMatrixPosition(activeObjects["framePivot"].matrixWorld);
+            if (
+                   ((!stopButtonTopState && !stopButtonLowerState) || 
+                   (stopButtonTopState && labSwitchState == 1)     || 
+                   (stopButtonLowerState && labSwitchState == -1)) &&
+                   labSwitchState != 0
+               )
+            {
+                activeObjects["slopingSurface"].updateMatrixWorld();
+                var framePivotPos = new THREE.Vector3();
+                framePivotPos.setFromMatrixPosition(activeObjects["framePivot"].matrixWorld);
 
-            activeObjects["rope"].geometry.vertices[0].copy(framePivotPos);
-            activeObjects["rope"].geometry.verticesNeedUpdate = true;
+                activeObjects["rope"].geometry.vertices[0].copy(framePivotPos);
+                activeObjects["rope"].geometry.verticesNeedUpdate = true;
+
+                var ropeTrembling = Math.random() * 0.5;
+                activeObjects["rope"].material.linewidth = ropeLineWidth + ((ropeTrembling > 0.25) ? ropeTrembling : -ropeTrembling);
+            }
         }
 
         return this;
@@ -165,23 +179,34 @@ activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.
 
         this.process = function()
         {
-            activeObjects["slopingBody"].__dirtyPosition = true;
-            activeObjects["slopingBody"].__dirtyRotation = true;
-            activeObjects["slopingSurface"].__dirtyRotation = true;
-            activeObjects["slopingSurface"].rotation.z -= 0.001;
+            if (
+                   ((!stopButtonTopState && !stopButtonLowerState) || 
+                   (stopButtonTopState && labSwitchState == 1)     || 
+                   (stopButtonLowerState && labSwitchState == -1)) &&
+                   labSwitchState != 0
+               )
+            {
+                activeObjects["slopingBody"].__dirtyPosition = true;
+                activeObjects["slopingBody"].__dirtyRotation = true;
+                activeObjects["slopingSurface"].__dirtyRotation = true;
+                activeObjects["slopingSurface"].rotation.z -= 0.001 * labSwitchState;
 
-            framePos = new THREE.Vector3();
-            activeObjects["slopingSurface"].updateMatrixWorld();
-            framePos.setFromMatrixPosition(activeObjects["frame"].matrixWorld);
+                framePos = new THREE.Vector3();
+                activeObjects["slopingSurface"].updateMatrixWorld();
+                framePos.setFromMatrixPosition(activeObjects["frame"].matrixWorld);
 
-            framePosY = new THREE.Vector3();
-            framePosY.y = framePos.y;
+                framePosY = new THREE.Vector3();
+                framePosY.y = framePos.y;
 
-            frameAngle = Math.asin( ( pulleyPos.length() * Math.sin( pulleyPos.angleTo(framePos) ) ) / pulleyPos.distanceTo(framePos));
-            frameAngle += (Math.PI / 2) - framePosY.angleTo(framePos);
- 
-            activeObjects["frame"].rotation.z = -(Math.PI / 2 + activeObjects["slopingSurface"].rotation.z - frameAngle);
-            activeObjects["plumb"].rotation.z = -activeObjects["slopingSurface"].rotation.z;
+                frameAngle = Math.asin( ( pulleyPos.length() * Math.sin( pulleyPos.angleTo(framePos) ) ) / pulleyPos.distanceTo(framePos));
+                frameAngle += (Math.PI / 2) - framePosY.angleTo(framePos);
+     
+                activeObjects["frame"].rotation.z = -(Math.PI / 2 + activeObjects["slopingSurface"].rotation.z - frameAngle);
+                activeObjects["plumb"].rotation.z = -activeObjects["slopingSurface"].rotation.z;
+
+                activeObjects["pulleyMotor"].rotateZ(0.01 * -labSwitchState);
+                activeObjects["pulley"].rotateZ(0.01 * -labSwitchState);
+            }
         }
 
         return this;
@@ -195,45 +220,59 @@ activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.
 
         this.process = function()
         {
-            activeObjects["slopingSurface"].updateMatrixWorld();
-            var framePivotPos = new THREE.Vector3();
-            framePivotPos.setFromMatrixPosition(activeObjects["framePivot"].matrixWorld);
-            var pulleyFramePivotVector = framePivotPos.clone().sub(pulleyPos);
-            if (prevPulleyFramePivotVector != undefined)
+            if (
+                   ((!stopButtonTopState && !stopButtonLowerState) || 
+                   (stopButtonTopState && labSwitchState == 1)     || 
+                   (stopButtonLowerState && labSwitchState == -1)) &&
+                   labSwitchState != 0
+               )
             {
-                var dZpusher = Math.abs(prevPulleyFramePivotVector - pulleyFramePivotVector.length());
-                activeObjects["pusher"].translateZ(dZpusher);
-//                activeObjects["pusher"].translateZ(-dZpusher);
+                activeObjects["slopingSurface"].updateMatrixWorld();
+                var framePivotPos = new THREE.Vector3();
+                framePivotPos.setFromMatrixPosition(activeObjects["framePivot"].matrixWorld);
+                var pulleyFramePivotVector = framePivotPos.clone().sub(pulleyPos);
+                if (prevPulleyFramePivotVector != undefined)
+                {
+                    var dZpusher = Math.abs(prevPulleyFramePivotVector - pulleyFramePivotVector.length());
+                    activeObjects["pusher"].translateZ(labSwitchState * dZpusher);
+                }
+                prevPulleyFramePivotVector = pulleyFramePivotVector.length();
             }
-            prevPulleyFramePivotVector = pulleyFramePivotVector.length();
-
-console.log(activeObjects["pusher"].position.y);
 
             // upper contact
+            if (activeObjects["pusher"].position.y >= 0.276)
+            {
+                stopButtonTopState = true;
+            }
+            if (labSwitchState == 1 && activeObjects["pusher"].position.y <= 0.136)
+            {
+                stopButtonTopState = false;
+            }
+
             if (activeObjects["pusher"].position.y > 0.136 && activeObjects["pusher"].position.y < 0.276)
             {
-                if (activeObjects["stopButton1Lever"].rotation.z > -0.14)
-                {
-                    activeObjects["stopButton1Lever"].rotateZ(-0.007);
-                    activeObjects["stopButton2Lever"].rotateZ(-0.007);
-                }
-                if (activeObjects["stopButton1Pin"].scale.y > 1.0)
-                {
-                    activeObjects["stopButton1Pin"].scale.y = activeObjects["stopButton2Pin"].scale.y -= 0.02;
-                }
+                activeObjects["stopButton1Lever"].rotateZ(0.007 * labSwitchState);
+                activeObjects["stopButton2Lever"].rotateZ(0.007 * labSwitchState);
+                activeObjects["stopButton1Pin"].scale.y = activeObjects["stopButton2Pin"].scale.y += 0.02 * labSwitchState;
             }
+
+            // lower contact
+            if (activeObjects["pusher"].position.y <= -3.670)
+            {
+                stopButtonLowerState = true;
+            }
+            if (labSwitchState == -1 && activeObjects["pusher"].position.y >= -3.525)
+            {
+                stopButtonLowerState = false;
+            }
+
             if (activeObjects["pusher"].position.y < -3.525 && activeObjects["pusher"].position.y > -3.670)
             {
-                if (activeObjects["stopButton3Lever"].rotation.z > -0.14)
-                {
-                    activeObjects["stopButton3Lever"].rotateZ(-0.0085);
-                    activeObjects["stopButton4Lever"].rotateZ(-0.0085);
-                }
-                if (activeObjects["stopButton3Pin"].scale.y > 1.0)
-                {
-                    activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.y -= 0.02;
-                }
+                activeObjects["stopButton3Lever"].rotateZ(-0.0125 * labSwitchState);
+                activeObjects["stopButton4Lever"].rotateZ(-0.0125 * labSwitchState);
+                activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.y -= 0.03 * labSwitchState;
             }
+
         }
 
         return this;
@@ -244,6 +283,43 @@ console.log(activeObjects["pusher"].position.y);
         self.addProcessNode("ropeAnimation", new ropeAnimation());
         self.addProcessNode("slopingSurfaceFrameAnimaiton", new slopingSurfaceFrameAnimaiton());
         self.addProcessNode("pusherAnimation", new pusherAnimation());
+    };
+
+    self.labSwitchHandler = function()
+    {
+        var mouseEvent = arguments[0];
+        var rotation = activeObjects["labSwitchHandlerBase"].rotation.y;
+        var labSwitchStateChangeTween = new TWEEN.Tween(activeObjects["labSwitchHandlerBase"].rotation);
+            labSwitchStateChangeTween.easing(TWEEN.Easing.Circular.In);
+            labSwitchStateChangeTween.onComplete(function(){
+                if (activeObjects["labSwitchHandlerBase"].rotation.y == 0)
+                {
+                    labSwitchState = 0;
+                }
+                else if (activeObjects["labSwitchHandlerBase"].rotation.y > 0)
+                {
+                    labSwitchState = 1;
+                }
+                else if (activeObjects["labSwitchHandlerBase"].rotation.y < 0)
+                {
+                    labSwitchState = -1;
+                }
+            });
+        if (mouseEvent.ctrlKey)
+        {
+            if(activeObjects["labSwitchHandlerBase"].rotation.y > -Math.PI / 2)
+            {
+                labSwitchStateChangeTween.to({y: (rotation - Math.PI / 2)}, 150);
+            }
+        }
+        else
+        {
+            if(activeObjects["labSwitchHandlerBase"].rotation.y < Math.PI / 2)
+            {
+                labSwitchStateChangeTween.to({y: (rotation + Math.PI / 2)}, 150);
+            }
+        }
+        labSwitchStateChangeTween.start();
     };
 
     self.button1Released = function()
@@ -264,7 +340,7 @@ console.log(activeObjects["pusher"].position.y);
         var zoomArgs = Object.assign({"sprite": this, "vlab":self}, arguments[0][0]);
         if (zoomArgs.target.indexOf("stopbutton") > -1)
         {
-            activeObjects["rope"].material.linewidth = 6;
+            ropeLineWidth = activeObjects["rope"].material.linewidth = 6;
         }
         new ZoomHelper(zoomArgs);
     }

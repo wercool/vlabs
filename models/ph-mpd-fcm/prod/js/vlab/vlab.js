@@ -331,7 +331,6 @@ function VLab(vlabNature)
                             physijsMesh.add(meshObjects[meshObjects[meshObjectName].childMeshes[childMeshName]].mesh);
                         }
                     }
-
                     if (self.vlabNature.physijs[meshObjectName].collision != undefined)
                     {
                         var collisionCallback = eval("self." + self.vlabNature.physijs[meshObjectName].collision);
@@ -363,6 +362,7 @@ function VLab(vlabNature)
                 if (self.vlabNature.castShadows.indexOf(lights[i].name) > -1)
                 {
                     lights[i].castShadow = true;
+                    lights[i].shadowBias = 0.0001;
                     lights[i].shadow.mapSize.width  = self.vlabNature.shadowsMapSize;
                     lights[i].shadow.mapSize.height = self.vlabNature.shadowsMapSize;
                 }
@@ -388,18 +388,35 @@ function VLab(vlabNature)
         {
             if (object.type == "Mesh")
             {
+                // manage shadows
                 if (self.vlabNature.shadows)
                 {
-                    // manage shadows
-                    if (self.vlabNature.castShadows.indexOf(object.name) > -1)
+                    if (!self.vlabNature.forceShadows)
+                    {
+                        if (self.vlabNature.castShadows.indexOf(object.name) > -1)
+                        {
+                            object.castShadow = true;
+                        }
+                        if (self.vlabNature.receiveShadows.indexOf(object.name) > -1)
+                        {
+                            object.receiveShadow = true;
+                        }
+                    }
+                    else
                     {
                         object.castShadow = true;
-                    }
-                    if (self.vlabNature.receiveShadows.indexOf(object.name) > -1)
-                    {
                         object.receiveShadow = true;
+                        if (self.vlabNature.castShadowsExecptions.indexOf(object.name) > -1)
+                        {
+                            object.castShadow = false;
+                        }
+                        if (self.vlabNature.receiveShadowsExecptions.indexOf(object.name) > -1)
+                        {
+                            object.receiveShadow = false;
+                        }
                     }
                 }
+                // add interactors to objects
                 if (self.vlabNature.interactors[object.name] != undefined)
                 {
                     addInteractorToObject(object);
@@ -636,7 +653,7 @@ function VLab(vlabNature)
 
                 if (typeof pressedObject.press === "function")
                 {
-                    pressedObject.press();
+                    pressedObject.press(mouseDownEvent);
                 }
                 if (typeof pressedObject.release === "function" && !pressedObject.strictRelease)
                 {
@@ -660,7 +677,7 @@ function VLab(vlabNature)
 
                 if (typeof releasedObject.release === "function")
                 {
-                    releasedObject.release();
+                    releasedObject.release(mouseUpEvent);
                     delete objectsToBeReleasedNotStrictly[releasedObject.name];
                 }
             }
