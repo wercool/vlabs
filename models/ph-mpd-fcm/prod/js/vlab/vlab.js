@@ -161,7 +161,6 @@ function VLab(vlabNature)
         sceneObject.traverse(function(object){
             if(object.type == "Object3D")
             {
-
                 var position = new THREE.Vector3();
                 var quaternion = new THREE.Quaternion();
                 quaternion.copy(object.quaternion);
@@ -283,70 +282,77 @@ function VLab(vlabNature)
         {
             if(meshObjects[meshObjectName].isRoot)
             {
-                if (self.vlabNature.physijs[meshObjectName] != undefined)
+                if (self.vlabNature.physijs != undefined)
                 {
-                    var physijsMesh;
-                    var position = new THREE.Vector3();
-                    var quaternion = new THREE.Quaternion();
-                    quaternion.copy(meshObjects[meshObjectName].mesh.quaternion);
-                    position.copy(meshObjects[meshObjectName].mesh.position);
-
-                    var physijsMaterial = Physijs.createMaterial(
-                        meshObjects[meshObjectName].mesh.material,
-                        self.vlabNature.physijs[meshObjectName].friction,
-                        self.vlabNature.physijs[meshObjectName].restitution
-                    );
-
-                    switch (self.vlabNature.physijs[meshObjectName].shape)
+                    if (self.vlabNature.physijs[meshObjectName] != undefined)
                     {
-                        case "BoxMesh":
-                            physijsMesh = new Physijs.BoxMesh(
-                                                    meshObjects[meshObjectName].mesh.geometry,
-                                                    physijsMaterial
-                                                );
-                        break;
-                        case "ConvexMesh":
-                            physijsMesh = new Physijs.ConvexMesh(
-                                                    meshObjects[meshObjectName].mesh.geometry,
-                                                    physijsMaterial
-                                                );
-                        break;
-                        case "ConcaveMesh":
-                            physijsMesh = new Physijs.ConcaveMesh(
-                                                    meshObjects[meshObjectName].mesh.geometry,
-                                                    physijsMaterial
-                                                );
-                        break;
-                    }
-                    physijsMesh.quaternion.copy(quaternion);
-                    physijsMesh.position.copy(position);
-                    physijsMesh.name = meshObjectName;
-                    physijsMesh.mass = self.vlabNature.physijs[meshObjectName].mass;
+                        var physijsMesh;
+                        var position = new THREE.Vector3();
+                        var quaternion = new THREE.Quaternion();
+                        quaternion.copy(meshObjects[meshObjectName].mesh.quaternion);
+                        position.copy(meshObjects[meshObjectName].mesh.position);
 
-                    // add child meshesh to newly created Physijs Mesh
-                    if(meshObjects[meshObjectName].childMeshes.length > 0)
-                    {
-                        for (var childMeshName in meshObjects[meshObjectName].childMeshes)
-                        {
-                            physijsMesh.add(meshObjects[meshObjects[meshObjectName].childMeshes[childMeshName]].mesh);
-                        }
-                    }
-                    if (self.vlabNature.physijs[meshObjectName].collision != undefined)
-                    {
-                        var collisionCallback = eval("self." + self.vlabNature.physijs[meshObjectName].collision);
-                        if (typeof collisionCallback === "function")
-                        {
-                            physijsMesh.addEventListener("collision", collisionCallback);
-                        }
-                        else
-                        {
-                            self.error("Collision callback [" + 
-                                        self.vlabNature.physijs[meshObjectName].collision + 
-                                        "] for the [" + meshObjectName + "] mesh is defined in VLab nature, but not implemented in VLab");
-                        }
-                    }
+                        var physijsMaterial = Physijs.createMaterial(
+                            meshObjects[meshObjectName].mesh.material,
+                            self.vlabNature.physijs[meshObjectName].friction,
+                            self.vlabNature.physijs[meshObjectName].restitution
+                        );
 
-                    vlabScene.add(physijsMesh);
+                        switch (self.vlabNature.physijs[meshObjectName].shape)
+                        {
+                            case "BoxMesh":
+                                physijsMesh = new Physijs.BoxMesh(
+                                                        meshObjects[meshObjectName].mesh.geometry,
+                                                        physijsMaterial
+                                                    );
+                            break;
+                            case "ConvexMesh":
+                                physijsMesh = new Physijs.ConvexMesh(
+                                                        meshObjects[meshObjectName].mesh.geometry,
+                                                        physijsMaterial
+                                                    );
+                            break;
+                            case "ConcaveMesh":
+                                physijsMesh = new Physijs.ConcaveMesh(
+                                                        meshObjects[meshObjectName].mesh.geometry,
+                                                        physijsMaterial
+                                                    );
+                            break;
+                        }
+                        physijsMesh.quaternion.copy(quaternion);
+                        physijsMesh.position.copy(position);
+                        physijsMesh.name = meshObjectName;
+                        physijsMesh.mass = self.vlabNature.physijs[meshObjectName].mass;
+
+                        // add child meshesh to newly created Physijs Mesh
+                        if(meshObjects[meshObjectName].childMeshes.length > 0)
+                        {
+                            for (var childMeshName in meshObjects[meshObjectName].childMeshes)
+                            {
+                                physijsMesh.add(meshObjects[meshObjects[meshObjectName].childMeshes[childMeshName]].mesh);
+                            }
+                        }
+                        if (self.vlabNature.physijs[meshObjectName].collision != undefined)
+                        {
+                            var collisionCallback = eval("self." + self.vlabNature.physijs[meshObjectName].collision);
+                            if (typeof collisionCallback === "function")
+                            {
+                                physijsMesh.addEventListener("collision", collisionCallback);
+                            }
+                            else
+                            {
+                                self.error("Collision callback [" + 
+                                            self.vlabNature.physijs[meshObjectName].collision + 
+                                            "] for the [" + meshObjectName + "] mesh is defined in VLab nature, but not implemented in VLab");
+                            }
+                        }
+
+                        vlabScene.add(physijsMesh);
+                    }
+                    else
+                    {
+                        vlabScene.add(meshObjects[meshObjectName].mesh);
+                    }
                 }
                 else
                 {
@@ -417,55 +423,61 @@ function VLab(vlabNature)
                     }
                 }
                 // add interactors to objects
-                if (self.vlabNature.interactors[object.name] != undefined)
+                if (self.vlabNature.interactors != undefined)
                 {
-                    addInteractorToObject(object);
+                    if (self.vlabNature.interactors[object.name] != undefined)
+                    {
+                        addInteractorToObject(object);
+                    }
                 }
             }
         });
 
         // interaction helpers
-        for (var interactionHelperName in self.vlabNature.interactionHelpers)
+        if (self.vlabNature.interactionHelpers != undefined)
         {
-            if (vlabScene.getObjectByName(self.vlabNature.interactionHelpers[interactionHelperName].parent) != undefined) // check parent for helpers existence
+            for (var interactionHelperName in self.vlabNature.interactionHelpers)
             {
-                var spriteMaterial = new THREE.SpriteMaterial( 
-                { 
-                    map: maps[self.vlabNature.interactionHelpers[interactionHelperName].map],
-                    color: ((self.vlabNature.interactionHelpers[interactionHelperName].color != undefined) ? parseInt(self.vlabNature.interactionHelpers[interactionHelperName].color) : 0xffffff),
-                    blending: THREE.AdditiveBlending
-                });
-
-                if (self.vlabNature.interactionHelpers[interactionHelperName].opacity != undefined)
+                if (vlabScene.getObjectByName(self.vlabNature.interactionHelpers[interactionHelperName].parent) != undefined) // check parent for helpers existence
                 {
-                    spriteMaterial.transparent = true;
-                    spriteMaterial.opacity = self.vlabNature.interactionHelpers[interactionHelperName].opacity;
-                    spriteMaterial.blending = THREE.NormalBlending;
+                    var spriteMaterial = new THREE.SpriteMaterial( 
+                    { 
+                        map: maps[self.vlabNature.interactionHelpers[interactionHelperName].map],
+                        color: ((self.vlabNature.interactionHelpers[interactionHelperName].color != undefined) ? parseInt(self.vlabNature.interactionHelpers[interactionHelperName].color) : 0xffffff),
+                        blending: THREE.AdditiveBlending
+                    });
+
+                    if (self.vlabNature.interactionHelpers[interactionHelperName].opacity != undefined)
+                    {
+                        spriteMaterial.transparent = true;
+                        spriteMaterial.opacity = self.vlabNature.interactionHelpers[interactionHelperName].opacity;
+                        spriteMaterial.blending = THREE.NormalBlending;
+                    }
+
+                    var sprite = new THREE.Sprite(spriteMaterial);
+
+                    if (self.vlabNature.interactionHelpers[interactionHelperName].scale != undefined)
+                    {
+                        sprite.scale.set(self.vlabNature.interactionHelpers[interactionHelperName].scale.x, 
+                                         self.vlabNature.interactionHelpers[interactionHelperName].scale.y, 1.0);
+                    }
+                    if (self.vlabNature.interactionHelpers[interactionHelperName].offset != undefined)
+                    {
+                        sprite.position.set(self.vlabNature.interactionHelpers[interactionHelperName].offset.x, 
+                                            self.vlabNature.interactionHelpers[interactionHelperName].offset.y,
+                                            self.vlabNature.interactionHelpers[interactionHelperName].offset.z);
+                    }
+                    sprite.name = interactionHelperName;
+                    sprite.visible = self.vlabNature.interactionHelpers[interactionHelperName].visible;
+                    addInteractorToObject(sprite);
+                    vlabScene.getObjectByName(self.vlabNature.interactionHelpers[interactionHelperName].parent).add(sprite);
+
+                    self.interactionHelpers[interactionHelperName] = sprite;
                 }
-
-                var sprite = new THREE.Sprite(spriteMaterial);
-
-                if (self.vlabNature.interactionHelpers[interactionHelperName].scale != undefined)
+                else
                 {
-                    sprite.scale.set(self.vlabNature.interactionHelpers[interactionHelperName].scale.x, 
-                                     self.vlabNature.interactionHelpers[interactionHelperName].scale.y, 1.0);
+                    self.error("Non-existing parent object [" + self.vlabNature.interactionHelpers[interactionHelperName].parent + "] is defined in VLab nature for " + interactionHelperName + " interaction helper");
                 }
-                if (self.vlabNature.interactionHelpers[interactionHelperName].offset != undefined)
-                {
-                    sprite.position.set(self.vlabNature.interactionHelpers[interactionHelperName].offset.x, 
-                                        self.vlabNature.interactionHelpers[interactionHelperName].offset.y,
-                                        self.vlabNature.interactionHelpers[interactionHelperName].offset.z);
-                }
-                sprite.name = interactionHelperName;
-                sprite.visible = self.vlabNature.interactionHelpers[interactionHelperName].visible;
-                addInteractorToObject(sprite);
-                vlabScene.getObjectByName(self.vlabNature.interactionHelpers[interactionHelperName].parent).add(sprite);
-
-                self.interactionHelpers[interactionHelperName] = sprite;
-            }
-            else
-            {
-                self.error("Non-existing parent object [" + self.vlabNature.interactionHelpers[interactionHelperName].parent + "] is defined in VLab nature for " + interactionHelperName + " interaction helper");
             }
         }
 
