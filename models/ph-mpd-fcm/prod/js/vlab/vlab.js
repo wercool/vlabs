@@ -574,10 +574,16 @@ function VLab(vlabNature)
         }
         self.webglContainerWidth  = webglContainer.width() - webglContainer.offset().left;
         self.webglContainerHeight = webglContainer.height() - webglContainer.offset().top;
-        $(webGLStatistics.domElement).css("top", webglContainer.offset().top);
-        $(webGLStatistics.domElement).css("left", webglContainer.offset().left);
-        $(physijsStatistics.domElement).css("top", webglContainer.offset().top + 50);
-        $(physijsStatistics.domElement).css("left", webglContainer.offset().left);
+        if (self.vlabNature.showStatistics)
+        {
+            $(webGLStatistics.domElement).css("top", webglContainer.offset().top);
+            $(webGLStatistics.domElement).css("left", webglContainer.offset().left);
+            if (self.vlabNature.isPhysijsScene)
+            {
+                $(physijsStatistics.domElement).css("top", webglContainer.offset().top + 50);
+                $(physijsStatistics.domElement).css("left", webglContainer.offset().left);
+            }
+        }
     };
 
     var mouseMove = function(event)

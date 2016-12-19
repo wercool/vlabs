@@ -1816,7 +1816,7 @@ Fullik.Structure.prototype = {
         this.targets.push( target ); 
         this.mNumChains ++;
 
-        if( meshBone ) this.addChainMeshs( chain );
+        if( meshBone ) this.addChainMeshs( chain );; 
 
     },
 
@@ -1916,7 +1916,7 @@ Fullik.Structure.prototype = {
 
         var size = bone.mLength;
         var color = bone.color;
-        var g = new THREE.CylinderBufferGeometry ( 0.2, 0.1, size, 12 );
+        var g = new THREE.CylinderBufferGeometry ( 1, 0.5, size, 4 );
         g.applyMatrix( new THREE.Matrix4().makeRotationX( -Math.PI*0.5 ) )
         g.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0, size*0.5 ) );
         var m = new THREE.MeshStandardMaterial();
@@ -1990,16 +1990,6 @@ Fullik.Structure.prototype = {
         }
         this.meshChains = [];
 
-    },
-
-    addMeshLinks:function(links)
-    {
-        this.isWithMesh = true;
-        for (var i = 0; i < links.length; i++)
-        {
-            console.log(links[i]);
-            //this.meshChains.push(links[i]);
-        }
     }
 
 }
