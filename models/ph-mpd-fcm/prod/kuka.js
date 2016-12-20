@@ -36,11 +36,7 @@ function Kuka(webGLContainer)
     var activeProperties = {};
 
     // this VLab constants
-    var ikSolver;
-    var ikChain;
-    var ikTarget;
-
-    var link1Pos = {};
+    var link1MaxAngle, link2MaxAngle, link3MaxAngle, link4MaxAngle;
 
     var scenePostBuilt = function()
     {
@@ -51,31 +47,100 @@ function Kuka(webGLContainer)
         activeObjects["link4"] = self.getVlabScene().getObjectByName("link4");
         activeObjects["link5"] = self.getVlabScene().getObjectByName("link5");
 
-        activeObjects["link2"].rotateZ(-Math.PI / 4);
-        activeObjects["link3"].rotateZ(-Math.PI / 4);
-        activeObjects["link4"].rotateZ(-Math.PI / 4);
+//        activeObjects["link2"].rotation.z = (-90 * Math.PI / 180);
+
+        link1MaxAngle = -Math.PI;
+        link2MaxAngle = (-90 * Math.PI / 180);
+        link3MaxAngle = (-90 * Math.PI / 180);
+        link4MaxAngle = (-90 * Math.PI / 180);
 
         self.setSceneRenderPause(false);
 
-        animate();
+        process();
     };
 
-    var i = 0;
-    var da = (Math.PI * 2) / 360;
-    var animate = function()
-    {
-        if (i < 360)
-        {
-            //console.log(activeObjects["link1"].rotation.y);
-            activeObjects["kukaBase"].updateMatrixWorld();
-            var endEffectorPos = new THREE.Vector3().setFromMatrixPosition(activeObjects["link5"].matrixWorld);
-            activeObjects["link1"].rotateY(-da);
-            console.log(endEffectorPos);
+    var da = (Math.PI * 2) / 60;
+    var dal1 = (Math.PI * 2) / 180;
+    var l1cnt = 0;
 
-            i++;
-            setTimeout(function(){ animate(); }, 5);
+    var process = function()
+    {
+        var efPos = getEndEffectorPos();
+        //console.log(efPos.x, efPos.y, efPos.z);
+
+        $.ajax({
+            url: "http://127.0.0.1:11111/ikxyz", 
+            type: 'POST', 
+            contentType: "application/json", 
+            data: JSON.stringify({
+                                    x:efPos.x, 
+                                    y:efPos.y, 
+                                    z:efPos.z, 
+                                    l1:activeObjects["link1"].rotation.y.toFixed(2), 
+                                    l2:activeObjects["link2"].rotation.z.toFixed(2), 
+                                    l3:activeObjects["link3"].rotation.z.toFixed(2), 
+                                    l4:activeObjects["link4"].rotation.z.toFixed(2)})
+        });
+
+
+        if (activeObjects["link4"].rotation.z > link4MaxAngle && efPos.y > 0)
+        {
+            activeObjects["link4"].rotateZ(-da * 2);
+
+            setTimeout(function(){ process(); }, 1);
+            return;
+        }
+        else
+        {
+            activeObjects["link4"].rotation.z = 0;
+        }
+
+        if (activeObjects["link3"].rotation.z > link3MaxAngle && efPos.y > 0)
+        {
+            activeObjects["link3"].rotateZ(-da);
+
+            setTimeout(function(){ process(); }, 1);
+            return;
+        }
+        else
+        {
+            activeObjects["link3"].rotation.z = 0;
+        }
+
+        if (activeObjects["link2"].rotation.z > link2MaxAngle && efPos.y > 0)
+        {
+            activeObjects["link2"].rotateZ(-da);
+
+            setTimeout(function(){ process(); }, 1);
+            return;
+        }
+        else
+        {
+            activeObjects["link2"].rotation.z = 0;
+        }
+
+        if (l1cnt < 90)
+        {
+            activeObjects["link1"].rotateY(-dal1);
+            l1cnt++;
+            setTimeout(function(){ process(); }, 1);
+            return;
+        }
+        else
+        {
+            activeObjects["link1"].rotation.y = 0;
         }
     };
+
+    var getEndEffectorPos = function()
+    {
+        activeObjects["kukaBase"].updateMatrixWorld();
+        var endEffectorPos = new THREE.Vector3().setFromMatrixPosition(activeObjects["link5"].matrixWorld);
+        endEffectorPos.x = endEffectorPos.x.toFixed(2);
+        endEffectorPos.y = endEffectorPos.y.toFixed(2);
+        endEffectorPos.z = endEffectorPos.z.toFixed(2);
+        return endEffectorPos;
+    }
 
     var simulationStep = function()
     {
