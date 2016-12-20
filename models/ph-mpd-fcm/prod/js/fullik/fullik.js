@@ -1921,6 +1921,7 @@ Fullik.Structure.prototype = {
         g.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0, size*0.5 ) );
         var m = new THREE.MeshStandardMaterial();
         m.color.setHex( color );
+        m.wireframe = true;
 
         var m2 = new THREE.MeshBasicMaterial({ wireframe : true });
 
