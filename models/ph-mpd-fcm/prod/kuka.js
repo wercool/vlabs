@@ -36,32 +36,34 @@ function Kuka(webGLContainer)
     var activeProperties = {};
 
     // this VLab constants
-    var link1MaxAngle, link2MaxAngle, link3MaxAngle, link4MaxAngle;
+    var kukaLink1MaxAngle, kukaLink2MaxAngle, kukaLink3MaxAngle, kukaLink4MaxAngle;
     var ikTarget;
 
     var scenePostBuilt = function()
     {
         activeObjects["kukaBase"] = self.getVlabScene().getObjectByName("kukaBase");
-        activeObjects["link1"] = self.getVlabScene().getObjectByName("link1");
-        activeObjects["link2"] = self.getVlabScene().getObjectByName("link2");
-        activeObjects["link3"] = self.getVlabScene().getObjectByName("link3");
-        activeObjects["link4"] = self.getVlabScene().getObjectByName("link4");
-        activeObjects["link5"] = self.getVlabScene().getObjectByName("link5");
+        activeObjects["kukaLink1"] = self.getVlabScene().getObjectByName("kukaLink1");
+        activeObjects["kukaLink2"] = self.getVlabScene().getObjectByName("kukaLink2");
+        activeObjects["kukaLink3"] = self.getVlabScene().getObjectByName("kukaLink3");
+        activeObjects["kukaLink4"] = self.getVlabScene().getObjectByName("kukaLink4");
+        activeObjects["kukaLink5"] = self.getVlabScene().getObjectByName("kukaLink5");
 
-        activeObjects["link1"].visible = true;
-        activeObjects["link2"].visible = true;
-        activeObjects["link3"].visible = true;
-        activeObjects["link4"].visible = true;
-        activeObjects["link5"].visible = true;
+        activeObjects["kukaLink1"].material.wireframe = false;
+        activeObjects["kukaLink2"].material.wireframe = false;
+        activeObjects["kukaLink3"].material.wireframe = false;
+        activeObjects["kukaLink4"].material.wireframe = false;
+        activeObjects["kukaLink5"].material.wireframe = false;
 
-        activeObjects["link1"].rotation.y = (-45 * Math.PI / 180);
-        activeObjects["link2"].rotation.z = (45 * Math.PI / 180);
-        activeObjects["link3"].rotation.z = (-135 * Math.PI / 180);
-
-        link1MaxAngle = -Math.PI;
-        link2MaxAngle = (-90 * Math.PI / 180);
-        link3MaxAngle = (-130 * Math.PI / 180);
-        link4MaxAngle = (-90 * Math.PI / 180);
+        activeObjects["kukaLink1"].visible = true;
+        activeObjects["kukaLink2"].visible = true;
+        activeObjects["kukaLink3"].visible = true;
+        activeObjects["kukaLink4"].visible = true;
+        activeObjects["kukaLink5"].visible = true;
+/*
+        activeObjects["kukaBase"].position.x -= 2.0;
+        activeObjects["kukaBase"].position.y += 2.0;
+        activeObjects["kukaBase"].position.z -= 2.0;
+*/
 
         ikTarget = {
             mesh : new THREE.Mesh( new THREE.SphereBufferGeometry(0.2),  new THREE.MeshStandardMaterial({color:0xFF0000, wireframe:true }) ),
@@ -84,16 +86,33 @@ function Kuka(webGLContainer)
             }
         });
 
-//        process();
+
+        activeObjects["kukaLink1"].rotation.y = (-90 * Math.PI / 180);
+        activeObjects["kukaLink2"].rotation.z = (45 * Math.PI / 180);
+        activeObjects["kukaLink3"].rotation.z = (-138 * Math.PI / 180);
+        activeObjects["kukaLink4"].rotation.z = (-75 * Math.PI / 180);
+
+//      activeObjects["kukaBase"].position.copy(new THREE.Vector3(-5.6, -5.75, -3.85));
+
+/*
+        kukaLink1MaxAngle = -Math.PI;
+        kukaLink2MaxAngle = (-95 * Math.PI / 180);
+        kukaLink3MaxAngle = (-142 * Math.PI / 180);
+        kukaLink4MaxAngle = (-90 * Math.PI / 180);
+        // get l1, l2, l3 IK for xyz
+        process();
+*/
     };
 
     var setKuka = function()
     {
+        var l4l5Height = 2.0;
+
         var endEffectorPos = ikTarget.control.position.clone();
         var requestForEEFPos = endEffectorPos.clone();
-        requestForEEFPos.x = endEffectorPos.x.toFixed(2);
-        requestForEEFPos.y = (endEffectorPos.y + 2.0).toFixed(2);
-        requestForEEFPos.z = endEffectorPos.z.toFixed(2);
+        requestForEEFPos.x = (endEffectorPos.x - activeObjects["kukaBase"].position.x).toFixed(2);
+        requestForEEFPos.y = (endEffectorPos.y - activeObjects["kukaBase"].position.y + l4l5Height).toFixed(2);
+        requestForEEFPos.z = (endEffectorPos.z - activeObjects["kukaBase"].position.z).toFixed(2);
 
         $.ajax({
             url: "http://127.0.0.1:11111/ikxyz", 
@@ -103,6 +122,7 @@ function Kuka(webGLContainer)
         }).done(function(res){
             if (res.length)
             {
+                console.log(res.length + " solutions found");
                 var kukaIKSolutionId = 0;
                 var minDistance = 0;
                 for (var i = 0; i < res.length; i++)
@@ -118,28 +138,56 @@ function Kuka(webGLContainer)
 
                 var kukaIK = res[kukaIKSolutionId];
 
-                var kukaIKEEFPos = new THREE.Vector3(kukaIK.x, kukaIK.y, kukaIK.z);
-                activeObjects["kukaBase"].updateMatrixWorld();
-                var l4Pos = new THREE.Vector3().setFromMatrixPosition(activeObjects["link4"].matrixWorld);
-                var l4Dir = kukaIKEEFPos.clone().sub(endEffectorPos);
-                var l4 = -Math.PI / 2 + l4Dir.angleTo(l4Pos);
+                // get l4 angle to eef
+                var kukaLink1Cur = activeObjects["kukaLink1"].rotation.y;
+                var kukaLink2Cur = activeObjects["kukaLink2"].rotation.z;
+                var kukaLink3Cur = activeObjects["kukaLink3"].rotation.z;
+                var kukaLink4Cur = activeObjects["kukaLink4"].rotation.z;
 
-                var link1 = new TWEEN.Tween(activeObjects["link1"].rotation);
-                link1.easing(TWEEN.Easing.Cubic.InOut);
-                link1.to({y: ((endEffectorPos.x < 0) ? -Math.PI : 0.0) + ((endEffectorPos.x < 0) ? -1 : 1) * kukaIK.l1}, 3000);
-                link1.start();
-                var link2 = new TWEEN.Tween(activeObjects["link2"].rotation);
-                link2.easing(TWEEN.Easing.Cubic.InOut);
-                link2.to({z: kukaIK.l2}, 3000);
-                link2.start();
-                var link3 = new TWEEN.Tween(activeObjects["link3"].rotation);
-                link3.easing(TWEEN.Easing.Cubic.InOut);
-                link3.to({z: kukaIK.l3}, 3000);
-                link3.start();
-                var link4 = new TWEEN.Tween(activeObjects["link4"].rotation);
-                link4.easing(TWEEN.Easing.Cubic.InOut);
-                link4.to({z: l4}, 3000);
-                link4.start();
+                activeObjects["kukaLink1"].rotation.y = ((requestForEEFPos.x < 0) ? -Math.PI : 0.0) + ((requestForEEFPos.x < 0) ? -1 : 1) * kukaIK.l1;
+                activeObjects["kukaLink2"].rotation.z = kukaIK.l2;
+                activeObjects["kukaLink3"].rotation.z = kukaIK.l3;
+                activeObjects["kukaLink4"].rotation.z = 0;
+
+                activeObjects["kukaBase"].updateMatrixWorld();
+                var l4Pos = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink4"].matrixWorld);
+                var l5Pos = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink5"].matrixWorld);
+                var l4EEFDir = l4Pos.clone().sub(endEffectorPos); 
+                var l4l5Dir  = l4Pos.clone().sub(l5Pos); 
+
+                self.getVlabScene().remove(activeObjects["arrowHelper1"]);
+                self.getVlabScene().remove(activeObjects["arrowHelper2"]);
+/*
+                activeObjects["arrowHelper1"] = new THREE.ArrowHelper(l4EEFDir.clone().normalize().negate(), l4Pos, l4EEFDir.length(), 0xffffff, 0.1, 0.1);
+                activeObjects["arrowHelper2"] = new THREE.ArrowHelper(l4l5Dir.clone().normalize().negate(), l4Pos, l4l5Dir.length(), 0xffffff, 0.1, 0.1);
+                self.getVlabScene().add(activeObjects["arrowHelper1"]);
+                self.getVlabScene().add(activeObjects["arrowHelper2"]);
+*/
+                var l4 = l4EEFDir.angleTo(l4l5Dir);
+
+                activeObjects["kukaLink1"].rotation.y = kukaLink1Cur;
+                activeObjects["kukaLink2"].rotation.z = kukaLink2Cur;
+                activeObjects["kukaLink3"].rotation.z = kukaLink3Cur;
+                activeObjects["kukaLink4"].rotation.z = kukaLink4Cur;
+
+
+                // set links
+                var kukaLink1 = new TWEEN.Tween(activeObjects["kukaLink1"].rotation);
+                kukaLink1.easing(TWEEN.Easing.Cubic.InOut);
+                kukaLink1.to({y: ((requestForEEFPos.x < 0) ? -Math.PI : 0.0) + ((requestForEEFPos.x < 0) ? -1 : 1) * kukaIK.l1}, 3000);
+                kukaLink1.start();
+                var kukaLink2 = new TWEEN.Tween(activeObjects["kukaLink2"].rotation);
+                kukaLink2.easing(TWEEN.Easing.Cubic.InOut);
+                kukaLink2.to({z: kukaIK.l2}, 3000);
+                kukaLink2.start();
+                var kukaLink3 = new TWEEN.Tween(activeObjects["kukaLink3"].rotation);
+                kukaLink3.easing(TWEEN.Easing.Cubic.InOut);
+                kukaLink3.to({z: kukaIK.l3}, 3000);
+                kukaLink3.start();
+                var kukaLink4 = new TWEEN.Tween(activeObjects["kukaLink4"].rotation);
+                kukaLink4.easing(TWEEN.Easing.Cubic.InOut);
+                kukaLink4.to({z: -l4}, 3000);
+                kukaLink4.start();
             }
             else
             {
@@ -157,17 +205,16 @@ function Kuka(webGLContainer)
     var process = function()
     {
         var efPos = getEndEffectorPos();
-//        console.log(efPos.x, efPos.y, efPos.z);
 
         dataArr.push([efPos.x, 
                       efPos.y, 
                       efPos.z, 
-                      activeObjects["link1"].rotation.y.toFixed(2), 
-                      activeObjects["link2"].rotation.z.toFixed(2), 
-                      activeObjects["link3"].rotation.z.toFixed(2), 
-                      activeObjects["link4"].rotation.z.toFixed(2)]);
+                      activeObjects["kukaLink1"].rotation.y.toFixed(2), 
+                      activeObjects["kukaLink2"].rotation.z.toFixed(2), 
+                      activeObjects["kukaLink3"].rotation.z.toFixed(2), 
+                      activeObjects["kukaLink4"].rotation.z.toFixed(2)]);
 
-        if (dataArr.length > 1000)
+        if (dataArr.length > 999)
         {
             $.ajax({
                 url: "http://127.0.0.1:11111/xyz", 
@@ -179,59 +226,65 @@ function Kuka(webGLContainer)
         }
 
 /*
-        if (activeObjects["link4"].rotation.z > link4MaxAngle)
+        if (activeObjects["kukaLink4"].rotation.z > kukaLink4MaxAngle)
         {
-            activeObjects["link4"].rotateZ(-da * 2);
+            activeObjects["kukaLink4"].rotateZ(-da * 2);
 
             setTimeout(function(){ process(); }, 1);
             return;
         }
         else
         {
-            activeObjects["link4"].rotation.z = 0;
+            activeObjects["kukaLink4"].rotation.z = 0;
         }
 */
-        if (activeObjects["link3"].rotation.z > link3MaxAngle)
+        if (activeObjects["kukaLink3"].rotation.z > kukaLink3MaxAngle)
         {
-            activeObjects["link3"].rotateZ(-da);
+            activeObjects["kukaLink3"].rotateZ(-da);
 
             setTimeout(function(){ process(); }, 1);
             return;
         }
         else
         {
-            activeObjects["link3"].rotation.z = 0;
+            activeObjects["kukaLink3"].rotation.z = 0;
         }
 
-        if (activeObjects["link2"].rotation.z > link2MaxAngle)
+        if (activeObjects["kukaLink2"].rotation.z > kukaLink2MaxAngle)
         {
-            activeObjects["link2"].rotateZ(-da);
+            activeObjects["kukaLink2"].rotateZ(-da);
 
             setTimeout(function(){ process(); }, 1);
             return;
         }
         else
         {
-            activeObjects["link2"].rotation.z = 0;
+            activeObjects["kukaLink2"].rotation.z = 0;
         }
 
         if (l1cnt < 90)
         {
-            activeObjects["link1"].rotateY(-dal1);
+            activeObjects["kukaLink1"].rotateY(-dal1);
             l1cnt++;
             setTimeout(function(){ process(); }, 1);
             return;
         }
         else
         {
-            activeObjects["link1"].rotation.y = 0;
+            activeObjects["kukaLink1"].rotation.y = 0;
+            $.ajax({
+                url: "http://127.0.0.1:11111/xyz", 
+                type: 'POST', 
+                contentType: "application/json", 
+                data: JSON.stringify(dataArr)
+            });
         }
     };
 
     var getEndEffectorPos = function()
     {
         activeObjects["kukaBase"].updateMatrixWorld();
-        var endEffectorPos = new THREE.Vector3().setFromMatrixPosition(activeObjects["link4"].matrixWorld);
+        var endEffectorPos = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink4"].matrixWorld);
         endEffectorPos.x = endEffectorPos.x.toFixed(2);
         endEffectorPos.y = endEffectorPos.y.toFixed(2);
         endEffectorPos.z = endEffectorPos.z.toFixed(2);

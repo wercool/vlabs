@@ -22,13 +22,13 @@ function PhMpdFcm(webGLContainer)
         self.getDefaultCamera().controls.autoRotate = false;
         self.getDefaultCamera().controls.enableKeys = false;
         // test mode
-
+/*
         self.getDefaultCamera().controls.minDistance = 5;
         self.getDefaultCamera().controls.maxDistance = 15;
         self.getDefaultCamera().controls.maxPolarAngle = Math.PI/2 - 0.2; 
         self.getDefaultCamera().controls.minPolarAngle = 0.85;
-
-//        self.getDefaultCamera().controls.testMode = true;
+*/
+        self.getDefaultCamera().controls.testMode = true;
 
         self.buildScene();
     };
@@ -44,6 +44,7 @@ function PhMpdFcm(webGLContainer)
     var labSwitchState = 1;
     var stopButtonTopState = true;
     var stopButtonLowerState = false;
+    var kuka = null;
 
     var scenePostBuilt = function()
     {
@@ -64,6 +65,8 @@ function PhMpdFcm(webGLContainer)
         activeObjects["stopButton4Lever"] = self.getVlabScene().getObjectByName("stopButton4Lever");
         activeObjects["stopButton4Pin"] = self.getVlabScene().getObjectByName("stopButton4Pin");
         activeObjects["labSwitchHandlerBase"] = self.getVlabScene().getObjectByName("labSwitchHandlerBase");
+
+        kuka = new Kuka(self, true, new THREE.Vector3(-5.6, -5.75, -3.85));
 
         // this VLab constants
         pulleyPos = activeObjects["pulley"].position.clone();

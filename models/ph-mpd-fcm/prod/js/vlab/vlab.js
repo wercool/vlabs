@@ -145,6 +145,17 @@ function VLab(vlabNature)
         loader.load(sceneFile, onSceneLoaded, onSceneLoadProgress);
     };
 
+    self.appendScene = function(appendSceneFile, callback)
+    {
+        var loader = new THREE.ColladaLoader();
+        loader.options.convertUpAxis = true;
+        var seneAppendedHandler = function(collada){
+            var appendedMeshObjects = onSceneAppended(collada);
+            callback(appendedMeshObjects);
+        };
+        loader.load(appendSceneFile, seneAppendedHandler, onSceneLoadProgress);
+    };
+
     var onSceneLoaded = function(collada)
     {
         // fix transparent materials
@@ -168,29 +179,7 @@ function VLab(vlabNature)
 
                 if (object.children[0].type == "Mesh")
                 {
-                    var mesh = object.children[0];
-                    mesh.name = object.name;
-                    mesh.quaternion.copy(quaternion);
-                    mesh.position.copy(position);
-
-                    if (meshObjects[mesh.name] == undefined)
-                    {
-                        meshObjects[mesh.name] = new Object();
-                        meshObjects[mesh.name].isRoot = true;
-                    }
-
-                    meshObjects[mesh.name].mesh = mesh;
-                    meshObjects[mesh.name].childMeshes = [];
-
-                    for (var i = 1; i < object.children.length; i++)
-                    {
-                        if (meshObjects[object.children[i].name] == undefined)
-                        {
-                            meshObjects[object.children[i].name] = new Object();
-                            meshObjects[object.children[i].name].isRoot = false;
-                        }
-                        meshObjects[mesh.name].childMeshes.push(object.children[i].name);
-                    }
+                    colladaObject3DToMeshObject(meshObjects, object);
                 }
                 else if (object.children[0].type == "PointLight")
                 {
@@ -213,6 +202,20 @@ function VLab(vlabNature)
             }
         }
         dispatchEvent(sceneLoadedEvent);
+    };
+
+    var onSceneAppended = function(collada)
+    {
+        var appendedMeshObjects = {};
+        var sceneObject = collada.scene;
+        sceneObject.traverse(function(object){
+            if(object.type == "Object3D")
+            {
+                colladaObject3DToMeshObject(appendedMeshObjects, object);
+            }
+        });
+        prepareRootObjects(appendedMeshObjects);
+        return appendedMeshObjects;
     };
 
     var onSceneLoadProgress = function(request)
@@ -266,17 +269,8 @@ function VLab(vlabNature)
             vlabScene = new THREE.Scene();
         }
 
-        // add children meshes to root meshes
-        for (var meshObjectName in meshObjects)
-        {
-            if(meshObjects[meshObjectName].childMeshes.length > 0)
-            {
-                for (var childMeshName in meshObjects[meshObjectName].childMeshes)
-                {
-                    meshObjects[meshObjectName].mesh.add(meshObjects[meshObjects[meshObjectName].childMeshes[childMeshName]].mesh);
-                }
-            }
-        }
+        prepareRootObjects(meshObjects);
+
         // add root meshes to the scene
         for (var meshObjectName in meshObjects)
         {
@@ -485,6 +479,56 @@ function VLab(vlabNature)
 
         render();
     }
+
+    var colladaObject3DToMeshObject = function(meshObjectsRef, object3D)
+    {
+        var position = new THREE.Vector3();
+        var quaternion = new THREE.Quaternion();
+        quaternion.copy(object3D.quaternion);
+        position.copy(object3D.position);
+
+        if (object3D.children[0].type == "Mesh")
+        {
+            var mesh = object3D.children[0];
+            mesh.name = object3D.name;
+            mesh.quaternion.copy(quaternion);
+            mesh.position.copy(position);
+
+            if (meshObjectsRef[mesh.name] == undefined)
+            {
+                meshObjectsRef[mesh.name] = new Object();
+                meshObjectsRef[mesh.name].isRoot = true;
+            }
+
+            meshObjectsRef[mesh.name].mesh = mesh;
+            meshObjectsRef[mesh.name].childMeshes = [];
+
+            for (var i = 1; i < object3D.children.length; i++)
+            {
+                if (meshObjectsRef[object3D.children[i].name] == undefined)
+                {
+                    meshObjectsRef[object3D.children[i].name] = new Object();
+                    meshObjectsRef[object3D.children[i].name].isRoot = false;
+                }
+                meshObjectsRef[mesh.name].childMeshes.push(object3D.children[i].name);
+            }
+        }
+    };
+
+    var prepareRootObjects = function(meshObjects)
+    {
+        // add children meshes to root meshes
+        for (var meshObjectName in meshObjects)
+        {
+            if(meshObjects[meshObjectName].childMeshes.length > 0)
+            {
+                for (var childMeshName in meshObjects[meshObjectName].childMeshes)
+                {
+                    meshObjects[meshObjectName].mesh.add(meshObjects[meshObjects[meshObjectName].childMeshes[childMeshName]].mesh);
+                }
+            }
+        }
+    };
 
     var render = function(time)
     {
