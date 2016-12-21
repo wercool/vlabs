@@ -362,7 +362,7 @@ function VLab(vlabNature)
                 if (self.vlabNature.castShadows.indexOf(lights[i].name) > -1)
                 {
                     lights[i].castShadow = true;
-                    lights[i].shadowBias = 0.0001;
+                    lights[i].shadow.bias = 0.0001;
                     lights[i].shadow.mapSize.width  = self.vlabNature.shadowsMapSize;
                     lights[i].shadow.mapSize.height = self.vlabNature.shadowsMapSize;
                 }

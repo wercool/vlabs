@@ -45,6 +45,7 @@ function PhMpdFcm(webGLContainer)
     var stopButtonTopState = true;
     var stopButtonLowerState = false;
     var kuka = null;
+    var initialSlopingBodyPosition = null;
 
     var scenePostBuilt = function()
     {
@@ -66,7 +67,10 @@ function PhMpdFcm(webGLContainer)
         activeObjects["stopButton4Pin"] = self.getVlabScene().getObjectByName("stopButton4Pin");
         activeObjects["labSwitchHandlerBase"] = self.getVlabScene().getObjectByName("labSwitchHandlerBase");
 
-        kuka = new Kuka(self, true, new THREE.Vector3(-5.6, -5.75, -3.85));
+        initialSlopingBodyPosition = activeObjects["slopingBody"].position.clone();
+
+        // kuka
+        kuka = new Kuka(self, true, self.getVlabScene().getObjectByName("kukabasePlate").position);
 
         // this VLab constants
         pulleyPos = activeObjects["pulley"].position.clone();
@@ -335,6 +339,22 @@ function PhMpdFcm(webGLContainer)
     self.physijsCollision = function(other_object, linear_velocity, angular_velocity)
     {
         self.trace(this.name + " [collided with] " + other_object.name);
+        if (other_object.name == "support")
+        {
+            var step1Angles = Object.assign({}, kuka.kukaLinksItialAngles);
+            step1Angles.link1 = 0.0;
+            step1Angles.link2 = (-45 * Math.PI / 180);
+            step1Angles.link4 = (90 * Math.PI / 180);
+            var kukaPath = [
+                                { angles: step1Angles },
+                                { xyz: activeObjects["slopingBody"].position },
+                                { angles: step1Angles },
+                                { angles: kuka.kukaLinksItialAngles },
+                                { xyz: initialSlopingBodyPosition },
+                                { angles: kuka.kukaLinksItialAngles }
+                           ];
+            kuka.moveByPath(kukaPath);
+        }
     };
 
     // helpers
