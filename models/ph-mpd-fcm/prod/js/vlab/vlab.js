@@ -22,9 +22,10 @@ function VLab(vlabNature)
     var sceneRenderPause = true;
     var physijsScenePause = true;
 
-    var sceneLoadedEvent    = new Event("sceneLoaded");
-    var sceneBuiltEvent     = new Event("sceneBuilt");
-    var simulationStepEvent = new Event("simulationStep");
+    var vlabInitializedEvent = new Event("vlabInitialized");
+    var sceneLoadedEvent     = new Event("sceneLoaded");
+    var sceneBuiltEvent      = new Event("sceneBuilt");
+    var simulationStepEvent  = new Event("simulationStep");
 
     var vlabScene = null;
     var vlabPhysijsSceneReady = false;
@@ -135,7 +136,52 @@ function VLab(vlabNature)
         self.webglContainerWidth  = webglContainer.width() - webglContainer.offset().left;
         self.webglContainerHeight = webglContainer.height() - webglContainer.offset().top;
 
-        loadScene(self.vlabNature.sceneFile);
+        if (self.vlabNature.isPhysijsScene)
+        {
+            Physijs.scripts.worker = "/js/physijs_worker.js";
+            Physijs.scripts.ammo = "/js/ammo.js";
+            vlabScene = new Physijs.Scene({ fixedTimeStep: 1 / 120});
+            vlabScene.setGravity(new THREE.Vector3( 0, -30, 0 ));
+
+            if (self.vlabNature.isPhysijsScene)
+            {
+                vlabScene.addEventListener(
+                    "update",
+                    function() 
+                    {
+                        self.vlabPhysijsSceneReady = true;
+                    }
+                );
+            }
+        }
+        else
+        {
+            vlabScene = new THREE.Scene();
+        }
+
+
+        if (self.vlabNature.showAxis)
+        {
+            var axisHelper = new THREE.AxisHelper(100.0);
+            vlabScene.add(axisHelper);
+        }
+
+        if (self.vlabNature.showTooltips)
+        {
+            // tooltip
+            tooltipDiv = $("<div id='tooltipDiv' class='tooltip'></div>");
+            webglContainer.append(tooltipDiv);
+            tooltipDiv.hide();
+        }
+
+        render();
+
+        dispatchEvent(vlabInitializedEvent);
+
+        if (self.vlabNature.sceneFile != undefined)
+        {
+            loadScene(self.vlabNature.sceneFile);
+        }
     };
 
     var loadScene = function(sceneFile)
@@ -246,29 +292,6 @@ function VLab(vlabNature)
 
     this.buildScene = function()
     {
-        if (self.vlabNature.isPhysijsScene)
-        {
-            Physijs.scripts.worker = "/js/physijs_worker.js";
-            Physijs.scripts.ammo = "/js/ammo.js";
-            vlabScene = new Physijs.Scene({ fixedTimeStep: 1 / 120});
-            vlabScene.setGravity(new THREE.Vector3( 0, -30, 0 ));
-
-            if (self.vlabNature.isPhysijsScene)
-            {
-                vlabScene.addEventListener(
-                    "update",
-                    function() 
-                    {
-                        self.vlabPhysijsSceneReady = true;
-                    }
-                );
-            }
-        }
-        else
-        {
-            vlabScene = new THREE.Scene();
-        }
-
         prepareRootObjects(meshObjects);
 
         // add root meshes to the scene
@@ -370,20 +393,6 @@ function VLab(vlabNature)
             vlabScene.add(lights[i]);
         }
 
-        if (self.vlabNature.showAxis)
-        {
-            var axisHelper = new THREE.AxisHelper(100.0);
-            vlabScene.add(axisHelper);
-        }
-
-        if (self.vlabNature.showTooltips)
-        {
-            // tooltip
-            tooltipDiv = $("<div id='tooltipDiv' class='tooltip'></div>");
-            webglContainer.append(tooltipDiv);
-            tooltipDiv.hide();
-        }
-
         vlabScene.traverse (function (object)
         {
             if (object.type == "Mesh")
@@ -476,8 +485,6 @@ function VLab(vlabNature)
         }
 
         dispatchEvent(sceneBuiltEvent);
-
-        render();
     }
 
     var colladaObject3DToMeshObject = function(meshObjectsRef, object3D)

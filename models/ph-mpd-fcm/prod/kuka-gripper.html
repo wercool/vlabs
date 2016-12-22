@@ -16,19 +16,18 @@
     <!-- WebGL includes -->
     <script src="js/three.js/build/three.min.js"></script>
     <script src="js/stats.js/build/stats.min.js"></script>
-    <script src="js/three.js/examples/js/loaders/ColladaLoader.js"></script>
     <script src="js/three.js/examples/js/controls/OrbitControls.js"></script>
     <script src="js/three.js/examples/js/controls/TransformControls.js"></script>
+    <script src="js/three.js/examples/js/loaders/ColladaLoader.js"></script>
 
     <!-- Include VLab generic modules -->
     <script src="js/physi.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/vlab/vlab.js"></script>
-    <script src="js/vlab/zoomHelper.js"></script>
 
     <!-- Include this VLab specific modules -->
-    <script src="js/vlab/kuka.js"></script>
-    <script src="ph-mpd-fcm.js"></script>
+    <script src="js/vlab/kuka-vacuum-gripper.js"></script>
+    <script src="kuka-gripper.js"></script>
 
     <div id="webGLContainer" class="webGLContainer"></div>
     <div id="notificationPopup"></div>
@@ -39,7 +38,7 @@
                 opacity: 0.2
             });
 
-            new PhMpdFcm("webGLContainer");
+            new KukaGripperExp("webGLContainer");
         });
     </script>
 </body>

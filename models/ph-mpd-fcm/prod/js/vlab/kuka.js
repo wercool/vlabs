@@ -1,36 +1,9 @@
+"use strict";
+
 function Kuka(vlab, test, basePosition, initialLinksAngles)
 {
     var self = this;
     self.initialized = false;
-
-    if (test)
-    {
-        var ikTarget;
-        ikTarget = {
-            mesh : new THREE.Mesh( new THREE.SphereBufferGeometry(0.2),  new THREE.MeshStandardMaterial({wireframe:true, emissive:0xFFFFFF }) ),
-            control : new THREE.TransformControls(vlab.getDefaultCamera(), vlab.WebGLRenderer.domElement)
-        };
-        vlab.getVlabScene().add(ikTarget.mesh);
-        ikTarget.control.addEventListener("change", function(){});
-        var endEffectorInitialPosition = new THREE.Vector3(0,0,0);
-        ikTarget.mesh.position.copy(endEffectorInitialPosition);
-        ikTarget.control.attach(ikTarget.mesh);
-        ikTarget.control.setSize(1.0);
-        vlab.getVlabScene().add(ikTarget.control);
-
-        window.addEventListener('keydown', function (event){
-            if (event.keyCode == 81) // q
-            {
-                self.setKuka(ikTarget.control.position.clone());
-            }
-            if (event.keyCode == 69) //e
-            {
-                self.kukaBase.updateMatrixWorld();
-                var link5Tip = new THREE.Vector3().setFromMatrixPosition(self.kukaLink5.matrixWorld);
-                vlab.trace("Kuka EEF pos: ", link5Tip);
-            }
-        });
-    }
 
     self.kukaBase = null;
     self.kukaLink1 = null;
@@ -89,8 +62,6 @@ function Kuka(vlab, test, basePosition, initialLinksAngles)
         vlab.trace("Kuka initialized");
         self.initialized = true;
     }
-
-    vlab.appendScene("scene/kuka.dae", sceneAppendedCallBack);
 
     self.path = [];
     self.positioningStage = 0;
@@ -255,4 +226,36 @@ function Kuka(vlab, test, basePosition, initialLinksAngles)
         });
         kukaLink4.start();
     }
+
+    if (test)
+    {
+        var ikTarget;
+        ikTarget = {
+            mesh : new THREE.Mesh( new THREE.SphereBufferGeometry(0.2),  new THREE.MeshStandardMaterial({wireframe:true, emissive:0xFFFFFF }) ),
+            control : new THREE.TransformControls(vlab.getDefaultCamera(), vlab.WebGLRenderer.domElement)
+        };
+        vlab.getVlabScene().add(ikTarget.mesh);
+        ikTarget.control.addEventListener("change", function(){});
+        var endEffectorInitialPosition = new THREE.Vector3(0,0,0);
+        ikTarget.mesh.position.copy(endEffectorInitialPosition);
+        ikTarget.control.attach(ikTarget.mesh);
+        ikTarget.control.setSize(1.0);
+        vlab.getVlabScene().add(ikTarget.control);
+
+        window.addEventListener('keydown', function (event){
+            if (event.keyCode == 81) // q
+            {
+                self.setKuka(ikTarget.control.position.clone());
+            }
+            if (event.keyCode == 69) //e
+            {
+                self.kukaBase.updateMatrixWorld();
+                var link5Tip = new THREE.Vector3().setFromMatrixPosition(self.kukaLink5.matrixWorld);
+                vlab.trace("Kuka EEF pos: ", link5Tip);
+            }
+        });
+    }
+
+    // append Kuka model to VLab scene 
+    vlab.appendScene("scene/kuka.dae", sceneAppendedCallBack);
 }

@@ -8,11 +8,6 @@ function PhMpdFcm(webGLContainer)
     addEventListener("sceneBuilt", function (event) { scenePostBuilt(); }, false);
     addEventListener("simulationStep", function (event) { simulationStep(); }, false);
 
-    $.getJSON("ph-mpd-fcm.json", function(jsonObj) {
-        VLab.apply(self, [jsonObj]);
-        self.initialize(webGLContainer);
-    });
-
     var sceneLoaded = function()
     {
         self.getDefaultCamera().position.set(0.0, 4.0, 14.0);
@@ -368,4 +363,11 @@ function PhMpdFcm(webGLContainer)
         new ZoomHelper(zoomArgs);
     }
 
+
+    //this VLab is ready to be initialized
+
+    $.getJSON("ph-mpd-fcm.json", function(jsonObj) {
+        VLab.apply(self, [jsonObj]);
+        self.initialize(webGLContainer);
+    });
 }

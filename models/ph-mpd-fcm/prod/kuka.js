@@ -4,6 +4,7 @@ function Kuka(webGLContainer)
 {
     var self = this;
 
+    addEventListener("vlabInitialized", function (event) { vlabInitialized(); }, false);
     addEventListener("sceneLoaded", function (event) { sceneLoaded(); }, false);
     addEventListener("sceneBuilt", function (event) { scenePostBuilt(); }, false);
     addEventListener("simulationStep", function (event) { simulationStep(); }, false);
@@ -18,6 +19,11 @@ function Kuka(webGLContainer)
 
     VLab.apply(self, [vlabNature]);
     self.initialize(webGLContainer);
+
+    var vlabInitialized = function()
+    {
+        console.log("vlabInitialized");
+    };
 
     var sceneLoaded = function()
     {

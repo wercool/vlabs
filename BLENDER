@@ -1,0 +1,2 @@
+// Show mesh vertices ID
+bpy.app.debug = True
