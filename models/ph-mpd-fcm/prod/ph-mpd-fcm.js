@@ -65,7 +65,12 @@ function PhMpdFcm(webGLContainer)
         initialSlopingBodyPosition = activeObjects["slopingBody"].position.clone();
 
         // kuka
-        kuka = new Kuka(self, true, self.getVlabScene().getObjectByName("kukabasePlate").position);
+        kuka = new Kuka(self,
+                        true, 
+                        self.getVlabScene().getObjectByName("kukabasePlate").position, 
+                        null, 
+                        KukaVacuumGripper, 
+                        [self, null, true, "slopingBody", [2, 28]]);
 
         // this VLab constants
         pulleyPos = activeObjects["pulley"].position.clone();
@@ -122,7 +127,10 @@ function PhMpdFcm(webGLContainer)
 
     var simulationStep = function()
     {
-        
+        if (kuka.gripper != undefined)
+        {
+            kuka.gripper.update();
+        }
     };
 
     self.cameraControlsEvent = function()
@@ -334,6 +342,7 @@ function PhMpdFcm(webGLContainer)
     self.physijsCollision = function(other_object, linear_velocity, angular_velocity)
     {
         self.trace(this.name + " [collided with] " + other_object.name);
+/*
         if (other_object.name == "support")
         {
             var step1Angles = Object.assign({}, kuka.kukaLinksItialAngles);
@@ -350,6 +359,7 @@ function PhMpdFcm(webGLContainer)
                            ];
             kuka.moveByPath(kukaPath);
         }
+*/
     };
 
     // helpers

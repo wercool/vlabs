@@ -28,7 +28,7 @@ function KukaGripperExp(webGLContainer)
         // test mode
         self.getDefaultCamera().controls.testMode = true;
 
-        kukaVacuumGripper = new KukaVacuumGripper(self, true, null, [2, 28]);
+        kukaVacuumGripper = new KukaVacuumGripper(self, null, true, "slopingBody", [2, 28]);
 
         var light = new THREE.PointLight(0xffffff, 0.85, 50);
         light.position.set(-10, 10, 10);
@@ -39,7 +39,7 @@ function KukaGripperExp(webGLContainer)
 
     var simulationStep = function()
     {
-        kukaVacuumGripper.processContact();
+        
     };
 
     //this VLab is ready to be initialized

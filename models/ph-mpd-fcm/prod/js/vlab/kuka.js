@@ -1,6 +1,6 @@
 "use strict";
 
-function Kuka(vlab, test, basePosition, initialLinksAngles)
+function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperContructorArgs)
 {
     var self = this;
     self.initialized = false;
@@ -17,6 +17,8 @@ function Kuka(vlab, test, basePosition, initialLinksAngles)
                                     link3:(-138 * Math.PI / 180), 
                                     link4:(-75 * Math.PI / 180)
                                 };
+
+    self.gripper = null;
 
     var sceneAppendedCallBack = function(kukaMeshObjects)
     {
@@ -45,11 +47,16 @@ function Kuka(vlab, test, basePosition, initialLinksAngles)
 
     var initialize = function()
     {
-        if (basePosition != undefined)
+        if (Gripper != null)
+        {
+            gripperContructorArgs[1] = self; // kuka instance
+            self.gripper = Gripper.apply({}, gripperContructorArgs);
+        }
+        if (basePosition != undefined && basePosition != null)
         {
             self.kukaBase.position.copy(basePosition);
         }
-        if (initialLinksAngles != undefined)
+        if (initialLinksAngles != null)
         {
         }
         else
@@ -181,6 +188,7 @@ function Kuka(vlab, test, basePosition, initialLinksAngles)
                     link3:kukaIK.l3, 
                     link4:-link4
                 };
+
                 self.setKukaAngles(angles);
             }
             else

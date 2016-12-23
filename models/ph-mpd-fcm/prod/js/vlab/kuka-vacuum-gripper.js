@@ -1,16 +1,17 @@
 "use strict";
 
-function KukaVacuumGripper(vlab, test, contactObject, contactSurfaceFaces)
+function KukaVacuumGripper(vlab, kuka, test, contactObjectName, contactSurfaceFaces)
 {
     var self = this;
     self.initialized = false;
 
-    var gripper = null;
+    var gripperMesh = null;
 
     var gripperTipVerticesIdx = [160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255]
     var testVertices = [176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191];
     var gripperTipVertices = [];
 
+    var contactObject;
     var arrowHelperFaceNormal
     var arrowHelpers = {};
 
@@ -30,9 +31,18 @@ function KukaVacuumGripper(vlab, test, contactObject, contactSurfaceFaces)
             {
                 if (meshObjectName == "kukaVacuumGripper")
                 {
-                    gripper = kukaVacuumGripperMeshObjects[meshObjectName].mesh;
+                    gripperMesh = kukaVacuumGripperMeshObjects[meshObjectName].mesh;
+                    if (kuka === null)
+                    {
+                        vlab.getVlabScene().add(gripperMesh);
+                    }
+                    else
+                    {
+                        gripperMesh.rotation.x = -gripperMesh.rotation.x;
+                        kuka.kukaLink5.add(gripperMesh);
+                        kuka.kukaLink5.updateMatrixWorld();
+                    }
                 }
-                vlab.getVlabScene().add(kukaVacuumGripperMeshObjects[meshObjectName].mesh);
             }
         }
 
@@ -41,129 +51,187 @@ function KukaVacuumGripper(vlab, test, contactObject, contactSurfaceFaces)
 
     var initialize = function()
     {
-// test!!!!!!!!!!!!!
-        contactObject = vlab.getVlabScene().getObjectByName("slopingBody");
-
-
-//        contactObject.rotation.x += 0.25;
-//        contactObject.rotation.y += 0.5;
-//        contactObject.rotation.z += -0.25;
-        contactObject.position.x += 2.5;
-//        contactObject.position.y += 2.5;
-//        contactObject.position.z += 3.0;
-
+        if (kuka !== null)
+        {
+            kuka.gripper = self;
+            kuka.kukaLink5.updateMatrixWorld();
+        }
+        contactObject = vlab.getVlabScene().getObjectByName(contactObjectName);
         if (test)
         {
-            gripper.material.wireframe = false;
+            gripperMesh.material.wireframe = false;
             contactObject.material.wireframe = false;
         }
 
+        contactObject.geometry.computeBoundingSphere();
+        self.updateContactSurfaceCentroidAndNormal();
+
+        // gripper contacting vertices
+        for (var i in gripperTipVerticesIdx)
+        {
+            var vertexId = gripperTipVerticesIdx[i];
+            var localVertextPos = gripperMesh.geometry.vertices[vertexId].clone();
+            if (test && testVertices.indexOf(vertexId) > -1)
+            {
+                var gripperContactVertextPos = gripperPos().add(localVertextPos);
+                var arrowHelperDir = gripperContactVertextPos.clone().sub(contactSurfaceCentroid);
+                var arrowHelperDirLength = arrowHelperDir.length();
+                var arrowHelper = new THREE.ArrowHelper(arrowHelperDir.normalize(), contactSurfaceCentroid, arrowHelperDirLength, ((vertexId == testVertices[0]) ? 0xff0000 : 0xffffff), 0.05, 0.01);
+                arrowHelpers[vertexId] = arrowHelper;
+                vlab.getVlabScene().add(arrowHelper);
+            }
+            gripperTipVertices.push({id:vertexId, pos:localVertextPos});
+        }
+
+        self.update();
+
+        vlab.trace("Kuka Vacuum Gripper initialized");
+        self.initialized = true;
+        if (test && kuka === null)
+        {
+            setTestControls();
+        }
+    }
+
+    self.update = function()
+    {
+        self.updateContactSurfaceCentroidAndNormal();
+        self.processContact();
+    };
+
+    self.updateContactSurfaceCentroidAndNormal = function()
+    {
+        if (contactObject == undefined) return;
+
         // contactObject contact surface normal
         contactObject.geometry.computeFaceNormals();
-        contactObject.geometry.computeVertexNormals(true);
+        contactObject.geometry.computeVertexNormals();
         contactObject.updateMatrixWorld();
 
-        for (i in contactSurfaceFaces)
+        contactSurfaceNormal = new THREE.Vector3();
+        contactSurfaceCentroid = new THREE.Vector3();
+
+        for (var i in contactSurfaceFaces)
         {
             var faceID = contactSurfaceFaces[i];
             var face = contactObject.geometry.faces[faceID].clone();
             contactSurfaceCentroid.add(contactObject.localToWorld(contactObject.geometry.vertices[face.a].clone()));
             contactSurfaceCentroid.add(contactObject.localToWorld(contactObject.geometry.vertices[face.b].clone()));
             contactSurfaceCentroid.add(contactObject.localToWorld(contactObject.geometry.vertices[face.c].clone()));
-            contactSurfaceNormal.add(contactObject.localToWorld(face.normal.clone()));
+            contactSurfaceNormal.add(face.normal.clone());
         }
-        contactSurfaceNormal.divideScalar(contactSurfaceFaces.length).sub(contactObject.position);
+        contactSurfaceNormal.divideScalar(contactSurfaceFaces.length).normalize();
         contactSurfaceCentroid.divideScalar(contactSurfaceFaces.length * 3);
 
+        var normalMatrix = new THREE.Matrix3().getNormalMatrix(contactObject.matrixWorld);
+        contactSurfaceNormal.applyMatrix3(normalMatrix);
+
         if (test)
         {
-            arrowHelperFaceNormal = new THREE.ArrowHelper(contactSurfaceNormal, contactSurfaceCentroid, 2, 0x00ffff, 0.1, 0.02);
-            vlab.getVlabScene().add(arrowHelperFaceNormal);
-        }
-
-        // gripper contacting vertices
-        for (var i in gripperTipVerticesIdx)
-        {
-            var vertexId = gripperTipVerticesIdx[i];
-            var localVertextPos = gripper.geometry.vertices[vertexId].clone();
-            if (test && testVertices.indexOf(vertexId) > -1)
+            if (arrowHelperFaceNormal == undefined)
             {
-                var gripperContactVertextPos = gripper.localToWorld(localVertextPos);
-                var arrowHelperDir = gripperContactVertextPos.clone().sub(contactSurfaceCentroid);
-                var arrowHelperDirLength = arrowHelperDir.length();
-
-                var arrowHelper = new THREE.ArrowHelper(arrowHelperDir.normalize(), contactSurfaceCentroid, arrowHelperDirLength, 0xffffff, 0.05, 0.01);
-                arrowHelpers[vertexId] = arrowHelper;
-                vlab.getVlabScene().add(arrowHelper);
+                arrowHelperFaceNormal = new THREE.ArrowHelper(contactSurfaceNormal.normalize(), contactSurfaceCentroid, 2, 0x00ffff, 0.1, 0.02);
+                vlab.getVlabScene().add(arrowHelperFaceNormal);
             }
-            gripperTipVertices.push({id:vertexId, pos:localVertextPos});
+            else
+            {
+                arrowHelperFaceNormal.position.copy(contactSurfaceCentroid);
+                arrowHelperFaceNormal.setDirection(contactSurfaceNormal);
+            }
         }
-        vlab.trace("Kuka Vacuum Gripper initialized");
-        self.initialized = true;
-        if (test)
-        {
-            setTestControls();
-        }
-    }
+    };
 
     self.processContact = function()
     {
-        var updateGeom = false;
-        for (var i in gripperTipVertices)
-        {
-            var vertexID  = gripperTipVertices[i].id;
-            var vertexPos = gripperTipVertices[i].pos;
-            var gripperContactVertextPos = gripper.localToWorld(vertexPos.clone());
-            var gripperVertexContactSurfaceCentroidDir = gripperContactVertextPos.sub(contactSurfaceCentroid);
-            var gripperVertexContactSurfaceCentroidDirLength = gripperVertexContactSurfaceCentroidDir.length();
-            var angle = gripperVertexContactSurfaceCentroidDir.angleTo(contactSurfaceCentroid) + 0.05;
+        if (contactObject == undefined) return;
 
-            if (test)
+        var updateGeom = false;
+        if (contactObject.position.distanceTo(gripperPos()) < contactObject.geometry.boundingSphere.radius * 2)
+        {
+            for (var i in gripperTipVertices)
             {
-                if (arrowHelpers[vertexID] != undefined)
+                var vertexID  = gripperTipVertices[i].id;
+                var vertexPos = gripperTipVertices[i].pos;
+                var gripperContactVertextPos = gripperPos().add(vertexPos);
+                var gripperVertexContactSurfaceCentroidDir = gripperContactVertextPos.sub(contactSurfaceCentroid);
+                var gripperVertexContactSurfaceCentroidDirLength = gripperVertexContactSurfaceCentroidDir.length();
+
+                var angle = gripperVertexContactSurfaceCentroidDir.angleTo(contactSurfaceNormal) + 0.01;
+
+                if (test)
                 {
-                    arrowHelpers[vertexID].setDirection(gripperVertexContactSurfaceCentroidDir.normalize());
-                    arrowHelpers[vertexID].setLength(gripperVertexContactSurfaceCentroidDirLength, 0.05, 0.01);
+                    if (arrowHelpers[vertexID] != undefined)
+                    {
+                        if (vertexID == testVertices[0])
+                        {
+//                            console.log(angle * 180 / Math.PI);
+                        }
+                        arrowHelpers[vertexID].visible = true;
+                        arrowHelpers[vertexID].position.copy(contactSurfaceCentroid);
+                        arrowHelpers[vertexID].setDirection(gripperVertexContactSurfaceCentroidDir.normalize());
+                        arrowHelpers[vertexID].setLength(gripperVertexContactSurfaceCentroidDirLength, 0.025, 0.005);
+                    }
+                }
+
+                if (angle > Math.PI / 2)
+                {
+                    var vertexDy = gripperVertexContactSurfaceCentroidDirLength * Math.sin(Math.PI / 2 - angle);
+                    var updatedVertexPos = gripperMesh.geometry.vertices[vertexID];
+                    updatedVertexPos.y = vertexPos.y - vertexDy;
+                    updateGeom = true;
                 }
             }
-
-            if (angle > Math.PI / 2)
-            {
-                var vertexDy = gripperVertexContactSurfaceCentroidDirLength * Math.sin(Math.PI / 2 - angle);
-                var updatedVertexPos = gripper.geometry.vertices[vertexID];
-                var vertexDxz = vertexDy / 5;
-                updatedVertexPos.y = vertexPos.y + vertexDy;
-/*
-                updatedVertexPos.x = vertexPos.x + ((vertexPos.x > 0) ? -vertexDxz : vertexDxz);
-                updatedVertexPos.z = vertexPos.z + ((vertexPos.z > 0) ? -vertexDxz : vertexDxz);
-*/
-                updateGeom = true;
-            }
-
         }
-        gripper.geometry.verticesNeedUpdate = updateGeom;
+        else
+        {
+            for (var i in testVertices)
+            {
+                arrowHelpers[testVertices[i]].visible = false;
+            }
+        }
+        gripperMesh.geometry.verticesNeedUpdate = updateGeom;
     }
 
     var setTestControls = function()
     {
         var control = new THREE.TransformControls(vlab.getDefaultCamera(), vlab.WebGLRenderer.domElement);
-//        control.addEventListener("change", function(){self.processContact();});
-        control.attach(gripper);
+        control.addEventListener("change", function(){self.processContact();});
+        control.attach(gripperMesh);
         control.setSize(1.0);
         vlab.getVlabScene().add(control);
+
+        var control1 = new THREE.TransformControls(vlab.getDefaultCamera(), vlab.WebGLRenderer.domElement);
+        control1.addEventListener("change", function(){self.updateContactSurfaceCentroidAndNormal();});
+        control1.attach(contactObject);
+        control1.setSize(1.0);
+        vlab.getVlabScene().add(control1);
 
         window.addEventListener('keydown', function (event){
             if (event.keyCode == 84) // t
             {
                 control.setMode("translate");
+                control1.setMode("translate");
             }
             if (event.keyCode == 82) // r
             {
                 control.setMode("rotate");
+                control1.setMode("rotate");
             }
         });
     }
 
-    // append Kuka Vacuum Gripper model to VLab scene 
+    var gripperPos = function()
+    {
+        if (kuka === null)
+        {
+            return gripperMesh.position;
+        }
+        else
+        {
+            return new THREE.Vector3().setFromMatrixPosition(gripperMesh.matrixWorld);
+        }
+    };
+
+    // append Kuka Vacuum Gripper model to VLab scene
     vlab.appendScene("scene/kuka-vacuum-gripper.dae", sceneAppendedCallBack);
 };

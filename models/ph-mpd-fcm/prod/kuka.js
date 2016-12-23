@@ -17,9 +17,6 @@ function Kuka(webGLContainer)
         "showAxis":         true
     };
 
-    VLab.apply(self, [vlabNature]);
-    self.initialize(webGLContainer);
-
     var vlabInitialized = function()
     {
         console.log("vlabInitialized");
@@ -92,12 +89,12 @@ function Kuka(webGLContainer)
             }
         });
 
-
+/*
         activeObjects["kukaLink1"].rotation.y = (-90 * Math.PI / 180);
         activeObjects["kukaLink2"].rotation.z = (45 * Math.PI / 180);
         activeObjects["kukaLink3"].rotation.z = (-138 * Math.PI / 180);
         activeObjects["kukaLink4"].rotation.z = (-75 * Math.PI / 180);
-
+*/
 //      activeObjects["kukaBase"].position.copy(new THREE.Vector3(-5.6, -5.75, -3.85));
 
 /*
@@ -246,7 +243,7 @@ function Kuka(webGLContainer)
 */
         if (activeObjects["kukaLink3"].rotation.z > kukaLink3MaxAngle)
         {
-            activeObjects["kukaLink3"].rotateZ(-da);
+            activeObjects["kukaLink3"].rotateZ(-da / 2);
 
             setTimeout(function(){ process(); }, 1);
             return;
@@ -258,7 +255,7 @@ function Kuka(webGLContainer)
 
         if (activeObjects["kukaLink2"].rotation.z > kukaLink2MaxAngle)
         {
-            activeObjects["kukaLink2"].rotateZ(-da);
+            activeObjects["kukaLink2"].rotateZ(-da / 4);
 
             setTimeout(function(){ process(); }, 1);
             return;
@@ -300,5 +297,8 @@ function Kuka(webGLContainer)
     var simulationStep = function()
     {
     };
+
+    VLab.apply(self, [vlabNature]);
+    self.initialize(webGLContainer);
 
 }
