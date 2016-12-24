@@ -27,4 +27,5 @@ html, body
     border-radius:5px; /* regular */
     background-color:rgba(0, 0, 0, 0.2);
     max-width: 500px;
+    pointer-events:none;
 }

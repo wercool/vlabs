@@ -36,7 +36,7 @@ app.post("/xyz", function(req, res) {
 app.post("/ikxyz", function(req, res) {
     var pos = req.body;
 
-    var d = 0.2;
+    var d = 0.02;
     var dxn, dxp, dyn, dyp, dzn, dzp;
 
     dxn = parseFloat(pos.x) - d;

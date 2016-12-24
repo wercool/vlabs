@@ -5,6 +5,15 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
     var self = this;
     self.initialized = false;
 
+    self.positioning = false;
+
+    self.path = [];
+    self.positioningStage = 0;
+    self.XYPositioning = true;
+    self.L1 = 0.0;
+
+    self.completeCallBack = undefined;
+
     self.kukaBase = null;
     self.kukaLink1 = null;
     self.kukaLink2 = null;
@@ -70,30 +79,24 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
         self.initialized = true;
     }
 
-    self.path = [];
-    self.positioningStage = 0;
-
-    self.moveByPath = function(pathNodes)
+    self.moveByPath = function(pathNodes, callback)
     {
-        if (pathNodes != undefined)
+        if (typeof pathNodes === "object")
         {
             self.path = self.path.concat(pathNodes);
         }
-        if (!self.initialized)
+        if (typeof callback === "function")
         {
-            vlab.trace("Kuka initializing...");
-            setTimeout(function(){ self.moveByPath(); }, 500);
-            return;
+            self.completeCallBack = callback;
         }
         if (self.path.length > 0)
         {
             if (self.positioningStage == 0)
             {
                 var pathNode = self.path.shift();
-                self.positioningStage = 4;
                 if (pathNode.xyz != undefined)
                 {
-                    self.setKuka(pathNode.xyz);
+                    self.setKuka(pathNode.xyz, true);
                 }
                 if (pathNode.angles != undefined)
                 {
@@ -104,25 +107,55 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
         }
         else
         {
-            vlab.trace("Kuka path completed");
+            if (self.positioningStage == 0)
+            {
+                vlab.trace("Kuka path completed");
+                if (typeof self.completeCallBack === "function")
+                {
+                    self.completeCallBack.call();
+                }
+            }
+            else
+            {
+                setTimeout(function(){ self.moveByPath(); }, 250);
+            }
         }
     };
 
-    self.setKuka = function(endEffectorPos)
+
+    self.setKuka = function(endEffectorPos, XY)
     {
         if (!self.initialized)
         {
             vlab.trace("Kuka initializing...");
-            setTimeout(function(){ self.setKuka(endEffectorPos); }, 200);
+            setTimeout(function(){ self.setKuka(endEffectorPos, XY); }, 200);
             return;
         }
 
-        var l4l5Height = 2.0;
+        self.XYPositioning = (XY === true) ? true : false;
+
+        var l4l5Height = 2.25;
 
         var requestForEEFPos = endEffectorPos.clone();
-        requestForEEFPos.x = (endEffectorPos.x - self.kukaBase.position.x).toFixed(2);
-        requestForEEFPos.y = (endEffectorPos.y - self.kukaBase.position.y + l4l5Height).toFixed(2);
-        requestForEEFPos.z = (endEffectorPos.z - self.kukaBase.position.z).toFixed(2);
+
+        if (self.XYPositioning)
+        {
+            var eefInitialXZPosition = endEffectorPos.clone();
+            eefInitialXZPosition.y = self.kukaBase.position.y;
+            var xzEEFDir = self.kukaBase.position.clone().sub(eefInitialXZPosition);
+            var xDir = new THREE.Vector3(1,0,0);
+            self.L1 = -Math.PI + xDir.angleTo(xzEEFDir.clone());
+
+            requestForEEFPos.x = xzEEFDir.length();
+            requestForEEFPos.y = (endEffectorPos.y - self.kukaBase.position.y + l4l5Height).toFixed(2);
+            requestForEEFPos.z = "0.00";
+        }
+        else
+        {
+            requestForEEFPos.x = (endEffectorPos.x - self.kukaBase.position.x).toFixed(2);
+            requestForEEFPos.y = (endEffectorPos.y - self.kukaBase.position.y + l4l5Height).toFixed(2);
+            requestForEEFPos.z = ((endEffectorPos.z - self.kukaBase.position.z).toFixed(2));
+        }
 
         $.ajax({
             url: "http://127.0.0.1:11111/ikxyz", 
@@ -153,7 +186,17 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
                 var kukaLink2Cur = self.kukaLink2.rotation.z;
                 var kukaLink3Cur = self.kukaLink3.rotation.z;
                 var kukaLink4Cur = self.kukaLink4.rotation.z;
-                self.kukaLink1.rotation.y = ((requestForEEFPos.x < 0) ? -Math.PI : 0.0) + ((requestForEEFPos.x < 0) ? -1 : 1) * kukaIK.l1;
+
+                if (self.XYPositioning)
+                {
+                    kukaIK.l1 = self.L1;
+                }
+                else
+                {
+                    kukaIK.l1 = ((requestForEEFPos.x < 0) ? -Math.PI : 0.0) + ((requestForEEFPos.x < 0) ? -1 : 1) * kukaIK.l1;
+                }
+
+                self.kukaLink1.rotation.y = kukaIK.l1;
                 self.kukaLink2.rotation.z = kukaIK.l2;
                 self.kukaLink3.rotation.z = kukaIK.l3;
                 self.kukaLink4.rotation.z = 0;
@@ -164,15 +207,6 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
                 var l4EEFDir = l4Pos.clone().sub(endEffectorPos); 
                 var l4l5Dir  = l4Pos.clone().sub(l5Pos); 
 
-/*
-                self.getVlabScene().remove(activeObjects["arrowHelper1"]);
-                self.getVlabScene().remove(activeObjects["arrowHelper2"]);
-
-                activeObjects["arrowHelper1"] = new THREE.ArrowHelper(l4EEFDir.clone().normalize().negate(), l4Pos, l4EEFDir.length(), 0xffffff, 0.1, 0.1);
-                activeObjects["arrowHelper2"] = new THREE.ArrowHelper(l4l5Dir.clone().normalize().negate(), l4Pos, l4l5Dir.length(), 0xffffff, 0.1, 0.1);
-                self.getVlabScene().add(activeObjects["arrowHelper1"]);
-                self.getVlabScene().add(activeObjects["arrowHelper2"]);
-*/
                 var link4 = l4EEFDir.angleTo(l4l5Dir);
 
                 self.kukaLink1.rotation.y = kukaLink1Cur;
@@ -180,10 +214,9 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
                 self.kukaLink3.rotation.z = kukaLink3Cur;
                 self.kukaLink4.rotation.z = kukaLink4Cur;
 
-
                 // set links
                 var angles = {
-                    link1:((requestForEEFPos.x < 0) ? -Math.PI : 0.0) + ((requestForEEFPos.x < 0) ? -1 : 1) * kukaIK.l1, 
+                    link1:kukaIK.l1, 
                     link2:kukaIK.l2, 
                     link3:kukaIK.l3, 
                     link4:-link4
@@ -201,12 +234,15 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
 
     self.setKukaAngles = function(angles)
     {
+        self.positioning = true;
+        self.positioningStage = 4;
+
         // set links
         var kukaLink1 = new TWEEN.Tween(self.kukaLink1.rotation);
         kukaLink1.easing(TWEEN.Easing.Cubic.InOut);
         kukaLink1.to({y: angles.link1}, 3000);
         kukaLink1.onComplete(function(){
-            self.positioningStage--;
+            self.positioning = (--self.positioningStage > 0);
         });
         kukaLink1.start();
 
@@ -214,7 +250,7 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
         kukaLink2.easing(TWEEN.Easing.Cubic.InOut);
         kukaLink2.to({z: angles.link2}, 3000);
         kukaLink2.onComplete(function(){
-            self.positioningStage--;
+            self.positioning = (--self.positioningStage > 0);
         });
         kukaLink2.start();
 
@@ -222,7 +258,7 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
         kukaLink3.easing(TWEEN.Easing.Cubic.InOut);
         kukaLink3.to({z: angles.link3}, 3000);
         kukaLink3.onComplete(function(){
-            self.positioningStage--;
+            self.positioning = (--self.positioningStage > 0);
         });
         kukaLink3.start();
 
@@ -230,7 +266,7 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
         kukaLink4.easing(TWEEN.Easing.Cubic.InOut);
         kukaLink4.to({z: angles.link4}, 3000);
         kukaLink4.onComplete(function(){
-            self.positioningStage--;
+            self.positioning = (--self.positioningStage > 0);
         });
         kukaLink4.start();
     }
@@ -243,7 +279,7 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
             control : new THREE.TransformControls(vlab.getDefaultCamera(), vlab.WebGLRenderer.domElement)
         };
         vlab.getVlabScene().add(ikTarget.mesh);
-        ikTarget.control.addEventListener("change", function(){});
+//        ikTarget.control.addEventListener("change", function(){});
         var endEffectorInitialPosition = new THREE.Vector3(0,0,0);
         ikTarget.mesh.position.copy(endEffectorInitialPosition);
         ikTarget.control.attach(ikTarget.mesh);
@@ -253,7 +289,7 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
         window.addEventListener('keydown', function (event){
             if (event.keyCode == 81) // q
             {
-                self.setKuka(ikTarget.control.position.clone());
+                self.setKuka(ikTarget.control.position.clone(), true);
             }
             if (event.keyCode == 69) //e
             {
@@ -263,6 +299,11 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
             }
         });
     }
+
+    self.removeCallBack = function()
+    {
+        delete self.completeCallBack;
+    };
 
     // append Kuka model to VLab scene 
     vlab.appendScene("scene/kuka.dae", sceneAppendedCallBack);

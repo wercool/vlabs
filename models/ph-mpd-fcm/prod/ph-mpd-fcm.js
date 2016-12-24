@@ -41,6 +41,8 @@ function PhMpdFcm(webGLContainer)
     var stopButtonLowerState = false;
     var kuka = null;
     var initialSlopingBodyPosition = null;
+    var slopingSurfaceFixtureContact = false;
+    var kukaReturnsSlopingBodyStep = 0;
 
     var scenePostBuilt = function()
     {
@@ -62,15 +64,17 @@ function PhMpdFcm(webGLContainer)
         activeObjects["stopButton4Pin"] = self.getVlabScene().getObjectByName("stopButton4Pin");
         activeObjects["labSwitchHandlerBase"] = self.getVlabScene().getObjectByName("labSwitchHandlerBase");
 
+        self.getVlabScene().getObjectByName("tableTop").material.side = THREE.DoubleSide;
+
         initialSlopingBodyPosition = activeObjects["slopingBody"].position.clone();
 
         // kuka
         kuka = new Kuka(self,
-                        true, 
+                        false, 
                         self.getVlabScene().getObjectByName("kukabasePlate").position, 
                         null, 
                         KukaVacuumGripper, 
-                        [self, null, true, "slopingBody", [2, 28]]);
+                        [self, null, false, "slopingBody", [2, 28]]);
 
         // this VLab constants
         pulleyPos = activeObjects["pulley"].position.clone();
@@ -127,7 +131,21 @@ function PhMpdFcm(webGLContainer)
 
     var simulationStep = function()
     {
-        if (kuka.gripper != undefined)
+        if (!slopingSurfaceFixtureContact)
+        {
+            return;
+        }
+        if (kukaReturnsSlopingBodyStep == 0)
+        {
+            var slopingBodyLinearVelocityX = activeObjects["slopingBody"].getLinearVelocity().x;
+            if (Math.abs(slopingBodyLinearVelocityX) < 0.001)
+            {
+                self.setPhysijsScenePause(true);
+                kukaReturnsSlopingBodyStep = 1;
+                kukaReturnsSlopingBody();
+            }
+        }
+        if (kuka.positioning && kukaReturnsSlopingBodyStep == 1)
         {
             kuka.gripper.update();
         }
@@ -253,6 +271,10 @@ function PhMpdFcm(webGLContainer)
             if (activeObjects["pusher"].position.y >= 0.276)
             {
                 stopButtonTopState = true;
+                if (kukaReturnsSlopingBodyStep == 2)
+                {
+                    self.nextKukaReturnsSlopingBodyStep();
+                }
             }
             if (labSwitchState == 1 && activeObjects["pusher"].position.y <= 0.136)
             {
@@ -342,24 +364,84 @@ function PhMpdFcm(webGLContainer)
     self.physijsCollision = function(other_object, linear_velocity, angular_velocity)
     {
         self.trace(this.name + " [collided with] " + other_object.name);
-/*
-        if (other_object.name == "support")
+
+        if (other_object.name == "slopingSurfaceFixture")
         {
-            var step1Angles = Object.assign({}, kuka.kukaLinksItialAngles);
-            step1Angles.link1 = 0.0;
-            step1Angles.link2 = (-45 * Math.PI / 180);
-            step1Angles.link4 = (90 * Math.PI / 180);
-            var kukaPath = [
-                                { angles: step1Angles },
-                                { xyz: activeObjects["slopingBody"].position },
-                                { angles: step1Angles },
-                                { angles: kuka.kukaLinksItialAngles },
-                                { xyz: initialSlopingBodyPosition },
-                                { angles: kuka.kukaLinksItialAngles }
-                           ];
-            kuka.moveByPath(kukaPath);
+            slopingSurfaceFixtureContact = true;
         }
-*/
+    };
+
+    var kukaReturnsSlopingBody = function()
+    {
+        self.trace("kuka step #" + kukaReturnsSlopingBodyStep);
+        switch(kukaReturnsSlopingBodyStep)
+        {
+            case 1:
+                var stepIntermediateAngles1 = Object.assign({}, kuka.kukaLinksItialAngles);
+                stepIntermediateAngles1.link1 = 0.0;
+                stepIntermediateAngles1.link2 = (-45 * Math.PI / 180);
+                stepIntermediateAngles1.link4 = (90 * Math.PI / 180);
+                var prePickPosition = activeObjects["slopingBody"].position.clone();
+                prePickPosition.y += 1.0;
+                var pickPosition = activeObjects["slopingBody"].position.clone();
+                pickPosition.y += 0.15;
+                var kukaPath = [
+                                    { angles: stepIntermediateAngles1 },
+                                    { xyz: prePickPosition },
+                                    { xyz: pickPosition }
+                               ];
+                kuka.moveByPath(kukaPath, self.nextKukaReturnsSlopingBodyStep);
+            break;
+            case 2:
+                var stepIntermediateAngles1 = Object.assign({}, kuka.kukaLinksItialAngles);
+                stepIntermediateAngles1.link1 = 0.0;
+                stepIntermediateAngles1.link2 = (45 * Math.PI / 180);
+                stepIntermediateAngles1.link4 = kuka.kukaLink4.rotation.z;
+
+                var stepIntermediateAngles2 = Object.assign({}, kuka.kukaLinksItialAngles);
+                stepIntermediateAngles2.link4 = (90 * Math.PI / 180);
+
+                kuka.gripper.gripperMesh.updateMatrixWorld();
+                THREE.SceneUtils.attach(activeObjects["slopingBody"], self.getVlabScene(), kuka.gripper.gripperMesh);
+
+                var kukaPath = [
+                                    { angles: stepIntermediateAngles1 },
+                                    { angles: stepIntermediateAngles2 }
+                               ];
+                kuka.moveByPath(kukaPath, self.nextKukaReturnsSlopingBodyStep);
+            break;
+            case 3:
+                var initialSlopingBodyDropPosition = initialSlopingBodyPosition.clone();
+                initialSlopingBodyDropPosition.y += 0.3;
+                var kukaPath = [
+                                    { xyz: initialSlopingBodyDropPosition }
+                               ];
+                kuka.moveByPath(kukaPath, self.nextKukaReturnsSlopingBodyStep);
+            break;
+            case 4:
+                if (activeObjects["slopingBody"].rotation.y != 0)
+                {
+                    var kukaLink5 = new TWEEN.Tween(kuka.kukaLink5.rotation);
+                    kukaLink5.easing(TWEEN.Easing.Cubic.InOut);
+                    kukaLink5.to({y: 0.0}, 1500);
+                    kukaLink5.onComplete(function(){
+                        
+                    });
+                    kukaLink5.start();
+                }
+            break;
+        }
+    };
+
+    self.nextKukaReturnsSlopingBodyStep = function()
+    {
+        kuka.removeCallBack();
+        if (kukaReturnsSlopingBodyStep == 2 && !stopButtonTopState)
+        {
+            return;
+        }
+        kukaReturnsSlopingBodyStep++;
+        kukaReturnsSlopingBody();
     };
 
     // helpers
@@ -371,7 +453,7 @@ function PhMpdFcm(webGLContainer)
             ropeLineWidth = activeObjects["rope"].material.linewidth = 6;
         }
         new ZoomHelper(zoomArgs);
-    }
+    };
 
 
     //this VLab is ready to be initialized

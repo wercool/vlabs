@@ -73,19 +73,26 @@ function Kuka(webGLContainer)
             control : new THREE.TransformControls(self.getDefaultCamera(), self.WebGLRenderer.domElement)
         };
         self.getVlabScene().add(ikTarget.mesh);
-        ikTarget.control.addEventListener("change", function(){});
+        ikTarget.control.addEventListener("change", function(){self.setEEFInitialXZPosition(true);});
         var endEffectorInitialPosition = new THREE.Vector3(5,0,5);
         ikTarget.mesh.position.copy(endEffectorInitialPosition);
         ikTarget.control.attach(ikTarget.mesh);
         ikTarget.control.setSize(1.0);
         self.getVlabScene().add(ikTarget.control);
 
+        var eefInitialXZPosition = endEffectorInitialPosition.clone();
+        eefInitialXZPosition.y = activeObjects["kukaBase"].position.y;
+        var xzEEFDir = activeObjects["kukaBase"].position.clone().sub(eefInitialXZPosition);
+        activeObjects["xzEEFDir"] = new THREE.ArrowHelper(xzEEFDir.clone().normalize().negate(), activeObjects["kukaBase"].position, xzEEFDir.length(), 0xffffff, 0.5, 0.1);
+        self.getVlabScene().add(activeObjects["xzEEFDir"]);
+        self.setEEFInitialXZPosition(true);
+
         self.setSceneRenderPause(false);
 
         window.addEventListener('keydown', function (event){
             if ( event.keyCode == 81 )
             {
-                setKuka();
+                self.setEEFInitialXZPosition(false);
             }
         });
 
@@ -97,6 +104,7 @@ function Kuka(webGLContainer)
 */
 //      activeObjects["kukaBase"].position.copy(new THREE.Vector3(-5.6, -5.75, -3.85));
 
+
 /*
         kukaLink1MaxAngle = -Math.PI;
         kukaLink2MaxAngle = (-95 * Math.PI / 180);
@@ -107,15 +115,50 @@ function Kuka(webGLContainer)
 */
     };
 
-    var setKuka = function()
+    self.setEEFInitialXZPosition = function(demo)
+    {
+        if (activeObjects["xzEEFDir"] == undefined) return;
+
+        var eefInitialXZPosition = ikTarget.control.position.clone();
+        eefInitialXZPosition.y = activeObjects["kukaBase"].position.y;
+        var xzEEFDir = activeObjects["kukaBase"].position.clone().sub(eefInitialXZPosition);
+        activeObjects["xzEEFDir"].setDirection(xzEEFDir.clone().normalize().negate());
+        activeObjects["xzEEFDir"].setLength(xzEEFDir.length(), 0.5, 0.1);
+        var xDir = new THREE.Vector3(1,0,0);
+        var l1 = -Math.PI + xDir.angleTo(xzEEFDir.clone());
+        if (demo)
+        {
+            activeObjects["kukaLink1"].rotation.y = l1;
+        }
+        else
+        {
+            self.l1 = l1;
+            setKuka(xzEEFDir.length());
+        }
+    };
+
+    self.l1 = null;
+
+    var setKuka = function(eefX)
     {
         var l4l5Height = 2.0;
 
-        var endEffectorPos = ikTarget.control.position.clone();
-        var requestForEEFPos = endEffectorPos.clone();
-        requestForEEFPos.x = (endEffectorPos.x - activeObjects["kukaBase"].position.x).toFixed(2);
-        requestForEEFPos.y = (endEffectorPos.y - activeObjects["kukaBase"].position.y + l4l5Height).toFixed(2);
-        requestForEEFPos.z = (endEffectorPos.z - activeObjects["kukaBase"].position.z).toFixed(2);
+        if (self.l1 == null)
+        {
+            var endEffectorPos = ikTarget.control.position.clone();
+            var requestForEEFPos = endEffectorPos.clone();
+            requestForEEFPos.x = (endEffectorPos.x - activeObjects["kukaBase"].position.x).toFixed(2);
+            requestForEEFPos.y = (endEffectorPos.y - activeObjects["kukaBase"].position.y + l4l5Height).toFixed(2);
+            requestForEEFPos.z = (endEffectorPos.z - activeObjects["kukaBase"].position.z).toFixed(2);
+        }
+        else
+        {
+            var endEffectorPos = ikTarget.control.position.clone();
+            var requestForEEFPos = new THREE.Vector3();
+            requestForEEFPos.x = eefX.toFixed(2);
+            requestForEEFPos.y = (endEffectorPos.y - activeObjects["kukaBase"].position.y + l4l5Height).toFixed(2);
+            requestForEEFPos.z = 0;
+        }
 
         $.ajax({
             url: "http://127.0.0.1:11111/ikxyz", 
@@ -147,7 +190,17 @@ function Kuka(webGLContainer)
                 var kukaLink3Cur = activeObjects["kukaLink3"].rotation.z;
                 var kukaLink4Cur = activeObjects["kukaLink4"].rotation.z;
 
-                activeObjects["kukaLink1"].rotation.y = ((requestForEEFPos.x < 0) ? -Math.PI : 0.0) + ((requestForEEFPos.x < 0) ? -1 : 1) * kukaIK.l1;
+
+                if (kukaIK.l1 == null)
+                {
+                    kukaIK.l1 = ((requestForEEFPos.x < 0) ? -Math.PI : 0.0) + ((requestForEEFPos.x < 0) ? -1 : 1) * kukaIK.l1;
+                    activeObjects["kukaLink1"].rotation.y = kukaIK.l1;
+                }
+                else
+                {
+                    activeObjects["kukaLink1"].rotation.y = self.l1;
+                    kukaIK.l1 = self.l1;
+                }
                 activeObjects["kukaLink2"].rotation.z = kukaIK.l2;
                 activeObjects["kukaLink3"].rotation.z = kukaIK.l3;
                 activeObjects["kukaLink4"].rotation.z = 0;
@@ -173,11 +226,10 @@ function Kuka(webGLContainer)
                 activeObjects["kukaLink3"].rotation.z = kukaLink3Cur;
                 activeObjects["kukaLink4"].rotation.z = kukaLink4Cur;
 
-
                 // set links
                 var kukaLink1 = new TWEEN.Tween(activeObjects["kukaLink1"].rotation);
                 kukaLink1.easing(TWEEN.Easing.Cubic.InOut);
-                kukaLink1.to({y: ((requestForEEFPos.x < 0) ? -Math.PI : 0.0) + ((requestForEEFPos.x < 0) ? -1 : 1) * kukaIK.l1}, 3000);
+                kukaLink1.to({y: kukaIK.l1}, 3000);
                 kukaLink1.start();
                 var kukaLink2 = new TWEEN.Tween(activeObjects["kukaLink2"].rotation);
                 kukaLink2.easing(TWEEN.Easing.Cubic.InOut);
@@ -199,8 +251,8 @@ function Kuka(webGLContainer)
         });
     };
 
-    var da = (Math.PI * 2) / 60;
-    var dal1 = (Math.PI * 2) / 180;
+    var da = (Math.PI * 2) / 720;
+    var dal1 = (Math.PI * 2) / 360;
     var l1cnt = 0;
 
     var dataArr = [];
@@ -243,7 +295,7 @@ function Kuka(webGLContainer)
 */
         if (activeObjects["kukaLink3"].rotation.z > kukaLink3MaxAngle)
         {
-            activeObjects["kukaLink3"].rotateZ(-da / 2);
+            activeObjects["kukaLink3"].rotateZ(-da);
 
             setTimeout(function(){ process(); }, 1);
             return;
@@ -255,7 +307,7 @@ function Kuka(webGLContainer)
 
         if (activeObjects["kukaLink2"].rotation.z > kukaLink2MaxAngle)
         {
-            activeObjects["kukaLink2"].rotateZ(-da / 4);
+            activeObjects["kukaLink2"].rotateZ(-da);
 
             setTimeout(function(){ process(); }, 1);
             return;
@@ -263,8 +315,15 @@ function Kuka(webGLContainer)
         else
         {
             activeObjects["kukaLink2"].rotation.z = 0;
+            activeObjects["kukaLink1"].rotation.y = 0;
+            $.ajax({
+                url: "http://127.0.0.1:11111/xyz", 
+                type: 'POST', 
+                contentType: "application/json", 
+                data: JSON.stringify(dataArr)
+            });
         }
-
+/*
         if (l1cnt < 90)
         {
             activeObjects["kukaLink1"].rotateY(-dal1);
@@ -282,6 +341,7 @@ function Kuka(webGLContainer)
                 data: JSON.stringify(dataArr)
             });
         }
+*/
     };
 
     var getEndEffectorPos = function()

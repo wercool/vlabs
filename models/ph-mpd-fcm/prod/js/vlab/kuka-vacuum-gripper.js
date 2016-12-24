@@ -5,7 +5,7 @@ function KukaVacuumGripper(vlab, kuka, test, contactObjectName, contactSurfaceFa
     var self = this;
     self.initialized = false;
 
-    var gripperMesh = null;
+    self.gripperMesh = null;
 
     var gripperTipVerticesIdx = [160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255]
     var testVertices = [176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191];
@@ -31,15 +31,14 @@ function KukaVacuumGripper(vlab, kuka, test, contactObjectName, contactSurfaceFa
             {
                 if (meshObjectName == "kukaVacuumGripper")
                 {
-                    gripperMesh = kukaVacuumGripperMeshObjects[meshObjectName].mesh;
+                    self.gripperMesh = kukaVacuumGripperMeshObjects[meshObjectName].mesh;
                     if (kuka === null)
                     {
-                        vlab.getVlabScene().add(gripperMesh);
+                        vlab.getVlabScene().add(self.gripperMesh);
                     }
                     else
                     {
-                        gripperMesh.rotation.x = -gripperMesh.rotation.x;
-                        kuka.kukaLink5.add(gripperMesh);
+                        kuka.kukaLink5.add(self.gripperMesh);
                         kuka.kukaLink5.updateMatrixWorld();
                     }
                 }
@@ -56,13 +55,12 @@ function KukaVacuumGripper(vlab, kuka, test, contactObjectName, contactSurfaceFa
             kuka.gripper = self;
             kuka.kukaLink5.updateMatrixWorld();
         }
-        contactObject = vlab.getVlabScene().getObjectByName(contactObjectName);
-        if (test)
-        {
-            gripperMesh.material.wireframe = false;
-            contactObject.material.wireframe = false;
-        }
 
+        contactObject = vlab.getVlabScene().getObjectByName(contactObjectName);
+/*
+        self.gripperMesh.material.wireframe = false;
+        contactObject.material.wireframe = false;
+*/
         contactObject.geometry.computeBoundingSphere();
         self.updateContactSurfaceCentroidAndNormal();
 
@@ -70,10 +68,10 @@ function KukaVacuumGripper(vlab, kuka, test, contactObjectName, contactSurfaceFa
         for (var i in gripperTipVerticesIdx)
         {
             var vertexId = gripperTipVerticesIdx[i];
-            var localVertextPos = gripperMesh.geometry.vertices[vertexId].clone();
+            var localVertextPos = self.gripperMesh.geometry.vertices[vertexId].clone();
             if (test && testVertices.indexOf(vertexId) > -1)
             {
-                var gripperContactVertextPos = gripperPos().add(localVertextPos);
+                var gripperContactVertextPos = gripperPos().add(localVertextPos.clone());
                 var arrowHelperDir = gripperContactVertextPos.clone().sub(contactSurfaceCentroid);
                 var arrowHelperDirLength = arrowHelperDir.length();
                 var arrowHelper = new THREE.ArrowHelper(arrowHelperDir.normalize(), contactSurfaceCentroid, arrowHelperDirLength, ((vertexId == testVertices[0]) ? 0xff0000 : 0xffffff), 0.05, 0.01);
@@ -152,11 +150,11 @@ function KukaVacuumGripper(vlab, kuka, test, contactObjectName, contactSurfaceFa
             {
                 var vertexID  = gripperTipVertices[i].id;
                 var vertexPos = gripperTipVertices[i].pos;
-                var gripperContactVertextPos = gripperPos().add(vertexPos);
+                var gripperContactVertextPos = gripperPos().add(vertexPos.clone().negate());
                 var gripperVertexContactSurfaceCentroidDir = gripperContactVertextPos.sub(contactSurfaceCentroid);
                 var gripperVertexContactSurfaceCentroidDirLength = gripperVertexContactSurfaceCentroidDir.length();
 
-                var angle = gripperVertexContactSurfaceCentroidDir.angleTo(contactSurfaceNormal) + 0.01;
+                var angle = gripperVertexContactSurfaceCentroidDir.angleTo(contactSurfaceNormal) + 0.02;
 
                 if (test)
                 {
@@ -176,27 +174,30 @@ function KukaVacuumGripper(vlab, kuka, test, contactObjectName, contactSurfaceFa
                 if (angle > Math.PI / 2)
                 {
                     var vertexDy = gripperVertexContactSurfaceCentroidDirLength * Math.sin(Math.PI / 2 - angle);
-                    var updatedVertexPos = gripperMesh.geometry.vertices[vertexID];
-                    updatedVertexPos.y = vertexPos.y - vertexDy;
+                    var updatedVertexPos = self.gripperMesh.geometry.vertices[vertexID];
+                    updatedVertexPos.y = vertexPos.y + vertexDy;
                     updateGeom = true;
                 }
             }
         }
         else
         {
-            for (var i in testVertices)
+            if (test)
             {
-                arrowHelpers[testVertices[i]].visible = false;
+                for (var i in testVertices)
+                {
+                    arrowHelpers[testVertices[i]].visible = false;
+                }
             }
         }
-        gripperMesh.geometry.verticesNeedUpdate = updateGeom;
+        self.gripperMesh.geometry.verticesNeedUpdate = updateGeom;
     }
 
     var setTestControls = function()
     {
         var control = new THREE.TransformControls(vlab.getDefaultCamera(), vlab.WebGLRenderer.domElement);
         control.addEventListener("change", function(){self.processContact();});
-        control.attach(gripperMesh);
+        control.attach(self.gripperMesh);
         control.setSize(1.0);
         vlab.getVlabScene().add(control);
 
@@ -224,11 +225,11 @@ function KukaVacuumGripper(vlab, kuka, test, contactObjectName, contactSurfaceFa
     {
         if (kuka === null)
         {
-            return gripperMesh.position;
+            return self.gripperMesh.position;
         }
         else
         {
-            return new THREE.Vector3().setFromMatrixPosition(gripperMesh.matrixWorld);
+            return new THREE.Vector3().setFromMatrixPosition(self.gripperMesh.matrixWorld);
         }
     };
 
