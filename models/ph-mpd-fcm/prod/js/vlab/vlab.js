@@ -222,7 +222,6 @@ function VLab(vlabNature)
                 var quaternion = new THREE.Quaternion();
                 quaternion.copy(object.quaternion);
                 position.copy(object.position);
-
                 if (object.children[0].type == "Mesh")
                 {
                     colladaObject3DToMeshObject(meshObjects, object);

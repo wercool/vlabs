@@ -11,7 +11,7 @@ function Kuka(webGLContainer)
 
     var vlabNature = {
         "title":            "Kuka",
-        "sceneFile":        "scene/kuka.dae",
+        "sceneFile":        "scene/kuka-test.dae",
         "isPhysijsScene":   false,
         "showStatistics":   true,
         "showAxis":         true
@@ -41,12 +41,11 @@ function Kuka(webGLContainer)
     // this VLab constants
     var kukaLink1MaxAngle, kukaLink2MaxAngle, kukaLink3MaxAngle, kukaLink4MaxAngle;
     var ikTarget;
-
-    var tubeLinks = [];
+    var cableSleeve, cableSleeveArmature, skeletonHelper;
 
     var scenePostBuilt = function()
     {
-        activeObjects["kukaBase"] = self.getVlabScene().getObjectByName("kukaBase");
+        activeObjects["kukaBase"]  = self.getVlabScene().getObjectByName("kukaBase");
         activeObjects["kukaLink1"] = self.getVlabScene().getObjectByName("kukaLink1");
         activeObjects["kukaLink2"] = self.getVlabScene().getObjectByName("kukaLink2");
         activeObjects["kukaLink3"] = self.getVlabScene().getObjectByName("kukaLink3");
@@ -69,6 +68,16 @@ function Kuka(webGLContainer)
         activeObjects["kukaBase"].position.y += 2.0;
         activeObjects["kukaBase"].position.z -= 2.0;
 */
+
+
+        // dynamic tube
+        initBones();
+        cableSleeve.position.z -= 1.7;
+        cableSleeve.position.x -= 1.7;
+        cableSleeve.position.y += 1.0;
+        cableSleeveArmature[1].rotation.z -= 0.7;
+        cableSleeveArmature[1].position.x -= 0.7;
+
 
         ikTarget = {
             mesh : new THREE.Mesh( new THREE.SphereBufferGeometry(0.2),  new THREE.MeshStandardMaterial({color:0xFF0000, wireframe:true }) ),
@@ -116,20 +125,97 @@ function Kuka(webGLContainer)
         process();
 */
 
-
-        // dynamic tube
-        tubeLinks[0].push(new THREE.Bone());
-        tubeLinks[1].push(new THREE.Bone());
-        tubeLinks[2].push(new THREE.Bone());
-        tubeLinks[3].push(new THREE.Bone());
-
-        // tube links hierarchy
-        tubeLinks[0].add(tubeLinks[1]);
-        tubeLinks[1].add(tubeLinks[2]);
-        tubeLinks[2].add(tubeLinks[3]);
-
-        var tubeSkeleton = new THREE.Skeleton(tubeLinks);
     };
+
+    var initBones = function ()
+    {
+        var segmentHeight = 2;
+        var segmentCount = 5;
+        var height = segmentHeight * segmentCount;
+        var halfHeight = height * 0.5;
+
+        var sizing = {
+            segmentHeight : segmentHeight,
+            segmentCount : segmentCount,
+            height : height,
+            halfHeight : halfHeight
+        };
+
+        var cableSleeveGeometry = createGeometry(sizing);
+        var armatureLinks = createBones(sizing);
+        cableSleeve = createMesh(cableSleeveGeometry, armatureLinks);
+
+        activeObjects["kukaBase"].add(cableSleeve);
+    }
+
+    var createGeometry = function(sizing)
+    {
+        var geometry = new THREE.CylinderGeometry(
+            0.1,                       // radiusTop
+            0.1,                       // radiusBottom
+            sizing.height,             // height
+            8,                         // radiusSegments
+            sizing.segmentCount * 4,   // heightSegments
+            true                       // openEnded
+        );
+
+        for ( var i = 0; i < geometry.vertices.length; i ++ )
+        {
+            var vertex = geometry.vertices[ i ];
+            var y = ( vertex.y + sizing.halfHeight );
+
+            var skinIndex = Math.floor(y / sizing.segmentHeight);
+            var skinWeight = 0.4 * (y % sizing.segmentHeight) / sizing.segmentHeight;
+
+            geometry.skinIndices.push(new THREE.Vector4(skinIndex, skinIndex + 1, 0, 0));
+            geometry.skinWeights.push(new THREE.Vector4(1 - skinWeight, skinWeight, 0, 0));
+        }
+        geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, sizing.height / 2, 0));
+        return geometry;
+    }
+
+    function createBones(sizing)
+    {
+        cableSleeveArmature = [];
+
+        var prevArmatureLink = new THREE.Bone();
+        cableSleeveArmature.push(prevArmatureLink);
+
+        for (var i = 0; i < sizing.segmentCount; i ++)
+        {
+            var armatureLink = new THREE.Bone();
+            armatureLink.position.y = sizing.segmentHeight;
+            cableSleeveArmature.push(armatureLink);
+            prevArmatureLink.add(armatureLink);
+            prevArmatureLink = armatureLink;
+        }
+
+        return cableSleeveArmature;
+    }
+
+    var createMesh = function(geometry, bones)
+    {
+        var material = new THREE.MeshPhongMaterial({
+            skinning : true,
+            color: 0x156289,
+            emissive: 0x072534,
+            side: THREE.DoubleSide,
+            shading: THREE.SmoothShading
+        });
+
+        var mesh = new THREE.SkinnedMesh(geometry, material);
+        var skeleton = new THREE.Skeleton(bones);
+
+        mesh.add(cableSleeveArmature[0]);
+
+        mesh.bind(skeleton);
+
+        skeletonHelper = new THREE.SkeletonHelper(mesh);
+        skeletonHelper.material.linewidth = 2;
+        self.getVlabScene().add(skeletonHelper);
+
+        return mesh;
+    }
 
     self.setEEFInitialXZPosition = function(demo)
     {
@@ -145,6 +231,7 @@ function Kuka(webGLContainer)
         if (demo)
         {
             activeObjects["kukaLink1"].rotation.y = l1;
+            cableSleeveArmature[1].rotation.y = l1;
         }
         else
         {
@@ -259,6 +346,11 @@ function Kuka(webGLContainer)
                 kukaLink4.easing(TWEEN.Easing.Cubic.InOut);
                 kukaLink4.to({z: -l4}, 3000);
                 kukaLink4.start();
+
+                var bone1 = new TWEEN.Tween(cableSleeveArmature[3].rotation);
+                bone1.easing(TWEEN.Easing.Cubic.InOut);
+                bone1.to({z: kukaIK.l2}, 3000);
+                bone1.start();
             }
             else
             {
@@ -372,6 +464,7 @@ function Kuka(webGLContainer)
 
     var simulationStep = function()
     {
+        skeletonHelper.update();
     };
 
     VLab.apply(self, [vlabNature]);
