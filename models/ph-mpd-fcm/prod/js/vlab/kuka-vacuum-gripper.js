@@ -154,7 +154,7 @@ function KukaVacuumGripper(vlab, kuka, test, contactObjectName, contactSurfaceFa
                 var gripperVertexContactSurfaceCentroidDir = gripperContactVertextPos.sub(contactSurfaceCentroid);
                 var gripperVertexContactSurfaceCentroidDirLength = gripperVertexContactSurfaceCentroidDir.length();
 
-                var angle = gripperVertexContactSurfaceCentroidDir.angleTo(contactSurfaceNormal) + 0.02;
+                var angle = gripperVertexContactSurfaceCentroidDir.angleTo(contactSurfaceNormal) + 0.04;
 
                 if (test)
                 {

@@ -17,13 +17,13 @@ function PhMpdFcm(webGLContainer)
         self.getDefaultCamera().controls.autoRotate = false;
         self.getDefaultCamera().controls.enableKeys = false;
         // test mode
-/*
+
         self.getDefaultCamera().controls.minDistance = 5;
         self.getDefaultCamera().controls.maxDistance = 15;
         self.getDefaultCamera().controls.maxPolarAngle = Math.PI/2 - 0.2; 
         self.getDefaultCamera().controls.minPolarAngle = 0.85;
-*/
-        self.getDefaultCamera().controls.testMode = true;
+
+//        self.getDefaultCamera().controls.testMode = true;
 
         self.buildScene();
     };
@@ -32,6 +32,11 @@ function PhMpdFcm(webGLContainer)
     var activeProperties = {};
 
     // this VLab constants
+    var theta = undefined;
+    var thetaRandomSeed = 0.0;
+    var slopingBodyPhysicallyInitialized = false;
+    var slopingBodyActivated = false;
+
     var origin = new THREE.Vector3(0, 0, 0);
     var pulleyPos;
     var ropeLineWidth = 3.0;
@@ -63,8 +68,6 @@ function PhMpdFcm(webGLContainer)
         activeObjects["stopButton4Lever"] = self.getVlabScene().getObjectByName("stopButton4Lever");
         activeObjects["stopButton4Pin"] = self.getVlabScene().getObjectByName("stopButton4Pin");
         activeObjects["labSwitchHandlerBase"] = self.getVlabScene().getObjectByName("labSwitchHandlerBase");
-
-        self.getVlabScene().getObjectByName("tableTop").material.side = THREE.DoubleSide;
 
         initialSlopingBodyPosition = activeObjects["slopingBody"].position.clone();
 
@@ -102,7 +105,7 @@ function PhMpdFcm(webGLContainer)
         ropeGeometry.vertices.push(pulleyPos2);
         ropeGeometry.vertices.push(pulleyMotorPos);
         var ropeMaterial = new THREE.LineBasicMaterial({
-                                     color:     0x1c2123,
+                                     color:     0x000000,
                                      opacity:   1.0,
                                      linewidth: ropeLineWidth
         });
@@ -131,6 +134,22 @@ function PhMpdFcm(webGLContainer)
 
     var simulationStep = function()
     {
+        if (!slopingBodyPhysicallyInitialized)
+        {
+            activeObjects["slopingBody"].updateMatrixWorld();
+            THREE.SceneUtils.attach(activeObjects["slopingBody"], self.getVlabScene(), activeObjects["slopingSurface"]);
+            self.setPhysijsScenePause(true);
+            slopingBodyPhysicallyInitialized = true;
+            return;
+        }
+
+        if ((-theta * 180 / Math.PI >= (self.vlabNature.presets.tetha + thetaRandomSeed)) && !slopingBodyActivated)
+        {
+            slopingBodyActivated = true;
+            THREE.SceneUtils.detach(activeObjects["slopingBody"], activeObjects["slopingSurface"], self.getVlabScene());
+            self.setPhysijsScenePause(false);
+            return;
+        }
         if (!slopingSurfaceFixtureContact)
         {
             return;
@@ -145,7 +164,7 @@ function PhMpdFcm(webGLContainer)
                 kukaReturnsSlopingBody();
             }
         }
-        if (kuka.positioning && kukaReturnsSlopingBodyStep == 1)
+        if ((kuka.positioning && kukaReturnsSlopingBodyStep == 1) || kukaReturnsSlopingBodyStep == 6)
         {
             kuka.gripper.update();
         }
@@ -179,10 +198,9 @@ function PhMpdFcm(webGLContainer)
         this.process = function()
         {
             if (
-                   ((!stopButtonTopState && !stopButtonLowerState) || 
-                   (stopButtonTopState && labSwitchState == 1)     || 
-                   (stopButtonLowerState && labSwitchState == -1)) &&
-                   labSwitchState != 0
+                   (!stopButtonTopState && !stopButtonLowerState && labSwitchState != 0)    || 
+                   (stopButtonTopState && labSwitchState == 1)                              || 
+                   (stopButtonLowerState && labSwitchState == -1)
                )
             {
                 activeObjects["slopingSurface"].updateMatrixWorld();
@@ -208,16 +226,23 @@ function PhMpdFcm(webGLContainer)
         this.process = function()
         {
             if (
-                   ((!stopButtonTopState && !stopButtonLowerState) || 
-                   (stopButtonTopState && labSwitchState == 1)     || 
-                   (stopButtonLowerState && labSwitchState == -1)) &&
-                   labSwitchState != 0
+                   (!stopButtonTopState && !stopButtonLowerState && labSwitchState != 0)    || 
+                   (stopButtonTopState && labSwitchState == 1)                              || 
+                   (stopButtonLowerState && labSwitchState == -1)
                )
             {
+                if (theta === undefined)
+                {
+                    activeObjects["slopingSurface"].updateMatrixWorld();
+                    theta = activeObjects["slopingSurface"].rotation.z;
+                }
+                theta -= 0.00125 * labSwitchState;
+
                 activeObjects["slopingBody"].__dirtyPosition = true;
                 activeObjects["slopingBody"].__dirtyRotation = true;
                 activeObjects["slopingSurface"].__dirtyRotation = true;
-                activeObjects["slopingSurface"].rotation.z -= 0.001 * labSwitchState;
+
+                activeObjects["slopingSurface"].rotation.z = theta;
 
                 framePos = new THREE.Vector3();
                 activeObjects["slopingSurface"].updateMatrixWorld();
@@ -232,8 +257,8 @@ function PhMpdFcm(webGLContainer)
                 activeObjects["frame"].rotation.z = -(Math.PI / 2 + activeObjects["slopingSurface"].rotation.z - frameAngle);
                 activeObjects["plumb"].rotation.z = -activeObjects["slopingSurface"].rotation.z;
 
-                activeObjects["pulleyMotor"].rotateZ(0.01 * -labSwitchState);
-                activeObjects["pulley"].rotateZ(0.01 * -labSwitchState);
+                activeObjects["pulleyMotor"].rotateZ(0.0125 * -labSwitchState);
+                activeObjects["pulley"].rotateZ(0.0125 * -labSwitchState);
             }
         }
 
@@ -249,10 +274,9 @@ function PhMpdFcm(webGLContainer)
         this.process = function()
         {
             if (
-                   ((!stopButtonTopState && !stopButtonLowerState) || 
-                   (stopButtonTopState && labSwitchState == 1)     || 
-                   (stopButtonLowerState && labSwitchState == -1)) &&
-                   labSwitchState != 0
+                   (!stopButtonTopState && !stopButtonLowerState && labSwitchState != 0)    || 
+                   (stopButtonTopState && labSwitchState == 1)                              || 
+                   (stopButtonLowerState && labSwitchState == -1)
                )
             {
                 activeObjects["slopingSurface"].updateMatrixWorld();
@@ -265,48 +289,46 @@ function PhMpdFcm(webGLContainer)
                     activeObjects["pusher"].translateZ(labSwitchState * dZpusher);
                 }
                 prevPulleyFramePivotVector = pulleyFramePivotVector.length();
-            }
 
-            // upper contact
-            if (activeObjects["pusher"].position.y >= 0.276)
-            {
-                stopButtonTopState = true;
-                if (kukaReturnsSlopingBodyStep == 2)
+                // upper contact
+                if (activeObjects["pusher"].position.y >= 0.276)
                 {
-                    self.nextKukaReturnsSlopingBodyStep();
+                    stopButtonTopState = true;
+                    if (kukaReturnsSlopingBodyStep == 2)
+                    {
+                        self.nextKukaReturnsSlopingBodyStep();
+                    }
+                }
+                if (labSwitchState == 1 && activeObjects["pusher"].position.y <= 0.136)
+                {
+                    stopButtonTopState = false;
+                }
+
+                if (activeObjects["pusher"].position.y > 0.136 && activeObjects["pusher"].position.y < 0.276)
+                {
+                    activeObjects["stopButton1Lever"].rotateZ(0.007 * labSwitchState);
+                    activeObjects["stopButton2Lever"].rotateZ(0.007 * labSwitchState);
+                    activeObjects["stopButton1Pin"].scale.y = activeObjects["stopButton2Pin"].scale.y += 0.02 * labSwitchState;
+                }
+
+                // lower contact
+                if (activeObjects["pusher"].position.y <= -3.670)
+                {
+                    stopButtonLowerState = true;
+                }
+                if (labSwitchState == -1 && activeObjects["pusher"].position.y >= -3.525)
+                {
+                    stopButtonLowerState = false;
+                }
+
+                if (activeObjects["pusher"].position.y < -3.525 && activeObjects["pusher"].position.y > -3.670)
+                {
+                    activeObjects["stopButton3Lever"].rotateZ(-0.0125 * labSwitchState);
+                    activeObjects["stopButton4Lever"].rotateZ(-0.0125 * labSwitchState);
+                    activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.y -= 0.03 * labSwitchState;
                 }
             }
-            if (labSwitchState == 1 && activeObjects["pusher"].position.y <= 0.136)
-            {
-                stopButtonTopState = false;
-            }
-
-            if (activeObjects["pusher"].position.y > 0.136 && activeObjects["pusher"].position.y < 0.276)
-            {
-                activeObjects["stopButton1Lever"].rotateZ(0.007 * labSwitchState);
-                activeObjects["stopButton2Lever"].rotateZ(0.007 * labSwitchState);
-                activeObjects["stopButton1Pin"].scale.y = activeObjects["stopButton2Pin"].scale.y += 0.02 * labSwitchState;
-            }
-
-            // lower contact
-            if (activeObjects["pusher"].position.y <= -3.670)
-            {
-                stopButtonLowerState = true;
-            }
-            if (labSwitchState == -1 && activeObjects["pusher"].position.y >= -3.525)
-            {
-                stopButtonLowerState = false;
-            }
-
-            if (activeObjects["pusher"].position.y < -3.525 && activeObjects["pusher"].position.y > -3.670)
-            {
-                activeObjects["stopButton3Lever"].rotateZ(-0.0125 * labSwitchState);
-                activeObjects["stopButton4Lever"].rotateZ(-0.0125 * labSwitchState);
-                activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.y -= 0.03 * labSwitchState;
-            }
-
         }
-
         return this;
     };
 
@@ -364,10 +386,19 @@ function PhMpdFcm(webGLContainer)
     self.physijsCollision = function(other_object, linear_velocity, angular_velocity)
     {
         self.trace(this.name + " [collided with] " + other_object.name);
-
-        if (other_object.name == "slopingSurfaceFixture")
+        if (this.name == "slopingBody")
         {
-            slopingSurfaceFixtureContact = true;
+            if (other_object.name == "slopingSurfaceFixture")
+            {
+                slopingSurfaceFixtureContact = true;
+            }
+            if (other_object.name == "slopingSurface")
+            {
+                if (kukaReturnsSlopingBodyStep == 6)
+                {
+                    setTimeout(function(){ self.nextKukaReturnsSlopingBodyStep(); }, 1500);
+                }
+            }
         }
     };
 
@@ -384,7 +415,20 @@ function PhMpdFcm(webGLContainer)
                 var prePickPosition = activeObjects["slopingBody"].position.clone();
                 prePickPosition.y += 1.0;
                 var pickPosition = activeObjects["slopingBody"].position.clone();
-                pickPosition.y += 0.15;
+
+                var position = new THREE.Vector3();
+                var quaternion = new THREE.Quaternion();
+                var scale = new THREE.Vector3();
+                activeObjects["slopingBody"].updateMatrixWorld(true);
+                activeObjects["slopingBody"].matrixWorld.decompose(position, quaternion, scale);
+                if (Math.abs(quaternion.x+quaternion.z) < 0.0001)
+                {
+                    pickPosition.y += 0.05;
+                }
+                else
+                {
+                    pickPosition.y += 0.125;
+                }
                 var kukaPath = [
                                     { angles: stepIntermediateAngles1 },
                                     { xyz: prePickPosition },
@@ -412,34 +456,89 @@ function PhMpdFcm(webGLContainer)
             break;
             case 3:
                 var initialSlopingBodyDropPosition = initialSlopingBodyPosition.clone();
-                initialSlopingBodyDropPosition.y += 0.3;
+                initialSlopingBodyDropPosition.y += 0.4;
                 var kukaPath = [
                                     { xyz: initialSlopingBodyDropPosition }
                                ];
                 kuka.moveByPath(kukaPath, self.nextKukaReturnsSlopingBodyStep);
             break;
             case 4:
-                if (activeObjects["slopingBody"].rotation.y != 0)
-                {
-                    var kukaLink5 = new TWEEN.Tween(kuka.kukaLink5.rotation);
-                    kukaLink5.easing(TWEEN.Easing.Cubic.InOut);
-                    kukaLink5.to({y: 0.0}, 1500);
-                    kukaLink5.onComplete(function(){
-                        
-                    });
-                    kukaLink5.start();
-                }
+                var position = new THREE.Vector3();
+                var quaternion = new THREE.Quaternion();
+                var scale = new THREE.Vector3();
+                activeObjects["slopingBody"].updateMatrixWorld(true);
+                activeObjects["slopingBody"].matrixWorld.decompose(position, quaternion, scale);
+
+                var kukaLink5 = new TWEEN.Tween(kuka.kukaLink5.rotation);
+                kukaLink5.easing(TWEEN.Easing.Cubic.InOut);
+                kukaLink5.to({y: -Math.PI}, 8000);
+                kukaLink5.onUpdate(function(){
+                    activeObjects["slopingBody"].updateMatrixWorld(true);
+                    activeObjects["slopingBody"].matrixWorld.decompose(position, quaternion, scale);
+                    if ((quaternion.y > -0.01 && quaternion.y < 0.01) || (quaternion.y > 0.999 && quaternion.y < 0.9995))
+                    {
+                        kukaLink5.stop();
+                        self.nextKukaReturnsSlopingBodyStep();
+                        return;
+                    }
+                });
+                kukaLink5.onComplete(function(){
+                    self.nextKukaReturnsSlopingBodyStep();
+                });
+                kukaLink5.start();
+            break;
+            case 5:
+                kuka.gripper.gripperMesh.updateMatrixWorld();
+                THREE.SceneUtils.detach(activeObjects["slopingBody"], kuka.gripper.gripperMesh, self.getVlabScene());
+                self.setPhysijsScenePause(false);
+                kukaReturnsSlopingBodyStep = 6;
+            break;
+            case 7:
+                var kukaLink5 = new TWEEN.Tween(kuka.kukaLink5.rotation);
+                kukaLink5.easing(TWEEN.Easing.Cubic.InOut);
+                kukaLink5.to({y: 0}, 4000);
+                kukaLink5.start();
+
+                var kukaPath = [
+                                    { angles: kuka.kukaLinksItialAngles }
+                               ];
+                kuka.moveByPath(kukaPath, self.nextKukaReturnsSlopingBodyStep);
             break;
         }
     };
 
     self.nextKukaReturnsSlopingBodyStep = function()
     {
+        self.trace("Callback from step#" + kukaReturnsSlopingBodyStep);
         kuka.removeCallBack();
         if (kukaReturnsSlopingBodyStep == 2 && !stopButtonTopState)
         {
             return;
         }
+
+        if (kukaReturnsSlopingBodyStep == 6)
+        {
+            slopingBodyActivated = false;
+            self.setPhysijsScenePause(true);
+            var slopingBodyCorrectPositionTween = new TWEEN.Tween(activeObjects["slopingBody"].position);
+            slopingBodyCorrectPositionTween.easing(TWEEN.Easing.Cubic.InOut);
+            slopingBodyCorrectPositionTween.to({y: initialSlopingBodyPosition.y}, 2000);
+            slopingBodyCorrectPositionTween.onComplete(function(){
+                activeObjects["slopingBody"].updateMatrixWorld();
+                THREE.SceneUtils.attach(activeObjects["slopingBody"], self.getVlabScene(), activeObjects["slopingSurface"]);
+            });
+            slopingBodyCorrectPositionTween.start();
+        }
+
+        if (kukaReturnsSlopingBodyStep == 7)
+        {
+            slopingSurfaceFixtureContact = false;
+            kukaReturnsSlopingBodyStep = 0;
+            thetaRandomSeed = getRandomInt(0, 2);
+            thetaRandomSeed *= ((getRandomInt(0, 1) == 0) ? 1 : -1);
+            return;
+        }
+
         kukaReturnsSlopingBodyStep++;
         kukaReturnsSlopingBody();
     };

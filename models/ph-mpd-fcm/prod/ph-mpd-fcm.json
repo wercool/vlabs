@@ -1,9 +1,10 @@
 {
+    "presets": {"tetha": 25},
     "title":            "Friction coefficient measurement",
     "sceneFile":        "scene/ph-mpd-fcm.dae",
     "isPhysijsScene":   true,
     "showStatistics":   true,
-    "showAxis":         true,
+    "showAxis":         false,
     "showTooltips":     true,
     "shadows":          true,
     "forceShadows":     true,
@@ -153,24 +154,23 @@
         "slopingBody":
         {
             "shape":"BoxMesh",
-            "mass":0.1,
-            "friction":0.2,
-            "restitution":0.2,
+            "mass":1.0,
+            "friction":0.5,
+            "restitution":0.5,
             "collision":"physijsCollision"
         },
         "slopingSurface":
         {
             "shape":"ConvexMesh", 
             "mass":0.0,
-            "friction":0.1,
-            "restitution":0.0,
-            "collision":"physijsCollision"
+            "friction":0.2,
+            "restitution":1.0
         },
         "slopingSurfaceFixture":
         {
             "shape":"ConvexMesh", 
             "mass":0.0,
-            "friction":0.5,
+            "friction":0.2,
             "restitution":0.1,
             "collision":"physijsCollision"
         },
@@ -186,7 +186,7 @@
         {
             "shape":"BoxMesh", 
             "mass":0.0,
-            "friction":0.1,
+            "friction":0.2,
             "restitution":0.5,
             "collision":"physijsCollision"
         }

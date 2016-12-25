@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.78.0 commit date:2016-10-24, commit time:12:20, hash:e8299c8</authoring_tool>
     </contributor>
-    <created>2016-12-24T00:04:42</created>
-    <modified>2016-12-24T00:04:42</modified>
+    <created>2016-12-25T01:07:52</created>
+    <modified>2016-12-25T01:07:52</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -5337,7 +5337,7 @@
         <instance_light url="#Lamp-light"/>
       </node>
       <node id="slopingBody" name="slopingBody" type="NODE">
-        <matrix sid="transform">0.9999423 0 0.01073432 -12.8823 0 1 0 -1.57361e-7 -0.01073432 0 0.9999423 -5.27149 0 0 0 1</matrix>
+        <matrix sid="transform">0.999945 0 0.01047175 -12.86289 0 1 0 -1.57361e-7 -0.01047175 0 0.999945 -5.286076 0 0 0 1</matrix>
         <instance_geometry url="#Cube_001-mesh" name="slopingBody">
           <bind_material>
             <technique_common>
@@ -5347,7 +5347,7 @@
         </instance_geometry>
       </node>
       <node id="slopingSurface" name="slopingSurface" type="NODE">
-        <matrix sid="transform">0.9999424 0 0.01073432 -5.562273 0 1 0 0 -0.01073432 0 0.9999424 -5.74052 0 0 0 1</matrix>
+        <matrix sid="transform">0.9999452 0 0.01047178 -5.562273 0 1 0 0 -0.01047178 0 0.9999452 -5.74052 0 0 0 1</matrix>
         <instance_geometry url="#Cube-mesh" name="slopingSurface">
           <bind_material>
             <technique_common>
@@ -5356,7 +5356,7 @@
           </bind_material>
         </instance_geometry>
         <node id="slopingSurfacePin" name="slopingSurfacePin" type="NODE">
-          <matrix sid="transform">0.9999999 0 -2.34693e-7 0 0 1 0 0 -1.08033e-7 0 0.9999999 9.53674e-7 0 0 0 1</matrix>
+          <matrix sid="transform">1 0 -9.49949e-8 0 0 1 0 0 2.98023e-8 0 0.9999999 0 0 0 0 1</matrix>
           <instance_geometry url="#Cube_010-mesh" name="slopingSurfacePin">
             <bind_material>
               <technique_common>
@@ -5366,7 +5366,7 @@
           </instance_geometry>
         </node>
         <node id="plumb" name="plumb" type="NODE">
-          <matrix sid="transform">0.9999424 0 -0.01073369 -8.251368 0 1 0 -2.153569 0.01073352 0 0.9999424 0.08844995 0 0 0 1</matrix>
+          <matrix sid="transform">0.9999425 0 -0.01073355 -8.25137 0 1 0 -2.153569 0.01073365 0 0.9999424 0.088449 0 0 0 1</matrix>
           <instance_geometry url="#Cylinder-mesh" name="plumb">
             <bind_material>
               <technique_common>
@@ -5376,15 +5376,15 @@
           </instance_geometry>
         </node>
         <node id="frame" name="frame" type="NODE">
-          <matrix sid="transform">0.7071068 0 0.7071066 -7.400536 0 1 0 0 -0.7071068 0 0.7071067 0.08780289 0 0 0 1</matrix>
+          <matrix sid="transform">0.7071068 0 0.7071068 -7.400537 0 1 0 0 -0.7071067 0 0.7071068 0.08780193 0 0 0 1</matrix>
           <instance_geometry url="#Cylinder_001-mesh" name="frame"/>
           <node id="framePivot" name="framePivot" type="NODE">
-            <matrix sid="transform">0.9999999 0 0 -0.001302719 0 1 0 0 0 0 1 1.909354 0 0 0 1</matrix>
+            <matrix sid="transform">0.9999999 0 -2.98023e-8 -0.001301765 0 1 0 0 0 0 1 1.909354 0 0 0 1</matrix>
             <instance_geometry url="#Cylinder_002-mesh" name="framePivot"/>
           </node>
         </node>
         <node id="scale" name="scale" type="NODE">
-          <matrix sid="transform">0.9999999 -1.17347e-7 5.10703e-15 -8.251368 0 -4.37114e-8 -1 -2.111351 -5.40167e-8 0.9999999 -4.37114e-8 0.08844995 0 0 0 1</matrix>
+          <matrix sid="transform">1 2.32831e-8 -1.02696e-15 -8.25137 0 -4.37114e-8 -1 -2.111351 8.28877e-8 1 -4.37114e-8 0.088449 0 0 0 1</matrix>
           <instance_geometry url="#Circle_007-mesh" name="scale"/>
         </node>
       </node>

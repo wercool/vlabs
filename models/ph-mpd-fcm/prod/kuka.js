@@ -42,6 +42,8 @@ function Kuka(webGLContainer)
     var kukaLink1MaxAngle, kukaLink2MaxAngle, kukaLink3MaxAngle, kukaLink4MaxAngle;
     var ikTarget;
 
+    var tubeLinks = [];
+
     var scenePostBuilt = function()
     {
         activeObjects["kukaBase"] = self.getVlabScene().getObjectByName("kukaBase");
@@ -96,12 +98,12 @@ function Kuka(webGLContainer)
             }
         });
 
-/*
-        activeObjects["kukaLink1"].rotation.y = (-90 * Math.PI / 180);
-        activeObjects["kukaLink2"].rotation.z = (45 * Math.PI / 180);
-        activeObjects["kukaLink3"].rotation.z = (-138 * Math.PI / 180);
+
+//        activeObjects["kukaLink1"].rotation.y = (-90 * Math.PI / 180);
+        activeObjects["kukaLink2"].rotation.z = (-45 * Math.PI / 180);
+        activeObjects["kukaLink3"].rotation.z = (-45 * Math.PI / 180);
         activeObjects["kukaLink4"].rotation.z = (-75 * Math.PI / 180);
-*/
+
 //      activeObjects["kukaBase"].position.copy(new THREE.Vector3(-5.6, -5.75, -3.85));
 
 
@@ -113,6 +115,20 @@ function Kuka(webGLContainer)
         // get l1, l2, l3 IK for xyz
         process();
 */
+
+
+        // dynamic tube
+        tubeLinks[0].push(new THREE.Bone());
+        tubeLinks[1].push(new THREE.Bone());
+        tubeLinks[2].push(new THREE.Bone());
+        tubeLinks[3].push(new THREE.Bone());
+
+        // tube links hierarchy
+        tubeLinks[0].add(tubeLinks[1]);
+        tubeLinks[1].add(tubeLinks[2]);
+        tubeLinks[2].add(tubeLinks[3]);
+
+        var tubeSkeleton = new THREE.Skeleton(tubeLinks);
     };
 
     self.setEEFInitialXZPosition = function(demo)
