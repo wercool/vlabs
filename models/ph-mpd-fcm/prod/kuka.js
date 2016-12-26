@@ -54,11 +54,11 @@ function Kuka(webGLContainer)
         activeObjects["kukaLink4"] = self.getVlabScene().getObjectByName("kukaLink4");
         activeObjects["kukaLink5"] = self.getVlabScene().getObjectByName("kukaLink5");
 
-        activeObjects["kukaLink1"].material.wireframe = false;
-        activeObjects["kukaLink2"].material.wireframe = false;
-        activeObjects["kukaLink3"].material.wireframe = false;
-        activeObjects["kukaLink4"].material.wireframe = false;
-        activeObjects["kukaLink5"].material.wireframe = false;
+        activeObjects["kukaLink1"].material.wireframe = true;
+        activeObjects["kukaLink2"].material.wireframe = true;
+        activeObjects["kukaLink3"].material.wireframe = true;
+        activeObjects["kukaLink4"].material.wireframe = true;
+        activeObjects["kukaLink5"].material.wireframe = true;
 
         activeObjects["kukaLink1"].visible = true;
         activeObjects["kukaLink2"].visible = true;
@@ -78,9 +78,8 @@ function Kuka(webGLContainer)
         cableSleeve.position.x -= 1.7;
         cableSleeveArmature[1].rotation.z -= 0.7;
 */
-
+/*
         var dae;
-        var skeleton;
 
         var loader = new THREE.ColladaLoader();
         loader.options.convertUpAxis = true;
@@ -95,7 +94,7 @@ function Kuka(webGLContainer)
                 }
             } );
         } );
-
+*/
 
         ikTarget = {
             mesh : new THREE.Mesh( new THREE.SphereBufferGeometry(0.2),  new THREE.MeshStandardMaterial({color:0xFF0000, wireframe:true }) ),
@@ -141,6 +140,35 @@ function Kuka(webGLContainer)
         // get l1, l2, l3 IK for xyz
         process();
 */
+
+        activeObjects["kukaBase"].updateMatrixWorld();
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink2"].matrixWorld);
+        var pos2 = pos1.clone();//new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink3"].matrixWorld);
+        pos2.y += 1;
+        var path = new THREE.CatmullRomCurve3([
+            pos1,
+            pos2
+        ]);
+        path.type = 'catmullrom';
+        path.closed = false;
+        var extrudeSettings = {
+            steps        : 1,
+            extrudePath  : path
+        };
+
+        var circleRadius = 0.1;
+        var circleShape = new THREE.Shape();
+        circleShape.moveTo(0, circleRadius);
+        circleShape.quadraticCurveTo(circleRadius, circleRadius, circleRadius, 0);
+        circleShape.quadraticCurveTo(circleRadius, -circleRadius, 0, -circleRadius);
+        circleShape.quadraticCurveTo(-circleRadius, -circleRadius, -circleRadius, 0);
+        circleShape.quadraticCurveTo(-circleRadius, circleRadius, 0, circleRadius);
+
+        var geometry = new THREE.ExtrudeGeometry(circleShape, extrudeSettings);
+        var material = new THREE.MeshLambertMaterial({color: 0xff00ff, wireframe: false});
+        cableSleeve = new THREE.Mesh(geometry, material);
+        activeObjects["kukaBase"].add(cableSleeve);
+
     };
 
     var initBones = function ()
@@ -362,11 +390,12 @@ function Kuka(webGLContainer)
                 kukaLink4.easing(TWEEN.Easing.Cubic.InOut);
                 kukaLink4.to({z: -l4}, 3000);
                 kukaLink4.start();
-
+/*
                 var bone1 = new TWEEN.Tween(cableSleeveArmature[3].rotation);
                 bone1.easing(TWEEN.Easing.Cubic.InOut);
                 bone1.to({z: kukaIK.l2}, 3000);
                 bone1.start();
+*/
             }
             else
             {
@@ -480,11 +509,37 @@ function Kuka(webGLContainer)
 
     var simulationStep = function()
     {
+return;
+        activeObjects["kukaBase"].updateMatrixWorld();
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink2"].matrixWorld);
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink3"].matrixWorld);
+        var path = new THREE.CatmullRomCurve3([
+            pos1,
+            pos2
+        ]);
+        path.type = 'catmullrom';
+        path.closed = false;
+        var extrudeSettings = {
+            steps        : 5,
+            extrudePath  : path
+        };
+
+        var circleRadius = 0.1;
+        var circleShape = new THREE.Shape();
+        circleShape.moveTo(0, circleRadius);
+        circleShape.quadraticCurveTo(circleRadius, circleRadius, circleRadius, 0);
+        circleShape.quadraticCurveTo(circleRadius, -circleRadius, 0, -circleRadius);
+        circleShape.quadraticCurveTo(-circleRadius, -circleRadius, -circleRadius, 0);
+        circleShape.quadraticCurveTo(-circleRadius, circleRadius, 0, circleRadius);
+
+        var geometry = new THREE.ExtrudeGeometry(circleShape, extrudeSettings);
+        cableSleeve.geometry = geometry;
+        cableSleeve.geometry.verticesNeedUpdate = true;
+
         //skeletonHelper.update();
         if (skeleton != undefined)
         {
-console.log(skeleton.bones[1].rotation.y);
-            skeleton.bones[1].rotation.y -= -0.01;
+            skeleton.bones[1].rotation.y += -0.001;
         }
     };
 
