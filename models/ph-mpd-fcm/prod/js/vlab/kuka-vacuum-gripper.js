@@ -44,8 +44,7 @@ function KukaVacuumGripper(vlab, kuka, test, contactObjectName, contactSurfaceFa
                 }
             }
         }
-
-        initialize();
+        setTimeout(function(){ initialize(); }, 250);
     };
 
     var initialize = function()
@@ -144,17 +143,17 @@ function KukaVacuumGripper(vlab, kuka, test, contactObjectName, contactSurfaceFa
         if (contactObject == undefined) return;
 
         var updateGeom = false;
-        if (contactObject.position.distanceTo(gripperPos()) < contactObject.geometry.boundingSphere.radius * 2)
+        if (contactObject.position.distanceTo(gripperPos()) < contactObject.geometry.boundingSphere.radius * 2 || test)
         {
+            self.gripperMesh.updateMatrixWorld();
             for (var i in gripperTipVertices)
             {
                 var vertexID  = gripperTipVertices[i].id;
-                var vertexPos = gripperTipVertices[i].pos;
-                var gripperContactVertextPos = gripperPos().add(vertexPos.clone().negate());
+                var gripperContactVertextPos = self.gripperMesh.localToWorld(gripperTipVertices[i].pos.clone());
                 var gripperVertexContactSurfaceCentroidDir = gripperContactVertextPos.sub(contactSurfaceCentroid);
                 var gripperVertexContactSurfaceCentroidDirLength = gripperVertexContactSurfaceCentroidDir.length();
 
-                var angle = gripperVertexContactSurfaceCentroidDir.angleTo(contactSurfaceNormal) + 0.04;
+                var angle = gripperVertexContactSurfaceCentroidDir.angleTo(contactSurfaceNormal) + 0.02;
 
                 if (test)
                 {
@@ -170,12 +169,11 @@ function KukaVacuumGripper(vlab, kuka, test, contactObjectName, contactSurfaceFa
                         arrowHelpers[vertexID].setLength(gripperVertexContactSurfaceCentroidDirLength, 0.025, 0.005);
                     }
                 }
-
                 if (angle > Math.PI / 2)
                 {
                     var vertexDy = gripperVertexContactSurfaceCentroidDirLength * Math.sin(Math.PI / 2 - angle);
                     var updatedVertexPos = self.gripperMesh.geometry.vertices[vertexID];
-                    updatedVertexPos.y = vertexPos.y + vertexDy;
+                    updatedVertexPos.y = gripperTipVertices[i].pos.y + vertexDy;
                     updateGeom = true;
                 }
             }

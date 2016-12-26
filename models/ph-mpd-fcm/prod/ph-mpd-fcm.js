@@ -17,13 +17,13 @@ function PhMpdFcm(webGLContainer)
         self.getDefaultCamera().controls.autoRotate = false;
         self.getDefaultCamera().controls.enableKeys = false;
         // test mode
-
+/*
         self.getDefaultCamera().controls.minDistance = 5;
         self.getDefaultCamera().controls.maxDistance = 15;
         self.getDefaultCamera().controls.maxPolarAngle = Math.PI/2 - 0.2; 
         self.getDefaultCamera().controls.minPolarAngle = 0.85;
-
-//        self.getDefaultCamera().controls.testMode = true;
+*/
+        self.getDefaultCamera().controls.testMode = true;
 
         self.buildScene();
     };
@@ -164,7 +164,7 @@ function PhMpdFcm(webGLContainer)
                 kukaReturnsSlopingBody();
             }
         }
-        if ((kuka.positioning && kukaReturnsSlopingBodyStep == 1) || kukaReturnsSlopingBodyStep == 6)
+        if ((kuka.positioning && kukaReturnsSlopingBodyStep == 1) || kukaReturnsSlopingBodyStep == 6 || kukaReturnsSlopingBodyStep == 7)
         {
             kuka.gripper.update();
         }
@@ -421,14 +421,7 @@ function PhMpdFcm(webGLContainer)
                 var scale = new THREE.Vector3();
                 activeObjects["slopingBody"].updateMatrixWorld(true);
                 activeObjects["slopingBody"].matrixWorld.decompose(position, quaternion, scale);
-                if (Math.abs(quaternion.x+quaternion.z) < 0.0001)
-                {
-                    pickPosition.y += 0.05;
-                }
-                else
-                {
-                    pickPosition.y += 0.125;
-                }
+                pickPosition.y += 0.2;
                 var kukaPath = [
                                     { angles: stepIntermediateAngles1 },
                                     { xyz: prePickPosition },
@@ -456,7 +449,7 @@ function PhMpdFcm(webGLContainer)
             break;
             case 3:
                 var initialSlopingBodyDropPosition = initialSlopingBodyPosition.clone();
-                initialSlopingBodyDropPosition.y += 0.4;
+                initialSlopingBodyDropPosition.y += 0.6;
                 var kukaPath = [
                                     { xyz: initialSlopingBodyDropPosition }
                                ];
