@@ -43,6 +43,8 @@ function Kuka(webGLContainer)
     var ikTarget;
     var cableSleeve, cableSleeveArmature, skeletonHelper;
 
+    var skeleton;
+
     var scenePostBuilt = function()
     {
         activeObjects["kukaBase"]  = self.getVlabScene().getObjectByName("kukaBase");
@@ -88,8 +90,8 @@ function Kuka(webGLContainer)
                 if ( child instanceof THREE.SkinnedMesh ) {
                     skeleton = child.skeleton;
                     activeObjects["kukaLink1"].add(child);
-                    skeleton.bones[1].rotation.y = -0.5;
-                    child.geometry.verticesNeedUpdate = true;
+                    //skeleton.bones[1].rotation.y = -0.75;
+                    //child.geometry.verticesNeedUpdate = false;
                 }
             } );
         } );
@@ -479,6 +481,11 @@ function Kuka(webGLContainer)
     var simulationStep = function()
     {
         //skeletonHelper.update();
+        if (skeleton != undefined)
+        {
+console.log(skeleton.bones[1].rotation.y);
+            skeleton.bones[1].rotation.y -= -0.01;
+        }
     };
 
     VLab.apply(self, [vlabNature]);
