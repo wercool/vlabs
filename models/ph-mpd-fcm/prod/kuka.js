@@ -143,16 +143,23 @@ function Kuka(webGLContainer)
 
         activeObjects["kukaBase"].updateMatrixWorld();
         var pos1 = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink2"].matrixWorld);
-        var pos2 = pos1.clone();//new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink3"].matrixWorld);
-        pos2.y += 1;
+        var pos2 = pos1.clone();
+        pos2.y += 2;
+        pos2.x += 0.5;
+        var pos3 = pos2.clone();
+        pos3.x += 0.5;
+        pos3.y += 0.5;
+        var pos4 = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink3"].matrixWorld);
         var path = new THREE.CatmullRomCurve3([
             pos1,
-            pos2
+            pos2,
+            pos3,
+            pos4
         ]);
-        path.type = 'catmullrom';
+        path.type = 'chordal';
         path.closed = false;
         var extrudeSettings = {
-            steps        : 1,
+            steps        : 10,
             extrudePath  : path
         };
 
@@ -165,7 +172,7 @@ function Kuka(webGLContainer)
         circleShape.quadraticCurveTo(-circleRadius, circleRadius, 0, circleRadius);
 
         var geometry = new THREE.ExtrudeGeometry(circleShape, extrudeSettings);
-        var material = new THREE.MeshLambertMaterial({color: 0xff00ff, wireframe: false});
+        var material = new THREE.MeshLambertMaterial({wireframe: false, shading:THREE.SmoothShading, map: THREE.ImageUtils.loadTexture('texture.jpg')});
         cableSleeve = new THREE.Mesh(geometry, material);
         activeObjects["kukaBase"].add(cableSleeve);
 
@@ -509,18 +516,25 @@ function Kuka(webGLContainer)
 
     var simulationStep = function()
     {
-return;
         activeObjects["kukaBase"].updateMatrixWorld();
         var pos1 = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink2"].matrixWorld);
-        var pos2 = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink3"].matrixWorld);
+        var pos2 = pos1.clone();
+        pos2.y += 1.5;
+        //pos2.x += 0.5;
+        var pos3 = pos2.clone();
+        //pos3.x += 0.5;
+        pos3.y += 0.5;
+        var pos4 = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink3"].matrixWorld);
         var path = new THREE.CatmullRomCurve3([
             pos1,
-            pos2
+            pos2,
+            pos3,
+            pos4
         ]);
-        path.type = 'catmullrom';
+        path.type = 'chordal';
         path.closed = false;
         var extrudeSettings = {
-            steps        : 5,
+            steps        : 10,
             extrudePath  : path
         };
 
