@@ -71,12 +71,28 @@ function Kuka(webGLContainer)
 
 
         // dynamic tube
+/*
         initBones();
-        cableSleeve.position.z -= 1.7;
         cableSleeve.position.x -= 1.7;
-        cableSleeve.position.y += 1.0;
         cableSleeveArmature[1].rotation.z -= 0.7;
-        cableSleeveArmature[1].position.x -= 0.7;
+*/
+
+        var dae;
+        var skeleton;
+
+        var loader = new THREE.ColladaLoader();
+        loader.options.convertUpAxis = true;
+        loader.load('bones.dae', function ( collada ){
+            dae = collada.scene;
+            dae.traverse( function ( child ) {
+                if ( child instanceof THREE.SkinnedMesh ) {
+                    skeleton = child.skeleton;
+                    activeObjects["kukaLink1"].add(child);
+                    skeleton.bones[1].rotation.y = -0.5;
+                    child.geometry.verticesNeedUpdate = true;
+                }
+            } );
+        } );
 
 
         ikTarget = {
@@ -85,7 +101,7 @@ function Kuka(webGLContainer)
         };
         self.getVlabScene().add(ikTarget.mesh);
         ikTarget.control.addEventListener("change", function(){self.setEEFInitialXZPosition(true);});
-        var endEffectorInitialPosition = new THREE.Vector3(5,0,5);
+        var endEffectorInitialPosition = new THREE.Vector3(5,0,0);
         ikTarget.mesh.position.copy(endEffectorInitialPosition);
         ikTarget.control.attach(ikTarget.mesh);
         ikTarget.control.setSize(1.0);
@@ -115,7 +131,6 @@ function Kuka(webGLContainer)
 
 //      activeObjects["kukaBase"].position.copy(new THREE.Vector3(-5.6, -5.75, -3.85));
 
-
 /*
         kukaLink1MaxAngle = -Math.PI;
         kukaLink2MaxAngle = (-95 * Math.PI / 180);
@@ -124,7 +139,6 @@ function Kuka(webGLContainer)
         // get l1, l2, l3 IK for xyz
         process();
 */
-
     };
 
     var initBones = function ()
@@ -145,7 +159,7 @@ function Kuka(webGLContainer)
         var armatureLinks = createBones(sizing);
         cableSleeve = createMesh(cableSleeveGeometry, armatureLinks);
 
-        activeObjects["kukaBase"].add(cableSleeve);
+        activeObjects["kukaLink1"].add(cableSleeve);
     }
 
     var createGeometry = function(sizing)
@@ -155,7 +169,7 @@ function Kuka(webGLContainer)
             0.1,                       // radiusBottom
             sizing.height,             // height
             8,                         // radiusSegments
-            sizing.segmentCount * 4,   // heightSegments
+            sizing.segmentCount * 8,   // heightSegments
             true                       // openEnded
         );
 
@@ -165,11 +179,12 @@ function Kuka(webGLContainer)
             var y = ( vertex.y + sizing.halfHeight );
 
             var skinIndex = Math.floor(y / sizing.segmentHeight);
-            var skinWeight = 0.4 * (y % sizing.segmentHeight) / sizing.segmentHeight;
+            var skinWeight = 0.5 * (y % sizing.segmentHeight) / sizing.segmentHeight;
 
             geometry.skinIndices.push(new THREE.Vector4(skinIndex, skinIndex + 1, 0, 0));
             geometry.skinWeights.push(new THREE.Vector4(1 - skinWeight, skinWeight, 0, 0));
         }
+
         geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, sizing.height / 2, 0));
         return geometry;
     }
@@ -231,7 +246,6 @@ function Kuka(webGLContainer)
         if (demo)
         {
             activeObjects["kukaLink1"].rotation.y = l1;
-            cableSleeveArmature[1].rotation.y = l1;
         }
         else
         {
@@ -464,7 +478,7 @@ function Kuka(webGLContainer)
 
     var simulationStep = function()
     {
-        skeletonHelper.update();
+        //skeletonHelper.update();
     };
 
     VLab.apply(self, [vlabNature]);
