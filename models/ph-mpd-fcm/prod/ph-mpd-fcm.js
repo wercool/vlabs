@@ -421,7 +421,7 @@ function PhMpdFcm(webGLContainer)
                 var scale = new THREE.Vector3();
                 activeObjects["slopingBody"].updateMatrixWorld(true);
                 activeObjects["slopingBody"].matrixWorld.decompose(position, quaternion, scale);
-                pickPosition.y += 0.2;
+                pickPosition.y += 0.25;
                 var kukaPath = [
                                     { angles: stepIntermediateAngles1 },
                                     { xyz: prePickPosition },
