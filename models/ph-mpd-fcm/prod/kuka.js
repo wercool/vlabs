@@ -11,7 +11,7 @@ function Kuka(webGLContainer)
 
     var vlabNature = {
         "title":            "Kuka",
-        "sceneFile":        "scene/kuka-test.dae",
+        "sceneFile":        "scene/kuka.dae",
         "isPhysijsScene":   false,
         "showStatistics":   true,
         "showAxis":         true
@@ -45,6 +45,8 @@ function Kuka(webGLContainer)
 
     var skeleton;
 
+    var circleShape, geometry;
+
     var scenePostBuilt = function()
     {
         activeObjects["kukaBase"]  = self.getVlabScene().getObjectByName("kukaBase");
@@ -53,12 +55,17 @@ function Kuka(webGLContainer)
         activeObjects["kukaLink3"] = self.getVlabScene().getObjectByName("kukaLink3");
         activeObjects["kukaLink4"] = self.getVlabScene().getObjectByName("kukaLink4");
         activeObjects["kukaLink5"] = self.getVlabScene().getObjectByName("kukaLink5");
+        activeObjects["kukaSleeveFixture1"] = self.getVlabScene().getObjectByName("kukaSleeveFixture1");
+        activeObjects["kukaSleeveFixture2"] = self.getVlabScene().getObjectByName("kukaSleeveFixture2");
+        activeObjects["kukaSleeveFixture3"] = self.getVlabScene().getObjectByName("kukaSleeveFixture3");
+        activeObjects["kukaSleeveFixture4"] = self.getVlabScene().getObjectByName("kukaSleeveFixture4");
+        activeObjects["kukaSleeveFixture5"] = self.getVlabScene().getObjectByName("kukaSleeveFixture5");
 
-        activeObjects["kukaLink1"].material.wireframe = true;
-        activeObjects["kukaLink2"].material.wireframe = true;
-        activeObjects["kukaLink3"].material.wireframe = true;
-        activeObjects["kukaLink4"].material.wireframe = true;
-        activeObjects["kukaLink5"].material.wireframe = true;
+        activeObjects["kukaLink1"].material.wireframe = false;
+        activeObjects["kukaLink2"].material.wireframe = false;
+        activeObjects["kukaLink3"].material.wireframe = false;
+        activeObjects["kukaLink4"].material.wireframe = false;
+        activeObjects["kukaLink5"].material.wireframe = false;
 
         activeObjects["kukaLink1"].visible = true;
         activeObjects["kukaLink2"].visible = true;
@@ -126,8 +133,8 @@ function Kuka(webGLContainer)
 
 
 //        activeObjects["kukaLink1"].rotation.y = (-90 * Math.PI / 180);
-        activeObjects["kukaLink2"].rotation.z = (-45 * Math.PI / 180);
-        activeObjects["kukaLink3"].rotation.z = (-45 * Math.PI / 180);
+        activeObjects["kukaLink2"].rotation.z = (45 * Math.PI / 180);
+        activeObjects["kukaLink3"].rotation.z = (-140 * Math.PI / 180);
         activeObjects["kukaLink4"].rotation.z = (-75 * Math.PI / 180);
 
 //      activeObjects["kukaBase"].position.copy(new THREE.Vector3(-5.6, -5.75, -3.85));
@@ -142,29 +149,29 @@ function Kuka(webGLContainer)
 */
 
         activeObjects["kukaBase"].updateMatrixWorld();
-        var pos1 = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink2"].matrixWorld);
+        var pos1 = activeObjects["kukaSleeveFixture2"].position;
         var pos2 = pos1.clone();
-        pos2.y += 2;
-        pos2.x += 0.5;
-        var pos3 = pos2.clone();
-        pos3.x += 0.5;
-        pos3.y += 0.5;
-        var pos4 = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink3"].matrixWorld);
+        pos2.y += 0.5;
+        var pos1 = activeObjects["kukaBase"].localToWorld(pos1);
+        var pos2 = activeObjects["kukaBase"].localToWorld(pos2);
+        var pos3 = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaSleeveFixture3"].matrixWorld);
         var path = new THREE.CatmullRomCurve3([
             pos1,
             pos2,
-            pos3,
-            pos4
+            pos3
         ]);
+/*
         path.type = 'chordal';
         path.closed = false;
         var extrudeSettings = {
             steps        : 10,
+            bevelEnabled : false,
+            curveSegments: 2,
             extrudePath  : path
         };
 
         var circleRadius = 0.1;
-        var circleShape = new THREE.Shape();
+        circleShape = new THREE.Shape();
         circleShape.moveTo(0, circleRadius);
         circleShape.quadraticCurveTo(circleRadius, circleRadius, circleRadius, 0);
         circleShape.quadraticCurveTo(circleRadius, -circleRadius, 0, -circleRadius);
@@ -172,10 +179,26 @@ function Kuka(webGLContainer)
         circleShape.quadraticCurveTo(-circleRadius, circleRadius, 0, circleRadius);
 
         var geometry = new THREE.ExtrudeGeometry(circleShape, extrudeSettings);
-        var material = new THREE.MeshLambertMaterial({wireframe: false, shading:THREE.SmoothShading, map: THREE.ImageUtils.loadTexture('texture.jpg')});
         cableSleeve = new THREE.Mesh(geometry, material);
-        activeObjects["kukaBase"].add(cableSleeve);
+*/
 
+/*
+        var curve = new THREE.SplineCurve3([pos1, pos2, pos3, pos4]);
+        var geometry = new THREE.TubeGeometry(curve, 16, 0.1, 4, false);
+
+        var texture = THREE.ImageUtils.loadTexture( 'texture.jpg' );
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(12, 0);
+
+        var material = new THREE.MeshLambertMaterial({wireframe: false, shading:THREE.SmoothShading, map: texture});
+*/
+        var material = new THREE.MeshLambertMaterial({wireframe: false, shading:THREE.SmoothShading});
+        var curve = new THREE.SplineCurve3([pos1, pos2]);
+        var geometry = new THREE.TubeBufferGeometry(curve, 16, 0.1, 4, false);
+        cableSleeve = new THREE.Mesh(geometry, material);
+        cableSleeve.dynamic = true;
+
+        activeObjects["kukaBase"].add(cableSleeve);
     };
 
     var initBones = function ()
@@ -516,45 +539,58 @@ function Kuka(webGLContainer)
 
     var simulationStep = function()
     {
+
         activeObjects["kukaBase"].updateMatrixWorld();
-        var pos1 = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink2"].matrixWorld);
+
+        var pos1 = activeObjects["kukaSleeveFixture2"].position.clone();
         var pos2 = pos1.clone();
-        pos2.y += 1.5;
-        //pos2.x += 0.5;
-        var pos3 = pos2.clone();
-        //pos3.x += 0.5;
-        pos3.y += 0.5;
-        var pos4 = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink3"].matrixWorld);
+        pos2.y += 1.4;
+        pos2.x -= 0.4;
+        var pos4 = activeObjects["kukaSleeveFixture3"].position.clone();
+        var pos3 = pos4.clone();
+        pos3.y -= 1.1;
+        pos3.x -= 0.2;
+
+
+        pos1 = activeObjects["kukaLink2"].localToWorld(pos1);
+        pos2 = activeObjects["kukaLink2"].localToWorld(pos2);
+        pos3 = activeObjects["kukaLink3"].localToWorld(pos3);
+        pos4 = activeObjects["kukaLink3"].localToWorld(pos4);
+
         var path = new THREE.CatmullRomCurve3([
             pos1,
             pos2,
             pos3,
             pos4
         ]);
+
+        var path = new THREE.CatmullRomCurve3([pos1, pos2, pos3, pos4]);
+        //path.type = 'chordal';
+        path.closed = false;
+        geometry = new THREE.TubeBufferGeometry(path, 18, 0.06, 4, false);
+        cableSleeve.geometry = geometry;
+        geometry = null;
+
+/*
         path.type = 'chordal';
         path.closed = false;
         var extrudeSettings = {
-            steps        : 10,
+            steps        : 8,
+            bevelEnabled : false,
+            curveSegments: 2,
             extrudePath  : path
         };
 
-        var circleRadius = 0.1;
-        var circleShape = new THREE.Shape();
-        circleShape.moveTo(0, circleRadius);
-        circleShape.quadraticCurveTo(circleRadius, circleRadius, circleRadius, 0);
-        circleShape.quadraticCurveTo(circleRadius, -circleRadius, 0, -circleRadius);
-        circleShape.quadraticCurveTo(-circleRadius, -circleRadius, -circleRadius, 0);
-        circleShape.quadraticCurveTo(-circleRadius, circleRadius, 0, circleRadius);
-
         var geometry = new THREE.ExtrudeGeometry(circleShape, extrudeSettings);
         cableSleeve.geometry = geometry;
-        cableSleeve.geometry.verticesNeedUpdate = true;
+        cableSleeve.geometry.computeVertexNormals();
 
         //skeletonHelper.update();
         if (skeleton != undefined)
         {
             skeleton.bones[1].rotation.y += -0.001;
         }
+*/
     };
 
     VLab.apply(self, [vlabNature]);
