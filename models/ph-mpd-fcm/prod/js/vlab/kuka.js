@@ -192,14 +192,16 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
                 var pos1ext = pos1.clone();
                 pos1ext.y += 0.2;
                 var pos2 = pos1ext.clone();
-                pos2.y += 0.6;
-                pos2.x -= 0.6 + self.kukaLink5.rotation.y / 2;
+                pos2.y += 0.4 - self.kukaLink5.rotation.y / 8;
+                pos2.x -= 0.5 + self.kukaLink5.rotation.y / 4;
+                pos2.z += self.kukaLink5.rotation.y / 4;
                 var pos4 = self.gripper.gripperPlug.position.clone();
                 pos4.x += 0.05;
                 var pos3_ext = pos4.clone();
                 pos3_ext.x -= 0.2;
                 var pos3 = pos3_ext.clone();
-                pos3.x -= 0.5;
+                pos3.x -= 0.4 + self.kukaLink5.rotation.y / 4;
+                pos3.z -= self.kukaLink5.rotation.y / 4;
 
                 pos1 = self.kukaLink4.localToWorld(pos1).sub(self.kukaBase.position);
                 pos1ext = self.kukaLink4.localToWorld(pos1ext).sub(self.kukaBase.position);
