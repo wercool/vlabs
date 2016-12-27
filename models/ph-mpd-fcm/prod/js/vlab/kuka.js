@@ -5,6 +5,8 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
     var self = this;
     self.initialized = false;
 
+    addEventListener("simulationStep", function (event) { self.simulationStep(); }, false);
+
     self.positioning = false;
 
     self.path = [];
@@ -29,6 +31,16 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
 
     self.gripper = null;
 
+    self.cableSleeve0 = null;
+    self.cableSleeve1 = null;
+    self.cableSleeve2 = null;
+    self.cableSleeve3 = null;
+    self.kukaSleeveFixture1 = null;
+    self.kukaSleeveFixture2 = null;
+    self.kukaSleeveFixture3 = null;
+    self.kukaSleeveFixture4 = null;
+    self.kukaSleeveFixture5 = null;
+
     var sceneAppendedCallBack = function(kukaMeshObjects)
     {
         self.kukaBase    = kukaMeshObjects["kukaBase"].mesh;
@@ -37,6 +49,12 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
         self.kukaLink3   = kukaMeshObjects["kukaLink3"].mesh;
         self.kukaLink4   = kukaMeshObjects["kukaLink4"].mesh;
         self.kukaLink5   = kukaMeshObjects["kukaLink5"].mesh;
+
+        self.kukaSleeveFixture1 = kukaMeshObjects["kukaSleeveFixture1"].mesh;
+        self.kukaSleeveFixture2 = kukaMeshObjects["kukaSleeveFixture2"].mesh;
+        self.kukaSleeveFixture3 = kukaMeshObjects["kukaSleeveFixture3"].mesh;
+        self.kukaSleeveFixture4 = kukaMeshObjects["kukaSleeveFixture4"].mesh;
+        self.kukaSleeveFixture5 = kukaMeshObjects["kukaSleeveFixture5"].mesh;
 
         for (var meshObjectName in kukaMeshObjects)
         {
@@ -75,9 +93,152 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
             self.kukaLink3.rotation.z = self.kukaLinksItialAngles.link3;
             self.kukaLink4.rotation.z = self.kukaLinksItialAngles.link4;
         }
+
+        self.simulationStep(true);
+
         vlab.trace("Kuka initialized");
         self.initialized = true;
     }
+
+    self.simulationStep = function(initialization, waitForGripper)
+    {
+        if (self.positioning || initialization === true || waitForGripper === true)
+        {
+            if (initialization === true)
+            {
+                var cableSleeveTexture = THREE.ImageUtils.loadTexture("js/vlab/maps/kuka/cablesleeve.jpg");
+                cableSleeveTexture.wrapS = cableSleeveTexture.wrapT = THREE.RepeatWrapping;
+                cableSleeveTexture.repeat.set(12, 0);
+
+                var cableSleeveMaterial = new THREE.MeshLambertMaterial({wireframe: false, shading:THREE.SmoothShading, map: cableSleeveTexture});
+
+                self.cableSleeve0 = new THREE.Mesh(new THREE.Geometry(), cableSleeveMaterial);
+                self.cableSleeve1 = new THREE.Mesh(new THREE.Geometry(), cableSleeveMaterial);
+                self.cableSleeve2 = new THREE.Mesh(new THREE.Geometry(), cableSleeveMaterial);
+                self.cableSleeve3 = new THREE.Mesh(new THREE.Geometry(), cableSleeveMaterial);
+
+                self.cableSleeve0.castShadow = true;
+                self.cableSleeve1.castShadow = true;
+                self.cableSleeve2.castShadow = true;
+                self.cableSleeve3.castShadow = true;
+            }
+
+            // cable sleeve animation
+            self.kukaBase.updateMatrixWorld();
+
+            // self.cableSleeve1
+            var pos1 = self.kukaSleeveFixture2.position.clone();
+            var pos2 = pos1.clone();
+            pos2.y += 1.4;
+            pos2.x -= 0.4;
+            var pos4 = self.kukaSleeveFixture3.position.clone();
+            var pos3 = pos4.clone();
+            pos3.y -= 1.1;
+            pos3.x -= 0.2;
+
+            pos1 = self.kukaLink2.localToWorld(pos1).sub(self.kukaBase.position);
+            pos2 = self.kukaLink2.localToWorld(pos2).sub(self.kukaBase.position);
+            pos3 = self.kukaLink3.localToWorld(pos3).sub(self.kukaBase.position);
+            pos4 = self.kukaLink3.localToWorld(pos4).sub(self.kukaBase.position);
+            var path = new THREE.CatmullRomCurve3([
+                pos1,
+                pos2,
+                pos3,
+                pos4
+            ]);
+
+            var path = new THREE.CatmullRomCurve3([pos1, pos2, pos3, pos4]);
+            path.type = 'chordal';
+            path.closed = false;
+            var geometry = new THREE.TubeBufferGeometry(path, 22, 0.06, 4, false);
+            self.cableSleeve1.geometry.dispose();
+            self.cableSleeve1.geometry = geometry.clone();
+            geometry = undefined;
+
+            // self.cableSleeve2
+            var pos1 = self.kukaSleeveFixture4.position.clone();
+            var pos2 = pos1.clone();
+            pos2.y += 1.0;
+            pos2.x -= 0.2;
+            var pos4 = self.kukaSleeveFixture5.position.clone();
+            pos4.x += 0.01;
+            var pos3 = pos4.clone();
+            pos3.y -= 1.0;
+            pos3.x -= 0.2;
+
+            pos1 = self.kukaLink3.localToWorld(pos1).sub(self.kukaBase.position);
+            pos2 = self.kukaLink3.localToWorld(pos2).sub(self.kukaBase.position);
+            pos3 = self.kukaLink4.localToWorld(pos3).sub(self.kukaBase.position);
+            pos4 = self.kukaLink4.localToWorld(pos4).sub(self.kukaBase.position);
+            var path = new THREE.CatmullRomCurve3([
+                pos1,
+                pos2,
+                pos3,
+                pos4
+            ]);
+
+            var path = new THREE.CatmullRomCurve3([pos1, pos2, pos3, pos4]);
+            path.type = 'chordal';
+            path.closed = false;
+            var geometry = new THREE.TubeBufferGeometry(path, 22, 0.06, 4, false);
+            self.cableSleeve2.geometry.dispose();
+            self.cableSleeve2.geometry = geometry.clone();
+            geometry = undefined;
+
+            // self.cableSleeve3 - gripperPlug
+            if (self.gripper != undefined)
+            {
+                var pos1 = self.kukaSleeveFixture5.position.clone();
+                var pos1ext = pos1.clone();
+                pos1ext.y += 0.2;
+                var pos2 = pos1ext.clone();
+                pos2.y += 0.6;
+                pos2.x -= 0.6 + self.kukaLink5.rotation.y / 2;
+                var pos4 = self.gripper.gripperPlug.position.clone();
+                pos4.x += 0.05;
+                var pos3_ext = pos4.clone();
+                pos3_ext.x -= 0.2;
+                var pos3 = pos3_ext.clone();
+                pos3.x -= 0.5;
+
+                pos1 = self.kukaLink4.localToWorld(pos1).sub(self.kukaBase.position);
+                pos1ext = self.kukaLink4.localToWorld(pos1ext).sub(self.kukaBase.position);
+                pos2 = self.kukaLink4.localToWorld(pos2).sub(self.kukaBase.position);
+                pos3 = self.gripper.gripperMesh.localToWorld(pos3).sub(self.kukaBase.position);
+                pos3_ext = self.gripper.gripperMesh.localToWorld(pos3_ext).sub(self.kukaBase.position);
+                pos4 = self.gripper.gripperMesh.localToWorld(pos4).sub(self.kukaBase.position);
+                var path = new THREE.CatmullRomCurve3([
+                    pos1,
+                    pos1ext,
+                    pos2,
+                    pos3,
+                    pos4
+                ]);
+
+                var path = new THREE.CatmullRomCurve3([pos1, pos1ext, pos2, pos3, pos3_ext, pos4]);
+                path.type = 'chordal';
+                path.closed = false;
+                var geometry = new THREE.TubeBufferGeometry(path, 22, 0.06, 4, false);
+                self.cableSleeve3.geometry.dispose();
+                self.cableSleeve3.geometry = geometry.clone();
+
+                geometry = undefined;
+            }
+            else
+            {
+                // kuka gripper not ready yet
+                setTimeout(function(){ self.simulationStep(null, true); }, 250);
+            }
+
+            if (initialization === true)
+            {
+                self.kukaBase.add(self.cableSleeve0);
+                self.kukaBase.add(self.cableSleeve1);
+                self.kukaBase.add(self.cableSleeve2);
+                self.kukaBase.add(self.cableSleeve3);
+            }
+        }
+    };
 
     self.moveByPath = function(pathNodes, callback)
     {

@@ -411,7 +411,7 @@ function PhMpdFcm(webGLContainer)
                 var stepIntermediateAngles1 = Object.assign({}, kuka.kukaLinksItialAngles);
                 stepIntermediateAngles1.link1 = 0.0;
                 stepIntermediateAngles1.link2 = (-45 * Math.PI / 180);
-                stepIntermediateAngles1.link4 = (90 * Math.PI / 180);
+                stepIntermediateAngles1.link4 = (15 * Math.PI / 180);
                 var prePickPosition = activeObjects["slopingBody"].position.clone();
                 prePickPosition.y += 1.0;
                 var pickPosition = activeObjects["slopingBody"].position.clone();
@@ -436,7 +436,7 @@ function PhMpdFcm(webGLContainer)
                 stepIntermediateAngles1.link4 = kuka.kukaLink4.rotation.z;
 
                 var stepIntermediateAngles2 = Object.assign({}, kuka.kukaLinksItialAngles);
-                stepIntermediateAngles2.link4 = (90 * Math.PI / 180);
+                stepIntermediateAngles2.link4 = (15 * Math.PI / 180);
 
                 kuka.gripper.gripperMesh.updateMatrixWorld();
                 THREE.SceneUtils.attach(activeObjects["slopingBody"], self.getVlabScene(), kuka.gripper.gripperMesh);
@@ -466,12 +466,14 @@ function PhMpdFcm(webGLContainer)
                 kukaLink5.easing(TWEEN.Easing.Cubic.InOut);
                 kukaLink5.to({y: -Math.PI}, 8000);
                 kukaLink5.onUpdate(function(){
+                    kuka.positioning = true;
                     activeObjects["slopingBody"].updateMatrixWorld(true);
                     activeObjects["slopingBody"].matrixWorld.decompose(position, quaternion, scale);
-                    if ((quaternion.y > -0.01 && quaternion.y < 0.01) || (quaternion.y > 0.999 && quaternion.y < 0.9995))
+                    if ((quaternion.y > -0.01 && quaternion.y < 0.01) || (quaternion.y > 0.999 && quaternion.y < 0.9995) || (Math.abs(kuka.kukaLink5.rotation.y) > (120 * Math.PI / 180)))
                     {
                         kukaLink5.stop();
                         self.nextKukaReturnsSlopingBodyStep();
+                        kuka.positioning = false;
                         return;
                     }
                 });
@@ -490,6 +492,12 @@ function PhMpdFcm(webGLContainer)
                 var kukaLink5 = new TWEEN.Tween(kuka.kukaLink5.rotation);
                 kukaLink5.easing(TWEEN.Easing.Cubic.InOut);
                 kukaLink5.to({y: 0}, 4000);
+                kukaLink5.onUpdate(function(){
+                    kuka.positioning = true;
+                });
+                kukaLink5.onComplete(function(){
+                    kuka.positioning = false;
+                });
                 kukaLink5.start();
 
                 var kukaPath = [

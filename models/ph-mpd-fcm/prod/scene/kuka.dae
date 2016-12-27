@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.78.0 commit date:2016-10-24, commit time:12:20, hash:e8299c8</authoring_tool>
     </contributor>
-    <created>2016-12-27T00:16:28</created>
-    <modified>2016-12-27T00:16:28</modified>
+    <created>2016-12-27T18:47:45</created>
+    <modified>2016-12-27T18:47:45</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -739,7 +739,7 @@
                   <instance_geometry url="#Circle_004-mesh" name="kukaLink5"/>
                 </node>
                 <node id="kukaSleeveFixture5" name="kukaSleeveFixture5" type="NODE">
-                  <matrix sid="transform">1 0 0 -0.5284519 0 1 -1.16415e-10 -2.70407e-7 0 0 1 0.9173317 0 0 0 1</matrix>
+                  <matrix sid="transform">1 0 0 -0.5284519 0 1 -1.16415e-10 -2.70375e-7 0 0 1 0.6433649 0 0 0 1</matrix>
                   <instance_geometry url="#Circle_013-mesh" name="kukaSleeveFixture5"/>
                 </node>
               </node>

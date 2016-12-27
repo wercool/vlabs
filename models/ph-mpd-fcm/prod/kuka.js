@@ -42,6 +42,7 @@ function Kuka(webGLContainer)
     var kukaLink1MaxAngle, kukaLink2MaxAngle, kukaLink3MaxAngle, kukaLink4MaxAngle;
     var ikTarget;
     var cableSleeve, cableSleeveArmature, skeletonHelper;
+    var cableSleeve1;
 
     var skeleton;
 
@@ -135,7 +136,7 @@ function Kuka(webGLContainer)
 //        activeObjects["kukaLink1"].rotation.y = (-90 * Math.PI / 180);
         activeObjects["kukaLink2"].rotation.z = (45 * Math.PI / 180);
         activeObjects["kukaLink3"].rotation.z = (-140 * Math.PI / 180);
-        activeObjects["kukaLink4"].rotation.z = (-75 * Math.PI / 180);
+        activeObjects["kukaLink4"].rotation.z = (0 * Math.PI / 180);
 
 //      activeObjects["kukaBase"].position.copy(new THREE.Vector3(-5.6, -5.75, -3.85));
 
@@ -195,10 +196,13 @@ function Kuka(webGLContainer)
         var material = new THREE.MeshLambertMaterial({wireframe: false, shading:THREE.SmoothShading});
         var curve = new THREE.SplineCurve3([pos1, pos2]);
         var geometry = new THREE.TubeBufferGeometry(curve, 16, 0.1, 4, false);
-        cableSleeve = new THREE.Mesh(geometry, material);
+        cableSleeve = new THREE.Mesh(new THREE.Geometry(), material);
         cableSleeve.dynamic = true;
 
+        cableSleeve1 = new THREE.Mesh(new THREE.Geometry(), material);
+
         activeObjects["kukaBase"].add(cableSleeve);
+        activeObjects["kukaBase"].add(cableSleeve1);
     };
 
     var initBones = function ()
@@ -570,6 +574,39 @@ function Kuka(webGLContainer)
         var geometry = new THREE.TubeBufferGeometry(path, 18, 0.06, 4, false);
         cableSleeve.geometry.dispose();
         cableSleeve.geometry = geometry.clone();
+        geometry = undefined;
+
+
+
+
+        var pos1 = activeObjects["kukaSleeveFixture4"].position.clone();
+        var pos2 = pos1.clone();
+        pos2.y += 1.2;
+        pos2.x -= 0.4;
+        var pos4 = activeObjects["kukaSleeveFixture5"].position.clone();
+        var pos3 = pos4.clone();
+        pos3.y -= 1.1;
+        pos3.x -= 0.2;
+
+
+        pos1 = activeObjects["kukaLink3"].localToWorld(pos1);
+        pos2 = activeObjects["kukaLink3"].localToWorld(pos2);
+        pos3 = activeObjects["kukaLink4"].localToWorld(pos3);
+        pos4 = activeObjects["kukaLink4"].localToWorld(pos4);
+
+        var path = new THREE.CatmullRomCurve3([
+            pos1,
+            pos2,
+            pos3,
+            pos4
+        ]);
+
+        var path = new THREE.CatmullRomCurve3([pos1, pos2, pos3, pos4]);
+        path.type = 'chordal';
+        path.closed = false;
+        var geometry = new THREE.TubeBufferGeometry(path, 18, 0.06, 4, false);
+        cableSleeve1.geometry.dispose();
+        cableSleeve1.geometry = geometry.clone();
         geometry = undefined;
 
 /*
