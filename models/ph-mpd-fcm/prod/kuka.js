@@ -45,7 +45,7 @@ function Kuka(webGLContainer)
 
     var skeleton;
 
-    var circleShape, geometry;
+    var circleShape;
 
     var scenePostBuilt = function()
     {
@@ -565,11 +565,12 @@ function Kuka(webGLContainer)
         ]);
 
         var path = new THREE.CatmullRomCurve3([pos1, pos2, pos3, pos4]);
-        //path.type = 'chordal';
+        path.type = 'chordal';
         path.closed = false;
-        geometry = new THREE.TubeBufferGeometry(path, 18, 0.06, 4, false);
-        cableSleeve.geometry = geometry;
-        geometry = null;
+        var geometry = new THREE.TubeBufferGeometry(path, 18, 0.06, 4, false);
+        cableSleeve.geometry.dispose();
+        cableSleeve.geometry = geometry.clone();
+        geometry = undefined;
 
 /*
         path.type = 'chordal';
