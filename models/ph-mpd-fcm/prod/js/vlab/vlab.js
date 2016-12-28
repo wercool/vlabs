@@ -91,7 +91,8 @@ function VLab(vlabNature)
                                                       alpha: true, 
                                                       antialias: true
                                                      });
-        self.WebGLRenderer.setClearColor(0xbababa);
+//        self.WebGLRenderer.setClearColor(0xbababa);
+        self.WebGLRenderer.setClearColor(0x000000);
         self.WebGLRenderer.setPixelRatio(window.devicePixelRatio);
         self.WebGLRenderer.setSize(webglContainer.width(), webglContainer.height() );
         self.WebGLRenderer.shadowMap.enabled = true;
@@ -497,6 +498,12 @@ function VLab(vlabNature)
         {
             var mesh = object3D.children[0];
             mesh.name = object3D.name;
+            if (mesh.material.bumpMap != null && mesh.material.bumpMap != undefined)
+            {
+                var nameWithParameters = mesh.material.name.split("_");
+                var bumpScale = parseFloat(nameWithParameters[2] + '.' + nameWithParameters[3]);
+                mesh.material.bumpScale = bumpScale;
+            }
             mesh.quaternion.copy(quaternion);
             mesh.position.copy(position);
 

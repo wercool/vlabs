@@ -69,6 +69,11 @@ function PhMpdFcm(webGLContainer)
         activeObjects["stopButton4Pin"] = self.getVlabScene().getObjectByName("stopButton4Pin");
         activeObjects["labSwitchHandlerBase"] = self.getVlabScene().getObjectByName("labSwitchHandlerBase");
 
+        var light = new THREE.AmbientLight(0x404040, 0.05); // soft white light
+        self.getVlabScene().add(light);
+        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.4);
+        self.getVlabScene().add(light);
+
         initialSlopingBodyPosition = activeObjects["slopingBody"].position.clone();
 
         // kuka
@@ -106,7 +111,7 @@ function PhMpdFcm(webGLContainer)
         ropeGeometry.vertices.push(pulleyMotorPos);
         var ropeMaterial = new THREE.LineBasicMaterial({
                                      color:     0x000000,
-                                     opacity:   1.0,
+                                     opacity:   0.5,
                                      linewidth: ropeLineWidth
         });
         activeObjects["rope"] = new THREE.Line(ropeGeometry, ropeMaterial);

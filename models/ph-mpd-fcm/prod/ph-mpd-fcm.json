@@ -28,7 +28,7 @@
     ],
     "castShadowsExecptions":
     [
-        "scale"
+        "scale", "akatakomPowerSupplyHandleVF", "akatakomPowerSupplyHandleVC", "akatakomPowerSupplyHandleCF", "akatakomPowerSupplyHandleCC"
     ],
     "receiveShadowsExecptions":
     [

@@ -106,21 +106,58 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
         {
             if (initialization === true)
             {
-                var cableSleeveTexture = THREE.ImageUtils.loadTexture("js/vlab/maps/kuka/cablesleeve.jpg");
-                cableSleeveTexture.wrapS = cableSleeveTexture.wrapT = THREE.RepeatWrapping;
-                cableSleeveTexture.repeat.set(12, 0);
+                if (self.cableSleeve0 == undefined)
+                {
+                    var loader = new THREE.TextureLoader();
+                    loader.load(
+                        "js/vlab/maps/kuka/cablesleeve.jpg",
+                        function (texture) {
+                            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                            texture.repeat.set(8, 0);
+                            var cableSleeveMaterial = new THREE.MeshPhongMaterial({wireframe: false, shading:THREE.SmoothShading, map: texture});
+                            cableSleeveMaterial.bumpMap = texture;
+                            cableSleeveMaterial.bumpScale = 1.0;
 
-                var cableSleeveMaterial = new THREE.MeshLambertMaterial({wireframe: false, shading:THREE.SmoothShading, map: cableSleeveTexture});
+                            self.cableSleeve0 = new THREE.Mesh(new THREE.Geometry(), cableSleeveMaterial);
+                            self.cableSleeve1 = new THREE.Mesh(new THREE.Geometry(), cableSleeveMaterial);
+                            self.cableSleeve2 = new THREE.Mesh(new THREE.Geometry(), cableSleeveMaterial);
+                            self.cableSleeve3 = new THREE.Mesh(new THREE.Geometry(), cableSleeveMaterial);
+                            self.cableSleeve0.castShadow = true;
+                            self.cableSleeve1.castShadow = true;
+                            self.cableSleeve2.castShadow = true;
+                            self.cableSleeve3.castShadow = true;
 
-                self.cableSleeve0 = new THREE.Mesh(new THREE.Geometry(), cableSleeveMaterial);
-                self.cableSleeve1 = new THREE.Mesh(new THREE.Geometry(), cableSleeveMaterial);
-                self.cableSleeve2 = new THREE.Mesh(new THREE.Geometry(), cableSleeveMaterial);
-                self.cableSleeve3 = new THREE.Mesh(new THREE.Geometry(), cableSleeveMaterial);
+                            var pos1 = self.kukaSleeveFixture1.position.clone();
+                            var pos2 = self.kukaSleeveFixture2.position.clone();
+                            var pos3 = self.kukaSleeveFixture3.position.clone();
+                            var pos4 = self.kukaSleeveFixture4.position.clone();
 
-                self.cableSleeve0.castShadow = true;
-                self.cableSleeve1.castShadow = true;
-                self.cableSleeve2.castShadow = true;
-                self.cableSleeve3.castShadow = true;
+                            var path = new THREE.CatmullRomCurve3([
+                                pos1,
+                                pos2
+                            ]);
+                            var path = new THREE.CatmullRomCurve3([pos1, pos2]);
+                            path.type = 'chordal';
+                            path.closed = false;
+                            var geometry = new THREE.TubeBufferGeometry(path, 22, 0.06, 6, false);
+                            var sleeveMesh = new THREE.Mesh(geometry, cableSleeveMaterial);
+                            self.kukaLink2.add(sleeveMesh);
+
+                            var path = new THREE.CatmullRomCurve3([
+                                pos3,
+                                pos4
+                            ]);
+                            var path = new THREE.CatmullRomCurve3([pos3, pos4]);
+                            path.type = 'chordal';
+                            path.closed = false;
+                            var geometry = new THREE.TubeBufferGeometry(path, 22, 0.06, 6, false);
+                            var sleeveMesh = new THREE.Mesh(geometry, cableSleeveMaterial);
+                            self.kukaLink3.add(sleeveMesh);
+
+                            self.simulationStep(true);
+                        });
+                    return;
+                }
             }
 
             // cable sleeve animation
