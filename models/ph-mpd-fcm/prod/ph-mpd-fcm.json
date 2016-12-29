@@ -11,7 +11,7 @@
     "shadowsMapSize":   512,
     "castShadows":
     [
-        "Lamp2",
+        "Lamp1",
         "slopingBody", "slopingSurface", "support", "frame", "acPlug", "acWire", "aktakomPowerSupply", 
         "minusWire", "pulleyMotor", "motorFixture", "slopingSurfaceFixture",
         "motor", "button", "tableTop", "tableTop_001", "Circle_015", "Circle_010", "Plane_007",
@@ -24,7 +24,7 @@
     [
         "tableTop", "slopingSurface", "slopingBody", "slopingSurfaceFixture", "motorWoodenStand", "Plane_007",
         "Cube_001", "aktakomPowerSupply", "tableTop_007", "Plane_011", "Plane_005", "Plane_010",
-        "motor", "support", "slopingSurfacePin", "labSwitch"
+        "motor", "support", "slopingSurfacePin", "labSwitch", "tableBottomFrame"
     ],
     "castShadowsExecptions":
     [
@@ -39,6 +39,15 @@
         {"name":"magnifier", "url":"scene/textures/magnifier.png"},
         {"name":"info", "url":"scene/textures/info.png"},
         {"name":"settings", "url":"scene/textures/settings.png"}
+    ],
+    "cubeMaps":
+    [
+        "scene/textures/cubemaps/posx.png",
+        "scene/textures/cubemaps/negx.png",
+        "scene/textures/cubemaps/posy.png",
+        "scene/textures/cubemaps/negy.png",
+        "scene/textures/cubemaps/posz.png",
+        "scene/textures/cubemaps/negz.png"
     ],
     "interactionHelpers":
     {
