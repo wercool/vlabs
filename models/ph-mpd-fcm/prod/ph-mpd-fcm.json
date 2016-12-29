@@ -40,15 +40,6 @@
         {"name":"info", "url":"scene/textures/info.png"},
         {"name":"settings", "url":"scene/textures/settings.png"}
     ],
-    "cubeMaps":
-    [
-        "scene/textures/cubemaps/posx.png",
-        "scene/textures/cubemaps/negx.png",
-        "scene/textures/cubemaps/posy.png",
-        "scene/textures/cubemaps/negy.png",
-        "scene/textures/cubemaps/posz.png",
-        "scene/textures/cubemaps/negz.png"
-    ],
     "interactionHelpers":
     {
         "plumbScaleHelper": 

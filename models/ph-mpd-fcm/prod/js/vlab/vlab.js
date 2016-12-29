@@ -220,9 +220,8 @@ function VLab(vlabNature)
             if(object.type == "Object3D")
             {
                 var position = new THREE.Vector3();
-                var quaternion = new THREE.Quaternion();
-                quaternion.copy(object.quaternion);
                 position.copy(object.position);
+
                 if (object.children[0].type == "Mesh")
                 {
                     colladaObject3DToMeshObject(meshObjects, object);
@@ -230,8 +229,8 @@ function VLab(vlabNature)
                 else if (object.children[0].type == "PointLight")
                 {
                     var light = object.children[0];
+
                     light.name = object.name;
-                    light.quaternion.copy(quaternion);
                     light.position.copy(position);
 
                     lights.push(light);

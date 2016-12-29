@@ -10,21 +10,6 @@ function PhMpdFcm(webGLContainer)
 
     var sceneLoaded = function()
     {
-        self.getDefaultCamera().position.set(0.0, 4.0, 14.0);
-
-        self.getDefaultCamera().controls = new THREE.OrbitControls(self.getDefaultCamera(), self.getWebglContainerDOM());
-        self.getDefaultCamera().controls.addEventListener("change", self.cameraControlsEvent);
-        self.getDefaultCamera().controls.autoRotate = false;
-        self.getDefaultCamera().controls.enableKeys = false;
-        // test mode
-/*
-        self.getDefaultCamera().controls.minDistance = 5;
-        self.getDefaultCamera().controls.maxDistance = 15;
-        self.getDefaultCamera().controls.maxPolarAngle = Math.PI/2 - 0.2; 
-        self.getDefaultCamera().controls.minPolarAngle = 0.85;
-*/
-        self.getDefaultCamera().controls.testMode = true;
-
         self.buildScene();
     };
 
@@ -51,6 +36,27 @@ function PhMpdFcm(webGLContainer)
 
     var scenePostBuilt = function()
     {
+        self.getDefaultCamera().position.set(-0.25, 20.0, 14.0);
+
+        var tableTopPos = self.getVlabScene().getObjectByName("tableTop").position.clone();
+
+        self.getDefaultCamera().controls = new THREE.OrbitControls(self.getDefaultCamera(), self.getWebglContainerDOM());
+        self.getDefaultCamera().controls.setTarget(tableTopPos);
+        self.getDefaultCamera().controls.addEventListener("change", self.cameraControlsEvent);
+        self.getDefaultCamera().controls.autoRotate = false;
+        self.getDefaultCamera().controls.enableKeys = false;
+        self.getDefaultCamera().controls.minDistance = 5;
+        self.getDefaultCamera().controls.maxDistance = 15;
+        self.getDefaultCamera().controls.maxPolarAngle = Math.PI/2 - 0.2; 
+        self.getDefaultCamera().controls.minPolarAngle = 0.85;
+        self.getDefaultCamera().controls.maxXPan    = tableTopPos.x + 3;
+        self.getDefaultCamera().controls.minXPan    = tableTopPos.x - 3;
+        self.getDefaultCamera().controls.maxYPan    = tableTopPos.y + 2;
+        self.getDefaultCamera().controls.minYPan    = tableTopPos.y;
+        self.getDefaultCamera().controls.update();
+
+//        self.getDefaultCamera().controls.testMode = true;
+
         activeObjects["slopingSurface"] = self.getVlabScene().getObjectByName("slopingSurface");
         activeObjects["slopingBody"] = self.getVlabScene().getObjectByName("slopingBody");
         activeObjects["plumb"] = self.getVlabScene().getObjectByName("plumb");
@@ -71,8 +77,12 @@ function PhMpdFcm(webGLContainer)
 
         var light = new THREE.AmbientLight(0x404040, 0.05); // soft white light
         self.getVlabScene().add(light);
-        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.4);
+        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.1);
         self.getVlabScene().add(light);
+        var spotLight = new THREE.SpotLight(0xffffff, 0.75, 120, 85, 0, 2);
+        spotLight.target = self.getVlabScene().getObjectByName("frontWall");
+        spotLight.position.set(0, 20, -5);
+        self.getVlabScene().add(spotLight);
 
         initialSlopingBodyPosition = activeObjects["slopingBody"].position.clone();
 

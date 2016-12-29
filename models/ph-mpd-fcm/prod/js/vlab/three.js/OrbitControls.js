@@ -80,16 +80,22 @@ THREE.OrbitControls = function ( object, domElement ) {
 	this.position0 = this.object.position.clone();
 	this.zoom0 = this.object.zoom;
 
-    this.maxXPan  = 2;
-    this.minXPan  = -2;
-    this.maxYPan  = 2;
-    this.minYPan  = -2;
+    this.maxXPan  = 0;
+    this.minXPan  = 0;
+    this.maxYPan  = 0;
+    this.minYPan  = 0;
 
     this.testMode = false;
 
 	//
 	// public methods
 	//
+
+    this.setTarget = function (targetPos)
+    {
+        this.target.copy(targetPos);
+        this.target0 = this.target.clone();
+    };
 
 	this.getPolarAngle = function () {
 
@@ -159,7 +165,6 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 			spherical.makeSafe();
 
-
 			spherical.radius *= scale;
 
 			// restrict radius to be between desired limits
@@ -177,7 +182,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 
                 if (newX <= scope.maxXPan && newX >= scope.minXPan && newY <= scope.maxYPan && newY >= scope.minYPan)
                 {
-                    scope.target.add( panOffset );
+                    scope.target.add(panOffset);
                 }
             }
             else
