@@ -92,7 +92,7 @@ function PhMpdFcm(webGLContainer)
                         self.getVlabScene().getObjectByName("kukabasePlate").position, 
                         null, 
                         KukaVacuumGripper, 
-                        [self, null, false, "slopingBody", [2, 28]]);
+                        [self, null, true, "slopingBody", [2, 28]]);
 
         // this VLab constants
         pulleyPos = activeObjects["pulley"].position.clone();
@@ -304,9 +304,9 @@ function PhMpdFcm(webGLContainer)
                     activeObjects["pusher"].translateZ(labSwitchState * dZpusher);
                 }
                 prevPulleyFramePivotVector = pulleyFramePivotVector.length();
-
+console.log(activeObjects["pusher"].position.y);
                 // upper contact
-                if (activeObjects["pusher"].position.y >= 0.276)
+                if (activeObjects["pusher"].position.y <= 14.93)
                 {
                     stopButtonTopState = true;
                     if (kukaReturnsSlopingBodyStep == 2)
@@ -314,12 +314,12 @@ function PhMpdFcm(webGLContainer)
                         self.nextKukaReturnsSlopingBodyStep();
                     }
                 }
-                if (labSwitchState == 1 && activeObjects["pusher"].position.y <= 0.136)
+                if (labSwitchState == 1 && activeObjects["pusher"].position.y <= 18.85)
                 {
                     stopButtonTopState = false;
                 }
 
-                if (activeObjects["pusher"].position.y > 0.136 && activeObjects["pusher"].position.y < 0.276)
+                if (activeObjects["pusher"].position.y < 18.85 && activeObjects["pusher"].position.y > 18.75)
                 {
                     activeObjects["stopButton1Lever"].rotateZ(0.007 * labSwitchState);
                     activeObjects["stopButton2Lever"].rotateZ(0.007 * labSwitchState);

@@ -6,7 +6,7 @@
     "showStatistics":   true,
     "showAxis":         false,
     "showTooltips":     true,
-    "shadows":          true,
+    "shadows":          false,
     "forceShadows":     true,
     "shadowsMapSize":   512,
     "castShadows":
