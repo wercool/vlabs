@@ -77,12 +77,15 @@ function PhMpdFcm(webGLContainer)
 
         var light = new THREE.AmbientLight(0x404040, 0.05); // soft white light
         self.getVlabScene().add(light);
-        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.1);
+
+        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.2);
         self.getVlabScene().add(light);
-        var spotLight = new THREE.SpotLight(0xffffff, 0.75, 120, 85, 0, 2);
+
+        var spotLight = new THREE.SpotLight(0xffffff, 0.6, 120, 85, 0, 2);
         spotLight.target = self.getVlabScene().getObjectByName("frontWall");
-        spotLight.position.set(0, 20, -5);
+        spotLight.position.set(0, 30, -5);
         self.getVlabScene().add(spotLight);
+
 
         initialSlopingBodyPosition = activeObjects["slopingBody"].position.clone();
 
@@ -267,7 +270,7 @@ function PhMpdFcm(webGLContainer)
                 framePosY.y = framePos.y;
 
                 frameAngle = Math.asin( ( pulleyPos.length() * Math.sin( pulleyPos.angleTo(framePos) ) ) / pulleyPos.distanceTo(framePos));
-                frameAngle += (Math.PI / 2) - framePosY.angleTo(framePos);
+                frameAngle -= (Math.PI / 2) - framePosY.angleTo(framePos);
      
                 activeObjects["frame"].rotation.z = -(Math.PI / 2 + activeObjects["slopingSurface"].rotation.z - frameAngle);
                 activeObjects["plumb"].rotation.z = -activeObjects["slopingSurface"].rotation.z;
@@ -304,9 +307,9 @@ function PhMpdFcm(webGLContainer)
                     activeObjects["pusher"].translateZ(labSwitchState * dZpusher);
                 }
                 prevPulleyFramePivotVector = pulleyFramePivotVector.length();
-console.log(activeObjects["pusher"].position.y);
+
                 // upper contact
-                if (activeObjects["pusher"].position.y <= 14.93)
+                if (activeObjects["pusher"].position.y >= 18.85)
                 {
                     stopButtonTopState = true;
                     if (kukaReturnsSlopingBodyStep == 2)
@@ -314,32 +317,32 @@ console.log(activeObjects["pusher"].position.y);
                         self.nextKukaReturnsSlopingBodyStep();
                     }
                 }
-                if (labSwitchState == 1 && activeObjects["pusher"].position.y <= 18.85)
+                if (labSwitchState == 1 && activeObjects["pusher"].position.y <= 18.75)
                 {
                     stopButtonTopState = false;
                 }
 
                 if (activeObjects["pusher"].position.y < 18.85 && activeObjects["pusher"].position.y > 18.75)
                 {
-                    activeObjects["stopButton1Lever"].rotateZ(0.007 * labSwitchState);
-                    activeObjects["stopButton2Lever"].rotateZ(0.007 * labSwitchState);
+                    activeObjects["stopButton1Lever"].rotateZ(0.0067 * labSwitchState);
+                    activeObjects["stopButton2Lever"].rotateZ(0.0067 * labSwitchState);
                     activeObjects["stopButton1Pin"].scale.y = activeObjects["stopButton2Pin"].scale.y += 0.02 * labSwitchState;
                 }
 
                 // lower contact
-                if (activeObjects["pusher"].position.y <= -3.670)
+                if (activeObjects["pusher"].position.y <= 14.94)
                 {
                     stopButtonLowerState = true;
                 }
-                if (labSwitchState == -1 && activeObjects["pusher"].position.y >= -3.525)
+                if (labSwitchState == -1 && activeObjects["pusher"].position.y >= 15.04)
                 {
                     stopButtonLowerState = false;
                 }
 
-                if (activeObjects["pusher"].position.y < -3.525 && activeObjects["pusher"].position.y > -3.670)
+                if (activeObjects["pusher"].position.y < 15.04 && activeObjects["pusher"].position.y > 14.94)
                 {
-                    activeObjects["stopButton3Lever"].rotateZ(-0.0125 * labSwitchState);
-                    activeObjects["stopButton4Lever"].rotateZ(-0.0125 * labSwitchState);
+                    activeObjects["stopButton3Lever"].rotateZ(-0.016 * labSwitchState);
+                    activeObjects["stopButton4Lever"].rotateZ(-0.016 * labSwitchState);
                     activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.y -= 0.03 * labSwitchState;
                 }
             }

@@ -88,8 +88,8 @@ function VLab(vlabNature)
         webglContainer = $("#" + webglContainerDOM.id);
 
         self.WebGLRenderer = new THREE.WebGLRenderer({
-                                                      alpha: true, 
-                                                      antialias: true
+                                                      alpha: false, 
+                                                      antialias: false
                                                      });
 //        self.WebGLRenderer.setClearColor(0xbababa);
         self.WebGLRenderer.setClearColor(0x000000);

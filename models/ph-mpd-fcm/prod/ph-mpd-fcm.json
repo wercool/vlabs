@@ -6,8 +6,8 @@
     "showStatistics":   true,
     "showAxis":         false,
     "showTooltips":     true,
-    "shadows":          false,
-    "forceShadows":     true,
+    "shadows":          true,
+    "forceShadows":     false,
     "shadowsMapSize":   512,
     "castShadows":
     [
@@ -18,13 +18,15 @@
         "Plane_010", "Plane_011", "Circle_012", "Circle_013", "pusher", "framePivot", "BezierCurve_009",
         "BezierCurve_010", "BezierCurve_008", "BezierCurve_007", "stopbuttonBottomPlate",
         "herconPlate2Fixture", "BezierCurve_006", "labSwitchHandler", "Plane_025", "labSwitchHandlerBase",
-        "BezierCurve_004", "BezierCurve_002", "BezierCurve_003"
+        "BezierCurve_004", "BezierCurve_002", "BezierCurve_003", "slopingSurfaceFixtureHandle1",
+        "slopingSurfaceFixtureHandle2", "tableBottomFrame", "tableTopFrame", "tableStand", "pulley",
+        "supportFixator1"
     ],
     "receiveShadows":
     [
         "tableTop", "slopingSurface", "slopingBody", "slopingSurfaceFixture", "motorWoodenStand", "Plane_007",
-        "Cube_001", "aktakomPowerSupply", "tableTop_007", "Plane_011", "Plane_005", "Plane_010",
-        "motor", "support", "slopingSurfacePin", "labSwitch", "tableBottomFrame"
+        "Cube_001", "tableTop_007", "Plane_011", "Plane_005", "Plane_010",
+        "motor", "support", "slopingSurfacePin", "labSwitch", "tableBottomFrame", "tableStand", "frontWall"
     ],
     "castShadowsExecptions":
     [
@@ -155,7 +157,7 @@
         {
             "shape":"BoxMesh",
             "mass":1.0,
-            "friction":0.2,
+            "friction":0.4,
             "restitution":0.2,
             "collision":"physijsCollision"
         },
