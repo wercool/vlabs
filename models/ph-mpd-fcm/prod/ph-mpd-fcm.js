@@ -95,7 +95,7 @@ function PhMpdFcm(webGLContainer)
                         self.getVlabScene().getObjectByName("kukabasePlate").position, 
                         null, 
                         KukaVacuumGripper, 
-                        [self, null, true, "slopingBody", [2, 28]]);
+                        [self, null, false, "slopingBody", [2, 28]]);
 
         // this VLab constants
         pulleyPos = activeObjects["pulley"].position.clone();
