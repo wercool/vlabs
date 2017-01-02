@@ -93,6 +93,7 @@ function VLab(vlabNature)
                                                      });
 //        self.WebGLRenderer.setClearColor(0xbababa);
         self.WebGLRenderer.setClearColor(0x000000);
+        self.WebGLRenderer.setFaceCulling(THREE.CullFaceNone);
         self.WebGLRenderer.setPixelRatio(window.devicePixelRatio);
         self.WebGLRenderer.setSize(webglContainer.width(), webglContainer.height() );
         self.WebGLRenderer.shadowMap.enabled = true;

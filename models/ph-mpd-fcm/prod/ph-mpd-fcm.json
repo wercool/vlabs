@@ -12,14 +12,14 @@
     "castShadows":
     [
         "Lamp1",
-        "slopingBody", "slopingSurface", "support", "frame", "acPlug", "acWire", "aktakomPowerSupply", 
+        "slopingBody", "tableTopFrame", "slopingSurface", "support", "supportRod", "frame", "acPlug", "acWire", "aktakomPowerSupply", 
         "minusWire", "pulleyMotor", "motorFixture", "slopingSurfaceFixture",
         "motor", "button", "tableTop_001", "Circle_015", "Circle_010", "Plane_007",
         "Plane_010", "Plane_011", "Circle_012", "Circle_013", "pusher", "framePivot", "BezierCurve_009",
         "BezierCurve_010", "BezierCurve_008", "BezierCurve_007", "stopbuttonBottomPlate",
         "herconPlate2Fixture", "BezierCurve_006", "labSwitchHandler", "Plane_025", "labSwitchHandlerBase",
         "BezierCurve_004", "BezierCurve_002", "BezierCurve_003", "slopingSurfaceFixtureHandle1",
-        "slopingSurfaceFixtureHandle2", "tableBottomFrame", "tableTopFrame", "tableStand", "pulley",
+        "slopingSurfaceFixtureHandle2", "tableBottomFrame", "tableStand", "pulley",
         "supportFixator1", "stopbuttonTopPlate", "Sphere_001", "Circle_011", "Plane_049", "Plane_050", "kukabasePlate"
     ],
     "receiveShadows":

@@ -47,6 +47,7 @@ function PhMpdFcm(webGLContainer)
         self.getDefaultCamera().controls.enableKeys = false;
         self.getDefaultCamera().controls.minDistance = 5;
         self.getDefaultCamera().controls.maxDistance = 15;
+
         self.getDefaultCamera().controls.maxPolarAngle = Math.PI/2 - 0.2; 
         self.getDefaultCamera().controls.minPolarAngle = 0.85;
         self.getDefaultCamera().controls.maxXPan    = tableTopPos.x + 3;
@@ -81,9 +82,9 @@ function PhMpdFcm(webGLContainer)
         var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.2);
         self.getVlabScene().add(light);
 
-        var spotLight = new THREE.SpotLight(0xffffff, 0.6, 120, 85, 0, 2);
+        var spotLight = new THREE.SpotLight(0xffffff, 0.5, 120, 85, 0, 2);
         spotLight.target = self.getVlabScene().getObjectByName("frontWall");
-        spotLight.position.set(0, 30, -5);
+        spotLight.position.set(0, 35, -8);
         self.getVlabScene().add(spotLight);
 
 
