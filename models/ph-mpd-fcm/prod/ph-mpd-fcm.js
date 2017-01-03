@@ -79,14 +79,13 @@ function PhMpdFcm(webGLContainer)
         var light = new THREE.AmbientLight(0x404040, 0.05); // soft white light
         self.getVlabScene().add(light);
 
-        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.2);
+        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.4);
         self.getVlabScene().add(light);
 
-        var spotLight = new THREE.SpotLight(0xffffff, 0.5, 120, 85, 0, 2);
+        var spotLight = new THREE.SpotLight(0xffffff, 0.4, 120, 45, 1.0, 2);
         spotLight.target = self.getVlabScene().getObjectByName("frontWall");
-        spotLight.position.set(0, 35, -8);
+        spotLight.position.set(0, 35, 0);
         self.getVlabScene().add(spotLight);
-
 
         initialSlopingBodyPosition = activeObjects["slopingBody"].position.clone();
 

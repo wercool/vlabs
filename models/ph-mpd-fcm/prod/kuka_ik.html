@@ -29,10 +29,7 @@
     <script src="js/vlab/vlab.js"></script>
     <script src="js/vlab/zoomHelper.js"></script>
 
-    <!-- Include this VLab specific modules -->
-    <script src="js/vlab/kuka.js"></script>
-    <script src="js/vlab/kuka-vacuum-gripper.js"></script>
-    <script src="ph-mpd-fcm.js"></script>
+    <script src="kuka_ik.js"></script>
 
     <div id="webGLContainer" class="webGLContainer"></div>
     <div id="notificationPopup"></div>
@@ -43,7 +40,7 @@
                 opacity: 0.2
             });
 
-            new PhMpdFcm("webGLContainer");
+            new Kuka("webGLContainer");
         });
     </script>
 </body>

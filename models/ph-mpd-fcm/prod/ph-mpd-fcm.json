@@ -26,7 +26,8 @@
     [
         "tableTop", "slopingSurface", "slopingBody", "slopingSurfaceFixture", "motorWoodenStand", "Plane_007",
         "Cube_001", "tableTop_007", "Plane_011", "Plane_005", "Plane_010",
-        "motor", "support", "slopingSurfacePin", "labSwitch", "tableBottomFrame", "tableStand", "frontWall", "rightWall", "floor"
+        "motor", "support", "slopingSurfacePin", "labSwitch", "tableBottomFrame", "tableStand", "frontWall", "rightWall", "floor",
+        "kukabasePlate"
     ],
     "castShadowsExecptions":
     [

@@ -9,6 +9,10 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
 
     self.positioning = false;
 
+    self.ikSolver = undefined;
+    self.ikChain = undefined;
+    self.l2l3initialAngle = 0;
+
     self.path = [];
     self.positioningStage = 0;
     self.XYPositioning = true;
@@ -83,6 +87,32 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
         {
             self.kukaBase.position.copy(basePosition);
         }
+
+        self.kukaBase.updateMatrixWorld();
+        var link2Pos = new THREE.Vector3().setFromMatrixPosition(self.kukaLink2.matrixWorld);
+        var link3Pos = new THREE.Vector3().setFromMatrixPosition(self.kukaLink3.matrixWorld);
+        var link4Pos = new THREE.Vector3().setFromMatrixPosition(self.kukaLink4.matrixWorld);
+
+        self.ikSolver = new Fullik.Structure(vlab.getVlabScene());
+        self.ikSolver.clear();
+        self.ikChain = new Fullik.Chain();
+
+        // Fabrick IK (FullIK.js)
+        var boneStartLoc = new Fullik.V3(link2Pos.x, link2Pos.y, link2Pos.z);
+        var boneEndLoc   = new Fullik.V3(link3Pos.x, link3Pos.y, link3Pos.z);
+        var bone = new Fullik.Bone(boneStartLoc, boneEndLoc);
+        self.ikChain.addBone(bone);
+        var l2l3Vec = link3Pos.clone().sub(link2Pos);
+        var l3l4Vec = link4Pos.clone().sub(link3Pos);
+        self.l2l3initialAngle = l2l3Vec.angleTo(l3l4Vec);
+        var l3l4DirLength = l3l4Vec.length();
+        l3l4Vec.normalize();
+        var l3l4Dir = new Fullik.V3(l3l4Vec.x, l3l4Vec.y, l3l4Vec.z);
+        self.ikChain.addConsecutiveBone(l3l4Dir, l3l4DirLength);
+
+        self.ikSolver.add(self.ikChain, link4Pos, false);
+        self.ikSolver.update();
+
         if (initialLinksAngles != null)
         {
         }

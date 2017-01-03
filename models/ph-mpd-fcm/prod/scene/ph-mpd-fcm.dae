@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.78.0 commit date:2016-10-24, commit time:12:20, hash:e8299c8</authoring_tool>
     </contributor>
-    <created>2017-01-02T23:42:26</created>
-    <modified>2017-01-02T23:42:26</modified>
+    <created>2017-01-03T16:10:16</created>
+    <modified>2017-01-03T16:10:16</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -315,7 +315,7 @@
         </technique>
       </profile_COMMON>
     </effect>
-    <effect id="slopingSurfaceFixtureMaterial_bumpScale_-0_1-effect">
+    <effect id="slopingSurfaceFixtureMaterial_bumpScale_0_025-effect">
       <profile_COMMON>
         <newparam sid="slopingSurfaceFixture_jpg-surface">
           <surface type="2D">
@@ -349,10 +349,10 @@
               <texture texture="slopingSurfaceFixture_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
-              <color sid="specular">0.2955475 0.2955475 0.2955475 1</color>
+              <color sid="specular">0.3841796 0.3841796 0.3841796 1</color>
             </specular>
             <shininess>
-              <float sid="shininess">20</float>
+              <float sid="shininess">60</float>
             </shininess>
             <index_of_refraction>
               <float sid="index_of_refraction">1</float>
@@ -779,6 +779,32 @@
       </profile_COMMON>
       <extra><technique profile="MAX3D"><double_sided>1</double_sided></technique></extra>
     </effect>
+    <effect id="kukabasePlateMaterial-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color sid="diffuse">0.8 0.8 0.8 1</color>
+            </diffuse>
+            <specular>
+              <color sid="specular">0.4 0.4 0.4 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">50</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
     <effect id="slopingSurfaceFixtureHandleMaterial_bumpScale_0_01-effect">
       <profile_COMMON>
         <newparam sid="slopingSurfaceFixtureHandle_jpg-surface">
@@ -980,10 +1006,10 @@
               <texture texture="supportRod_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
-              <color sid="specular">0.3784138 0.3784138 0.3784138 1</color>
+              <color sid="specular">0.5486307 0.5486307 0.5486307 1</color>
             </specular>
             <shininess>
-              <float sid="shininess">10</float>
+              <float sid="shininess">100</float>
             </shininess>
             <index_of_refraction>
               <float sid="index_of_refraction">1</float>
@@ -1009,8 +1035,8 @@
     <material id="tableTopMaterial_bumpScale_0_003-material" name="tableTopMaterial_bumpScale_0_003">
       <instance_effect url="#tableTopMaterial_bumpScale_0_003-effect"/>
     </material>
-    <material id="slopingSurfaceFixtureMaterial_bumpScale_-0_1-material" name="slopingSurfaceFixtureMaterial_bumpScale_-0_1">
-      <instance_effect url="#slopingSurfaceFixtureMaterial_bumpScale_-0_1-effect"/>
+    <material id="slopingSurfaceFixtureMaterial_bumpScale_0_025-material" name="slopingSurfaceFixtureMaterial_bumpScale_0_025">
+      <instance_effect url="#slopingSurfaceFixtureMaterial_bumpScale_0_025-effect"/>
     </material>
     <material id="pulleyMaterial-material" name="pulleyMaterial">
       <instance_effect url="#pulleyMaterial-effect"/>
@@ -1050,6 +1076,9 @@
     </material>
     <material id="supportFixator1Material-material" name="supportFixator1Material">
       <instance_effect url="#supportFixator1Material-effect"/>
+    </material>
+    <material id="kukabasePlateMaterial-material" name="kukabasePlateMaterial">
+      <instance_effect url="#kukabasePlateMaterial-effect"/>
     </material>
     <material id="slopingSurfaceFixtureHandleMaterial_bumpScale_0_01-material" name="slopingSurfaceFixtureHandleMaterial_bumpScale_0_01">
       <instance_effect url="#slopingSurfaceFixtureHandleMaterial_bumpScale_0_01-effect"/>
@@ -1459,7 +1488,7 @@
         <vertices id="Cube_005-mesh-vertices">
           <input semantic="POSITION" source="#Cube_005-mesh-positions"/>
         </vertices>
-        <polylist material="slopingSurfaceFixtureMaterial_bumpScale_-0_1-material" count="66">
+        <polylist material="slopingSurfaceFixtureMaterial_bumpScale_0_025-material" count="66">
           <input semantic="VERTEX" source="#Cube_005-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cube_005-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cube_005-mesh-map-0" offset="2" set="0"/>
@@ -5672,7 +5701,7 @@
         <vertices id="kukabaseplatebox-mesh-vertices">
           <input semantic="POSITION" source="#kukabaseplatebox-mesh-positions"/>
         </vertices>
-        <polylist count="30">
+        <polylist material="kukabasePlateMaterial-material" count="30">
           <input semantic="VERTEX" source="#kukabaseplatebox-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#kukabaseplatebox-mesh-normals" offset="1"/>
           <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
@@ -6055,7 +6084,7 @@
     <geometry id="Plane_027-mesh" name="Plane.027">
       <mesh>
         <source id="Plane_027-mesh-positions">
-          <float_array id="Plane_027-mesh-positions-array" count="12">-28.28668 -20.08495 -1.90735e-6 28.28668 -20.08495 -1.90735e-6 -28.28668 20.08495 -1.92716e-6 28.28668 20.08495 -1.92716e-6</float_array>
+          <float_array id="Plane_027-mesh-positions-array" count="12">-28.28668 1.90735e-6 -1.90735e-6 28.28668 1.90735e-6 -1.90735e-6 -28.28668 40.1699 -1.92716e-6 28.28668 40.1699 -1.92716e-6</float_array>
           <technique_common>
             <accessor source="#Plane_027-mesh-positions-array" count="4" stride="3">
               <param name="X" type="float"/>
@@ -6313,7 +6342,7 @@
         <instance_geometry url="#Cube_005-mesh" name="slopingSurfaceFixture">
           <bind_material>
             <technique_common>
-              <instance_material symbol="slopingSurfaceFixtureMaterial_bumpScale_-0_1-material" target="#slopingSurfaceFixtureMaterial_bumpScale_-0_1-material">
+              <instance_material symbol="slopingSurfaceFixtureMaterial_bumpScale_0_025-material" target="#slopingSurfaceFixtureMaterial_bumpScale_0_025-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>
@@ -6924,7 +6953,13 @@
       </node>
       <node id="kukabasePlate" name="kukabasePlate" type="NODE">
         <matrix sid="transform">1 0 0 -6.253929 0 1 0 3.738962 0 0 1 13.38545 0 0 0 1</matrix>
-        <instance_geometry url="#kukabaseplatebox-mesh" name="kukabasePlate"/>
+        <instance_geometry url="#kukabaseplatebox-mesh" name="kukabasePlate">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="kukabasePlateMaterial-material" target="#kukabasePlateMaterial-material"/>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
       </node>
       <node id="kukabasePlateHandle1" name="kukabasePlateHandle1" type="NODE">
         <matrix sid="transform">-4.37114e-8 -1 0 -7.986899 1 -4.37114e-8 0 3.738961 0 0 1 13.38772 0 0 0 1</matrix>
@@ -7005,7 +7040,7 @@
         </instance_geometry>
       </node>
       <node id="frontWall" name="frontWall" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 -4.37114e-8 -1 19.97688 0 1 -4.37114e-8 20.08495 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 9.53674e-7 0 -4.37114e-8 -1 19.97688 0 1 -4.37114e-8 -1.90735e-6 0 0 0 1</matrix>
         <instance_geometry url="#Plane_027-mesh" name="frontWall">
           <bind_material>
             <technique_common>

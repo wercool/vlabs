@@ -96,9 +96,12 @@ function VLab(vlabNature)
         self.WebGLRenderer.setFaceCulling(THREE.CullFaceNone);
         self.WebGLRenderer.setPixelRatio(window.devicePixelRatio);
         self.WebGLRenderer.setSize(webglContainer.width(), webglContainer.height() );
-        self.WebGLRenderer.shadowMap.enabled = true;
-        self.WebGLRenderer.shadowMapSoft = true;
-        self.WebGLRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        if (self.vlabNature.shadows)
+        {
+            self.WebGLRenderer.shadowMap.enabled                = true;
+            self.WebGLRenderer.shadowMapSoft                    = true;
+            self.WebGLRenderer.shadowMap.type                   = THREE.PCFSoftShadowMap;
+        }
 
         webglContainer.append(self.WebGLRenderer.domElement);
 
@@ -183,6 +186,10 @@ function VLab(vlabNature)
         if (self.vlabNature.sceneFile != undefined)
         {
             loadScene(self.vlabNature.sceneFile);
+        }
+        else
+        {
+            dispatchEvent(sceneBuiltEvent);
         }
     };
 
