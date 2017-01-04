@@ -45,11 +45,11 @@ function PhMpdFcm(webGLContainer)
         self.getDefaultCamera().controls.addEventListener("change", self.cameraControlsEvent);
         self.getDefaultCamera().controls.autoRotate = false;
         self.getDefaultCamera().controls.enableKeys = false;
+
         self.getDefaultCamera().controls.minDistance = 5;
         self.getDefaultCamera().controls.maxDistance = 15;
-
         self.getDefaultCamera().controls.maxPolarAngle = Math.PI/2 - 0.2; 
-        self.getDefaultCamera().controls.minPolarAngle = 0.85;
+        self.getDefaultCamera().controls.minPolarAngle = 0.75;
         self.getDefaultCamera().controls.maxXPan    = tableTopPos.x + 3;
         self.getDefaultCamera().controls.minXPan    = tableTopPos.x - 3;
         self.getDefaultCamera().controls.maxYPan    = tableTopPos.y + 2;
@@ -81,7 +81,7 @@ function PhMpdFcm(webGLContainer)
         var light = new THREE.AmbientLight(0xecf5ff, 0.05); // soft white light
         self.getVlabScene().add(light);
 
-        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.1);
+        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.3);
         self.getVlabScene().add(light);
 /*
         var spotLight = new THREE.SpotLight(0xecf5ff, 0.8, 250, 45, 1.0, 10);
@@ -146,6 +146,8 @@ function PhMpdFcm(webGLContainer)
         // lower stop button off-state
         activeObjects["stopButton3Lever"].rotation.z = activeObjects["stopButton4Lever"].rotation.z = 0.15;
         activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.y = 1.8;
+
+var powerSupply = new AktakomPowerSupply(self);
 
 
         // Aktakom Power Supply screen

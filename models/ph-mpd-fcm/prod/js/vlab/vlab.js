@@ -89,7 +89,7 @@ function VLab(vlabNature)
 
         self.WebGLRenderer = new THREE.WebGLRenderer({
                                                       alpha: false, 
-                                                      antialias: false
+                                                      antialias: (self.vlabNature.antialias != undefined) ? self.vlabNature.antialias : false
                                                      });
 //        self.WebGLRenderer.setClearColor(0xbababa);
         self.WebGLRenderer.setClearColor(0x000000);
