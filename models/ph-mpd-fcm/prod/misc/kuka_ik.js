@@ -16,9 +16,6 @@ function Kuka(webGLContainer)
         "showAxis":         true
     };
 
-    VLab.apply(self, [vlabNature]);
-    self.initialize(webGLContainer);
-
     var sceneLoaded = function()
     {
         self.getDefaultCamera().position.set(0.0, 20.0, 15.0);
@@ -38,11 +35,112 @@ function Kuka(webGLContainer)
     // this VLab constants
     var ikSolver;
     var ikChain;
-    var ikTarget;
+    var ikTarget, ikTargetKukaLink1;
 
     var link1Vec, link2Vec, link3Vec;
+    var l2l3initialAngle;
 
     var scenePostBuilt = function()
+    {
+        activeObjects["kukaBase"] = self.getVlabScene().getObjectByName("kukaBase");
+        activeObjects["kukaLink1"] = self.getVlabScene().getObjectByName("kukaLink1");
+        activeObjects["kukaLink2"] = self.getVlabScene().getObjectByName("kukaLink2");
+        activeObjects["kukaLink3"] = self.getVlabScene().getObjectByName("kukaLink3");
+        activeObjects["kukaLink4"] = self.getVlabScene().getObjectByName("kukaLink4");
+
+        activeObjects["kukaLink2"].material.wireframe = true;
+        activeObjects["kukaLink3"].material.wireframe = true;
+        activeObjects["kukaLink4"].material.wireframe = true;
+
+        self.getDefaultCamera().position.set(0.0, 20.0, 15.0);
+
+        self.getDefaultCamera().controls = new THREE.OrbitControls(self.getDefaultCamera(), self.getWebglContainerDOM());
+        self.getDefaultCamera().controls.autoRotate = false;
+        self.getDefaultCamera().controls.enableKeys = false;
+        // test mode
+        self.getDefaultCamera().controls.testMode = true;
+
+        var light = new THREE.AmbientLight(0x404040, 1.0); // soft white light
+        self.getVlabScene().add(light);
+
+        ikSolver = new Fullik.Structure(self.getVlabScene());
+        ikSolver.clear();
+
+        activeObjects["kukaBase"].updateMatrixWorld();
+        var link2Pos = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink2"].matrixWorld);
+        var link3Pos = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink3"].matrixWorld);
+        var link4Pos = new THREE.Vector3().setFromMatrixPosition(activeObjects["kukaLink4"].matrixWorld);
+
+        // ik target
+        ikTarget = {
+            mesh : new THREE.Mesh( new THREE.SphereBufferGeometry(0.2),  new THREE.MeshStandardMaterial({color:0xFFFFFF, wireframe:true }) ),
+            control : new THREE.TransformControls(self.getDefaultCamera(), self.WebGLRenderer.domElement)
+        };
+        self.getVlabScene().add(ikTarget.mesh);
+        ikTarget.control.addEventListener( 'change', function(){updateIK();});
+        var endEffectorInitialPosition = link4Pos;
+        ikTarget.mesh.position.copy(endEffectorInitialPosition);
+        ikTarget.control.attach(ikTarget.mesh);
+        ikTarget.control.setSize(1.0);
+        self.getVlabScene().add(ikTarget.control);
+
+        // kukaLink1 target
+        ikTargetKukaLink1 = {
+            mesh : new THREE.Mesh( new THREE.SphereBufferGeometry(0.2),  new THREE.MeshStandardMaterial({color:0xFFFFFF, wireframe:true }) ),
+            control : new THREE.TransformControls(self.getDefaultCamera(), self.WebGLRenderer.domElement)
+        };
+        self.getVlabScene().add(ikTargetKukaLink1.mesh);
+        ikTargetKukaLink1.control.addEventListener( 'change', function(){updateKukaLink1();});
+        var endEffectorInitialPosition = new THREE.Vector3(10,0,0);
+        ikTargetKukaLink1.mesh.position.copy(endEffectorInitialPosition);
+        ikTargetKukaLink1.control.attach(ikTargetKukaLink1.mesh);
+        ikTargetKukaLink1.control.setSize(1.0);
+        self.getVlabScene().add(ikTargetKukaLink1.control);
+
+        var eefInitialXZPosition = endEffectorInitialPosition.clone();
+        eefInitialXZPosition.y = activeObjects["kukaBase"].position.y;
+        var xzEEFDir = activeObjects["kukaBase"].position.clone().sub(eefInitialXZPosition);
+        activeObjects["xzEEFDir"] = new THREE.ArrowHelper(xzEEFDir.clone().normalize().negate(), activeObjects["kukaBase"].position, xzEEFDir.length(), 0xffffff, 0.5, 0.1);
+        self.getVlabScene().add(activeObjects["xzEEFDir"]);
+
+        // add IK chain links
+        var X_AXIS = new Fullik.V3( 1, 0, 0 );
+        var Y_AXIS = new Fullik.V3( 0, 1, 0 );
+        var Z_AXIS = new Fullik.V3( 0, 0, 1 );
+
+        ikChain = new Fullik.Chain(0x999999);
+
+        // link1
+        var boneStartLoc = new Fullik.V3(link2Pos.x, link2Pos.y, link2Pos.z);
+        var boneEndLoc   = new Fullik.V3(link3Pos.x, link3Pos.y, link3Pos.z);
+        var bone = new Fullik.Bone(boneStartLoc, boneEndLoc);
+        ikChain.addBone(bone);
+        var l2l3Vec = link3Pos.clone().sub(link2Pos);
+        var l3l4Vec = link4Pos.clone().sub(link3Pos);
+        l2l3initialAngle = l2l3Vec.angleTo(l3l4Vec);
+        var l3l4DirLength = l3l4Vec.length();
+        l3l4Vec.normalize();
+        var l3l4Dir = new Fullik.V3(l3l4Vec.x, l3l4Vec.y, l3l4Vec.z);
+        ikChain.addConsecutiveBone(l3l4Dir, l3l4DirLength);
+
+
+
+        ikSolver.add(ikChain, link4Pos, true);
+
+        ikSolver.update();
+
+
+//        link1Vec = new THREE.ArrowHelper(ikSolver.chains[0].bones[0].getDirectionUV(), ikSolver.chains[0].bones[0].mStartLocation, ikSolver.chains[0].bones[0].getLength(), 0xff00ff, 0.2, 0.2);
+//        self.getVlabScene().add(link1Vec);
+
+//        link2Vec = new THREE.ArrowHelper(ikSolver.chains[0].bones[1].getDirectionUV(), ikSolver.chains[0].bones[1].mStartLocation, ikSolver.chains[0].bones[1].getLength(), 0xff00ff, 0.2, 0.2);
+//        self.getVlabScene().add(link2Vec);
+
+        self.WebGLRenderer.setClearColor(0xbababa);
+        self.setSceneRenderPause(false);
+    };
+/*
+    var scenePostBuilt_notused = function()
     {
         activeObjects["kukaBase"] = self.getVlabScene().getObjectByName("kukaBase");
         activeObjects["link1"] = self.getVlabScene().getObjectByName("link1");
@@ -97,10 +195,10 @@ function Kuka(webGLContainer)
         var bone = new Fullik.Bone(boneStartLoc, boneEndLoc);
         ikChain.addBone(bone);
         ikChain.setHingeBaseboneConstraint("global", Y_AXIS, 180, 180, Y_AXIS);
-/*
-        ikChain.addConsecutiveHingedBone(Y_AXIS, 7, "global", Z_AXIS, 90, 90, X_AXIS);
-        ikChain.addConsecutiveHingedBone(Y_AXIS, 3, "global", Z_AXIS, 90, 90, X_AXIS);
-*/
+
+//        ikChain.addConsecutiveHingedBone(Y_AXIS, 7, "global", Z_AXIS, 90, 90, X_AXIS);
+//        ikChain.addConsecutiveHingedBone(Y_AXIS, 3, "global", Z_AXIS, 90, 90, X_AXIS);
+
         ikSolver.add(ikChain, ikTarget.control.position, true);
 
         var link2Pos = new THREE.Vector3().setFromMatrixPosition(activeObjects["link2"].matrixWorld);
@@ -114,7 +212,7 @@ function Kuka(webGLContainer)
         chain1.addConsecutiveHingedBone(Y_AXIS, 5, "global", Z_AXIS, 90, 0, X_AXIS);
         chain1.addConsecutiveHingedBone(Y_AXIS, 3, "global", Z_AXIS, 90, 90, X_AXIS);
 
-        ikSolver.add(chain1, ikTarget.control.position, true);
+        ikSolver.add(chain1, null, true);
 
 
         ikSolver.update();
@@ -129,14 +227,14 @@ function Kuka(webGLContainer)
 
         self.setSceneRenderPause(false);
     };
-
+*/
     var simulationStep = function()
     {
     };
 
     var updateIK = function()
     {
-
+/*
         if (link1Vec != undefined)
         {
             var line1VecDir = ikSolver.chains[0].bones[0].getDirectionUV();
@@ -158,7 +256,40 @@ function Kuka(webGLContainer)
             activeObjects["link1"].rotation.y = -line1Vec3.angleTo(new THREE.Vector3(1,0,0));
             activeObjects["link2"].rotation.z = -line3Vec3.angleTo(new THREE.Vector3(0,1,0));
         }
+*/
 
-        ikSolver.update();
+
+        getKukaBonesBasedIK();
     };
+
+    var updateKukaLink1 = function()
+    {
+        if (activeObjects["xzEEFDir"] == undefined) return;
+
+        var eefInitialXZPosition = ikTargetKukaLink1.control.position.clone();
+        eefInitialXZPosition.y = activeObjects["kukaBase"].position.y;
+        var xzEEFDir = activeObjects["kukaBase"].position.clone().sub(eefInitialXZPosition);
+        activeObjects["xzEEFDir"].setDirection(xzEEFDir.clone().normalize().negate());
+        activeObjects["xzEEFDir"].setLength(xzEEFDir.length(), 0.5, 0.1);
+        var xDir = new THREE.Vector3(1,0,0);
+        var l1 = -Math.PI + xDir.angleTo(xzEEFDir.clone());
+        activeObjects["kukaLink1"].rotation.y = l1;
+    };
+
+    var getKukaBonesBasedIK = function()
+    {
+        if (ikChain != undefined)
+        {
+            ikChain.updateTarget(ikTarget.control.position.clone());
+            //ikSolver.update();
+            var l1l2Dir = ikSolver.chains[0].bones[0].getDirectionUV().clone();
+            var l2l3Dir = ikSolver.chains[0].bones[1].getDirectionUV().clone();
+
+            activeObjects["kukaLink2"].rotation.z = -l1l2Dir.angleTo(new THREE.Vector3(0,1,0));
+            activeObjects["kukaLink3"].rotation.z = -l2l3initialAngle - l2l3Dir.angleTo(l1l2Dir);
+        }
+    };
+
+    VLab.apply(self, [vlabNature]);
+    self.initialize(webGLContainer);
 }

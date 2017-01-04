@@ -75,18 +75,20 @@ function PhMpdFcm(webGLContainer)
         activeObjects["stopButton4Lever"] = self.getVlabScene().getObjectByName("stopButton4Lever");
         activeObjects["stopButton4Pin"] = self.getVlabScene().getObjectByName("stopButton4Pin");
         activeObjects["labSwitchHandlerBase"] = self.getVlabScene().getObjectByName("labSwitchHandlerBase");
+        activeObjects["aktakomPowerSupplyScreen"] = self.getVlabScene().getObjectByName("aktakomPowerSupplyScreen");
+        activeObjects["aktakomPowerSupplyScreenBack"] = self.getVlabScene().getObjectByName("aktakomPowerSupplyScreenBack");
 
-        var light = new THREE.AmbientLight(0x404040, 0.05); // soft white light
+        var light = new THREE.AmbientLight(0xecf5ff, 0.05); // soft white light
         self.getVlabScene().add(light);
 
-        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.4);
+        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.1);
         self.getVlabScene().add(light);
-
-        var spotLight = new THREE.SpotLight(0xffffff, 0.4, 120, 45, 1.0, 2);
+/*
+        var spotLight = new THREE.SpotLight(0xecf5ff, 0.8, 250, 45, 1.0, 10);
         spotLight.target = self.getVlabScene().getObjectByName("frontWall");
-        spotLight.position.set(0, 35, 0);
+        spotLight.position.set(0, 30, 0);
         self.getVlabScene().add(spotLight);
-
+*/
         initialSlopingBodyPosition = activeObjects["slopingBody"].position.clone();
 
         // kuka
@@ -144,6 +146,32 @@ function PhMpdFcm(webGLContainer)
         // lower stop button off-state
         activeObjects["stopButton3Lever"].rotation.z = activeObjects["stopButton4Lever"].rotation.z = 0.15;
         activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.y = 1.8;
+
+
+        // Aktakom Power Supply screen
+        // create a canvas element
+        var canvases = $("#canvases");
+        var aktakomPowerSupplyScreenCanvas  = document.createElement("canvas");
+        aktakomPowerSupplyScreenCanvas.width = 256;
+        aktakomPowerSupplyScreenCanvas.height = 256;
+        canvases.append(aktakomPowerSupplyScreenCanvas);
+        var aktakomPowerSupplyScreenCanvas2D = aktakomPowerSupplyScreenCanvas.getContext("2d");
+        aktakomPowerSupplyScreenCanvas2D.font = "55px AktakomPowerSupplyScreenFont";
+        aktakomPowerSupplyScreenCanvas2D.fillStyle = "rgba(0, 0, 0, 0.7)";
+        aktakomPowerSupplyScreenCanvas2D.textBaseline = "top";
+        aktakomPowerSupplyScreenCanvas2D.fillText("12.02", 70, 155);
+        aktakomPowerSupplyScreenCanvas2D.fillText("0.00",  70, 205);
+        aktakomPowerSupplyScreenCanvas2D.font = "30px AktakomPowerSupplyScreenFont";
+        aktakomPowerSupplyScreenCanvas2D.fillText("V", 190, 172);
+        aktakomPowerSupplyScreenCanvas2D.fillText("A", 190, 222);
+        // canvas contents will be used for a texture
+        var aktakomPowerSupplyScreenTexture = new THREE.Texture(aktakomPowerSupplyScreenCanvas) 
+        aktakomPowerSupplyScreenTexture.needsUpdate = true;
+        var aktakomPowerSupplyScreenMaterial = new THREE.MeshBasicMaterial({map:aktakomPowerSupplyScreenTexture, side:THREE.FrontSide});
+        aktakomPowerSupplyScreenMaterial.transparent = true;
+        activeObjects["aktakomPowerSupplyScreen"].material = aktakomPowerSupplyScreenMaterial;
+        var aktakomPowerSupplyScreenBackMaterial = new THREE.MeshLambertMaterial({emissive:0xcfedff, emissiveIntensity:0.65, side:THREE.FrontSide});
+        activeObjects["aktakomPowerSupplyScreenBack"].material = aktakomPowerSupplyScreenBackMaterial;
 
         // actually start VLab
         self.setPhysijsScenePause(false);

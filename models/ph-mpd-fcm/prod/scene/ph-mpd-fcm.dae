@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.78.0 commit date:2016-10-24, commit time:12:20, hash:e8299c8</authoring_tool>
     </contributor>
-    <created>2017-01-03T16:10:16</created>
-    <modified>2017-01-03T16:10:16</modified>
+    <created>2017-01-04T02:05:35</created>
+    <modified>2017-01-04T02:05:35</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -111,6 +111,9 @@
     <image id="aktakomPowerSupply_jpg" name="aktakomPowerSupply_jpg">
       <init_from>aktakomPowerSupply.jpg</init_from>
     </image>
+    <image id="aktakomPowerSupply-bump_jpg" name="aktakomPowerSupply-bump_jpg">
+      <init_from>aktakomPowerSupply-bump.jpg</init_from>
+    </image>
     <image id="alimunim1_jpg" name="alimunim1_jpg">
       <init_from>alimunim1.jpg</init_from>
     </image>
@@ -123,8 +126,14 @@
     <image id="floor_jpg" name="floor_jpg">
       <init_from>floor.jpg</init_from>
     </image>
+    <image id="floor-bump_jpg" name="floor-bump_jpg">
+      <init_from>floor-bump.jpg</init_from>
+    </image>
     <image id="frontWall_jpg" name="frontWall_jpg">
       <init_from>frontWall.jpg</init_from>
+    </image>
+    <image id="frontWall-bump_jpg" name="frontWall-bump_jpg">
+      <init_from>frontWall-bump.jpg</init_from>
     </image>
     <image id="supportRod_jpg" name="supportRod_jpg">
       <init_from>supportRod.jpg</init_from>
@@ -473,32 +482,6 @@
         </technique>
       </profile_COMMON>
     </effect>
-    <effect id="aktakomPowerSupplyScreenMaterial-effect">
-      <profile_COMMON>
-        <technique sid="common">
-          <phong>
-            <emission>
-              <color sid="emission">0 0 0 1</color>
-            </emission>
-            <ambient>
-              <color sid="ambient">0 0 0 1</color>
-            </ambient>
-            <diffuse>
-              <color sid="diffuse">0.2375649 0.3484868 0.5 1</color>
-            </diffuse>
-            <specular>
-              <color sid="specular">0.5 0.5 0.5 1</color>
-            </specular>
-            <shininess>
-              <float sid="shininess">50</float>
-            </shininess>
-            <index_of_refraction>
-              <float sid="index_of_refraction">1</float>
-            </index_of_refraction>
-          </phong>
-        </technique>
-      </profile_COMMON>
-    </effect>
     <effect id="buttonMaterial-effect">
       <profile_COMMON>
         <newparam sid="button_jpg-surface">
@@ -535,7 +518,7 @@
         </technique>
       </profile_COMMON>
     </effect>
-    <effect id="aktakomPowerSupplyMaterial-effect">
+    <effect id="aktakomPowerSupplyMaterial_bumpScale_-0_02-effect">
       <profile_COMMON>
         <newparam sid="aktakomPowerSupply_jpg-surface">
           <surface type="2D">
@@ -545,6 +528,16 @@
         <newparam sid="aktakomPowerSupply_jpg-sampler">
           <sampler2D>
             <source>aktakomPowerSupply_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="aktakomPowerSupply-bump_jpg-surface">
+          <surface type="2D">
+            <init_from>aktakomPowerSupply-bump_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="aktakomPowerSupply-bump_jpg-sampler">
+          <sampler2D>
+            <source>aktakomPowerSupply-bump_jpg-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -559,15 +552,22 @@
               <texture texture="aktakomPowerSupply_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
-              <color sid="specular">0.5 0.5 0.5 1</color>
+              <color sid="specular">0.5593646 0.5593646 0.5593646 1</color>
             </specular>
             <shininess>
-              <float sid="shininess">2</float>
+              <float sid="shininess">50</float>
             </shininess>
             <index_of_refraction>
               <float sid="index_of_refraction">1</float>
             </index_of_refraction>
           </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="aktakomPowerSupply-bump_jpg-sampler" texcoord="UVMap"/>
+              </bump>
+            </technique>
+          </extra>
         </technique>
       </profile_COMMON>
     </effect>
@@ -623,7 +623,7 @@
         </technique>
       </profile_COMMON>
     </effect>
-    <effect id="aluminum1Material_bumpScale_0_85-effect">
+    <effect id="aluminum1Material-effect">
       <profile_COMMON>
         <newparam sid="alimunim1_jpg-surface">
           <surface type="2D">
@@ -647,10 +647,10 @@
               <texture texture="alimunim1_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
-              <color sid="specular">0.5389051 0.5389051 0.5389051 1</color>
+              <color sid="specular">0.4194739 0.5593643 0.3744713 1</color>
             </specular>
             <shininess>
-              <float sid="shininess">10</float>
+              <float sid="shininess">80</float>
             </shininess>
             <index_of_refraction>
               <float sid="index_of_refraction">1</float>
@@ -910,16 +910,16 @@
         </technique>
       </profile_COMMON>
     </effect>
-    <effect id="floorMaterial-effect">
+    <effect id="floorMaterial_bumpScale_0_3-effect">
       <profile_COMMON>
-        <newparam sid="floor_jpg-surface">
+        <newparam sid="floor-bump_jpg-surface">
           <surface type="2D">
-            <init_from>floor_jpg</init_from>
+            <init_from>floor-bump_jpg</init_from>
           </surface>
         </newparam>
-        <newparam sid="floor_jpg-sampler">
+        <newparam sid="floor-bump_jpg-sampler">
           <sampler2D>
-            <source>floor_jpg-surface</source>
+            <source>floor-bump_jpg-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -931,13 +931,13 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <texture texture="floor_jpg-sampler" texcoord="UVMap"/>
+              <texture texture="floor-bump_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
-              <color sid="specular">0.1 0.1 0.1 1</color>
+              <color sid="specular">0.008134465 0.008134465 0.008134465 1</color>
             </specular>
             <shininess>
-              <float sid="shininess">2</float>
+              <float sid="shininess">100</float>
             </shininess>
             <index_of_refraction>
               <float sid="index_of_refraction">1</float>
@@ -946,7 +946,7 @@
         </technique>
       </profile_COMMON>
     </effect>
-    <effect id="frontWallMaterial-effect">
+    <effect id="frontWallMaterial_bumpScale_0_3-effect">
       <profile_COMMON>
         <newparam sid="frontWall_jpg-surface">
           <surface type="2D">
@@ -956,6 +956,16 @@
         <newparam sid="frontWall_jpg-sampler">
           <sampler2D>
             <source>frontWall_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="frontWall-bump_jpg-surface">
+          <surface type="2D">
+            <init_from>frontWall-bump_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="frontWall-bump_jpg-sampler">
+          <sampler2D>
+            <source>frontWall-bump_jpg-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -970,15 +980,22 @@
               <texture texture="frontWall_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
-              <color sid="specular">0.01 0.01 0.01 1</color>
+              <color sid="specular">0.005901043 0.005901043 0.005901043 1</color>
             </specular>
             <shininess>
-              <float sid="shininess">1</float>
+              <float sid="shininess">200</float>
             </shininess>
             <index_of_refraction>
               <float sid="index_of_refraction">1</float>
             </index_of_refraction>
           </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="frontWall-bump_jpg-sampler" texcoord="UVMap"/>
+              </bump>
+            </technique>
+          </extra>
         </technique>
       </profile_COMMON>
     </effect>
@@ -1006,7 +1023,7 @@
               <texture texture="supportRod_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
-              <color sid="specular">0.5486307 0.5486307 0.5486307 1</color>
+              <color sid="specular">0.4630405 0.5486307 0.4118147 1</color>
             </specular>
             <shininess>
               <float sid="shininess">100</float>
@@ -1047,14 +1064,11 @@
     <material id="motorWoodenStandMaterial_bumpScale_0_005-material" name="motorWoodenStandMaterial_bumpScale_0_005">
       <instance_effect url="#motorWoodenStandMaterial_bumpScale_0_005-effect"/>
     </material>
-    <material id="aktakomPowerSupplyScreenMaterial-material" name="aktakomPowerSupplyScreenMaterial">
-      <instance_effect url="#aktakomPowerSupplyScreenMaterial-effect"/>
-    </material>
     <material id="buttonMaterial-material" name="buttonMaterial">
       <instance_effect url="#buttonMaterial-effect"/>
     </material>
-    <material id="aktakomPowerSupplyMaterial-material" name="aktakomPowerSupplyMaterial">
-      <instance_effect url="#aktakomPowerSupplyMaterial-effect"/>
+    <material id="aktakomPowerSupplyMaterial_bumpScale_-0_02-material" name="aktakomPowerSupplyMaterial_bumpScale_-0_02">
+      <instance_effect url="#aktakomPowerSupplyMaterial_bumpScale_-0_02-effect"/>
     </material>
     <material id="blackWireMaterial-material" name="blackWireMaterial">
       <instance_effect url="#blackWireMaterial-effect"/>
@@ -1062,8 +1076,8 @@
     <material id="redWireMaterial-material" name="redWireMaterial">
       <instance_effect url="#redWireMaterial-effect"/>
     </material>
-    <material id="aluminum1Material_bumpScale_0_85-material" name="aluminum1Material_bumpScale_0_85">
-      <instance_effect url="#aluminum1Material_bumpScale_0_85-effect"/>
+    <material id="aluminum1Material-material" name="aluminum1Material">
+      <instance_effect url="#aluminum1Material-effect"/>
     </material>
     <material id="tableBottomMaterial-material" name="tableBottomMaterial">
       <instance_effect url="#tableBottomMaterial-effect"/>
@@ -1089,11 +1103,11 @@
     <material id="clampHandleMaterial-material" name="clampHandleMaterial">
       <instance_effect url="#clampHandleMaterial-effect"/>
     </material>
-    <material id="floorMaterial-material" name="floorMaterial">
-      <instance_effect url="#floorMaterial-effect"/>
+    <material id="floorMaterial_bumpScale_0_3-material" name="floorMaterial_bumpScale_0_3">
+      <instance_effect url="#floorMaterial_bumpScale_0_3-effect"/>
     </material>
-    <material id="frontWallMaterial-material" name="frontWallMaterial">
-      <instance_effect url="#frontWallMaterial-effect"/>
+    <material id="frontWallMaterial_bumpScale_0_3-material" name="frontWallMaterial_bumpScale_0_3">
+      <instance_effect url="#frontWallMaterial_bumpScale_0_3-effect"/>
     </material>
     <material id="supportRodMaterial-material" name="supportRodMaterial">
       <instance_effect url="#supportRodMaterial-effect"/>
@@ -1863,14 +1877,24 @@
             </accessor>
           </technique_common>
         </source>
+        <source id="Cube_003-mesh-map-0">
+          <float_array id="Cube_003-mesh-map-0-array" count="12">6.55651e-5 0.4302995 0.9999343 6.55949e-5 0.9999344 0.4302994 6.55651e-5 0.4302995 6.55651e-5 6.55949e-5 0.9999343 6.55949e-5</float_array>
+          <technique_common>
+            <accessor source="#Cube_003-mesh-map-0-array" count="6" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
         <vertices id="Cube_003-mesh-vertices">
           <input semantic="POSITION" source="#Cube_003-mesh-positions"/>
         </vertices>
-        <polylist material="aktakomPowerSupplyScreenMaterial-material" count="2">
+        <polylist count="2">
           <input semantic="VERTEX" source="#Cube_003-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cube_003-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Cube_003-mesh-map-0" offset="2" set="0"/>
           <vcount>3 3 </vcount>
-          <p>1 0 2 0 0 0 1 1 3 1 2 1</p>
+          <p>1 0 0 2 0 1 0 0 2 1 1 3 3 1 4 2 1 5</p>
         </polylist>
       </mesh>
     </geometry>
@@ -2149,7 +2173,7 @@
         <vertices id="Cube_009-mesh-vertices">
           <input semantic="POSITION" source="#Cube_009-mesh-positions"/>
         </vertices>
-        <polylist material="aktakomPowerSupplyMaterial-material" count="178">
+        <polylist material="aktakomPowerSupplyMaterial_bumpScale_-0_02-material" count="178">
           <input semantic="VERTEX" source="#Cube_009-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cube_009-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cube_009-mesh-map-0" offset="2" set="0"/>
@@ -2878,7 +2902,7 @@
           </technique_common>
         </source>
         <source id="Plane_008-mesh-map-0">
-          <float_array id="Plane_008-mesh-map-0-array" count="828">0 0 0 0 0 0 0.03902411 0.5288954 0.1882684 0.4320554 0.03902411 0.4320555 0.2644929 0.3320108 0.191473 0.5288954 0.2644929 0.5288954 0 0 0 0 0 0 0.02870756 0.9690482 0.9305573 0.8230746 0.02870756 0.8230747 0.3407173 0.3320108 0.2676975 0.5288954 0.3407173 0.5288954 0 0 0 0 0 0 0.0593397 0.9545542 0.9611895 0.08751451 0.9611895 0.9545542 0.343922 0.3320108 0.4169418 0.5288954 0.4169418 0.3320108 0 0 0 0 0 0 0.02870756 0.5263756 0.9305573 0.6723492 0.9305573 0.5263756 0.4931663 0.3320108 0.4201465 0.5288954 0.4931663 0.5288954 0 0 0 0 0 0 0 0 0 0 0 0 0.496371 0.5288954 0.6456153 0.4320554 0.496371 0.4320554 0 0 0 0 0 0 0 0 0 0 0 0 0.64882 0.3320108 0.7218398 0.5288954 0.7218398 0.3320108 0 0 0 0 0 0 0 0 0 0 0 0 0.03902411 0.3320108 0.1882684 0.4288508 0.1882684 0.3320108 0 0 0 0 0 0 0 0 0 0 0 0 0.003742575 0.8972119 0.9947474 0.5296714 0.003742575 0.5296714 0 0 0 0 0 0 0 0 0 0 0 0 0.811025 0.4183872 0.05981427 0.9058244 0.811025 0.905824 0 0 0 0 0 0 0 0 0 0 0 0 0.003742575 0.1460007 0.9947474 0.5135412 0.9947474 0.1460007 0 0 0 0 0 0 0 0 0 0 0 0 0.1914731 0.3288062 0.3407173 0.2319661 0.1914731 0.2319661 0.7250444 0.3320108 0.7980644 0.5288954 0.7980644 0.3320108 0 0 0 0 0 0 0.343922 0.2319661 0.4931663 0.3288062 0.4931663 0.2319661 0.9276531 0.9853488 0.0570079 0.01421988 0.05701005 0.9853491 0 0 0 0 0 0 0.64882 0.2319661 0.7980644 0.3288062 0.7980644 0.2319661 -1.78148e-4 0.1603322 0.9908266 0.5278725 0.9908266 0.1603322 0.07276141 0.2106215 0.07304286 0.1655253 0.1136155 0.1831896 0.8377936 0.2361546 0.8181908 0.2930344 0.818495 0.2002407 0.2252106 0.210622 0.2254921 0.1655262 0.2660647 0.1831898 0.8373134 0.02887922 0.8807036 0.9781579 0.8807036 0.02887928 0.4185748 0.1831896 0.3785083 0.2111666 0.3791306 0.1655253 0.8826079 0.02887928 0.9259981 0.9781579 0.925998 0.02887922 0.02870756 0.4522008 0.9305573 0.5239996 0.9305573 0.4522008 0.9712924 0.02887928 0.9279024 0.9781579 0.9712924 0.9781579 0 0 0 0 0 0 0 0 0 0 0 0 0.03902411 0.5288954 0.1882684 0.5288954 0.1882684 0.4320554 0.2644929 0.3320108 0.1914731 0.3320108 0.191473 0.5288954 0 0 0 0 0 0 0.02870756 0.9690482 0.9305573 0.9690482 0.9305573 0.8230746 0.3407173 0.3320108 0.2676975 0.3320108 0.2676975 0.5288954 0 0 0 0 0 0 0.0593397 0.9545542 0.0593397 0.08751386 0.9611895 0.08751451 0.343922 0.3320108 0.343922 0.5288954 0.4169418 0.5288954 0 0 0 0 0 0 0.02870756 0.5263756 0.02870756 0.6723492 0.9305573 0.6723492 0.4931663 0.3320108 0.4201465 0.3320108 0.4201465 0.5288954 0 0 0 0 0 0 0 0 0 0 0 0 0.496371 0.5288954 0.6456153 0.5288954 0.6456153 0.4320554 0 0 0 0 0 0 0 0 0 0 0 0 0.64882 0.3320108 0.64882 0.5288954 0.7218398 0.5288954 0 0 0 0 0 0 0 0 0 0 0 0 0.03902411 0.3320108 0.03902411 0.4288508 0.1882684 0.4288508 0 0 0 0 0 0 0 0 0 0 0 0 0.003742575 0.8972119 0.9947474 0.8972119 0.9947474 0.5296714 0 0 0 0 0 0 0 0 0 0 0 0 0.811025 0.4183872 0.05981427 0.4183872 0.05981427 0.9058244 0 0 0 0 0 0 0 0 0 0 0 0 0.003742575 0.1460007 0.003742575 0.5135412 0.9947474 0.5135412 0 0 0 0 0 0 0 0 0 0 0 0 0.1914731 0.3288062 0.3407173 0.3288062 0.3407173 0.2319661 0.7250444 0.3320108 0.7250444 0.5288954 0.7980644 0.5288954 0 0 0 0 0 0 0.343922 0.2319661 0.343922 0.3288062 0.4931663 0.3288062 0.9276531 0.9853488 0.9276525 0.01421982 0.0570079 0.01421988 0 0 0 0 0 0 0.64882 0.2319661 0.64882 0.3288062 0.7980644 0.3288062 -1.78148e-4 0.1603322 -1.78148e-4 0.5278725 0.9908266 0.5278725 0.1530597 0.165525 0.1873781 0.1319215 0.1882684 0.1774185 0.1882684 0.1774185 0.1536816 0.2111667 0.1530597 0.165525 0.1138548 0.2287616 0.07276141 0.2106215 0.1136155 0.1831896 0.03902405 0.1764116 0.03979969 0.1319215 0.07304286 0.1655253 0.1136155 0.1831896 0.1530597 0.165525 0.1536816 0.2111667 0.03902405 0.1764116 0.07304286 0.1655253 0.07276141 0.2106215 0.1136155 0.1831896 0.1536816 0.2111667 0.1138548 0.2287616 0.8576443 0.2002423 0.8739092 0.1319214 0.8742888 0.2223735 0.8742888 0.2223735 0.857782 0.291926 0.8576443 0.2002423 0.8376767 0.3288062 0.8181908 0.2930344 0.8377936 0.2361546 0.8012689 0.2244209 0.8017045 0.1319215 0.818495 0.2002407 0.8377936 0.2361546 0.8576443 0.2002423 0.857782 0.291926 0.8012689 0.2244209 0.818495 0.2002407 0.8181908 0.2930344 0.8377936 0.2361546 0.857782 0.291926 0.8376767 0.3288062 0.3055092 0.1655251 0.3398269 0.1319218 0.3407173 0.1774188 0.3407173 0.1774188 0.3061311 0.2111667 0.3055092 0.1655251 0.2663039 0.2287615 0.2252106 0.210622 0.2660647 0.1831898 0.191473 0.1764113 0.1922485 0.1319215 0.2254921 0.1655262 0.2660647 0.1831898 0.3055092 0.1655251 0.3061311 0.2111667 0.191473 0.1764113 0.2254921 0.1655262 0.2252106 0.210622 0.2660647 0.1831898 0.3061311 0.2111667 0.2663039 0.2287615 0.8373134 0.02887922 0.8373135 0.9781579 0.8807036 0.9781579 0.4591478 0.1655253 0.4923909 0.1319215 0.4931663 0.1764115 0.4931663 0.1764115 0.459429 0.2106215 0.4591478 0.1655253 0.4183357 0.2287615 0.3785083 0.2111666 0.4185748 0.1831896 0.343922 0.1774189 0.3448122 0.1319215 0.3791306 0.1655253 0.4185748 0.1831896 0.4591478 0.1655253 0.459429 0.2106215 0.343922 0.1774189 0.3791306 0.1655253 0.3785083 0.2111666 0.4185748 0.1831896 0.459429 0.2106215 0.4183357 0.2287615 0.8826079 0.02887928 0.8826079 0.9781579 0.9259981 0.9781579 0.02870756 0.4522008 0.02870756 0.5239996 0.9305573 0.5239996 0.9712924 0.02887928 0.9279022 0.02887922 0.9279024 0.9781579 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</float_array>
+          <float_array id="Plane_008-mesh-map-0-array" count="828">0 0 0 0 0 0 0.02427518 0.1069098 0.9679138 0.2153217 0.02427589 0.2153219 0.2644929 0.3320108 0.191473 0.5288954 0.2644929 0.5288954 0 0 0 0 0 0 0.9143104 0.9411557 0.05276685 0.09315484 0.05276799 0.9411557 0.3407173 0.3320108 0.2676975 0.5288954 0.3407173 0.5288954 0 0 0 0 0 0 0.0593397 0.9545542 0.9611895 0.08751451 0.9611895 0.9545542 0.343922 0.3320108 0.4169418 0.5288954 0.4169418 0.3320108 0 0 0 0 0 0 0.9570112 0.046875 0.02569103 0.9487248 0.9570117 0.9487246 0.1489225 0.9999994 7.11628e-7 0 0.1489232 8.14684e-7 0 0 0 0 0 0 0 0 0 0 0 0 1 1.23877e-6 0.6911211 0.9999994 0.691122 0 0 0 0 0 0 0 0 0 0 0 0 0 0.691122 0 0.3722415 1 0.3722428 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3722415 1 0.1489232 8.14684e-7 0.3722428 0 0 0 0 0 0 0 0 0 0 0 0 0 0.02100658 0.05341994 0.9789934 0.3317148 0.02100735 0.3317151 0 0 0 0 0 0 0 0 0 0 0 0 0.02100735 0.3317151 0.9789921 0.6190143 0.02100664 0.619015 0 0 0 0 0 0 0 0 0 0 0 0 0.9789921 0.6190143 0.0210067 0.820219 0.02100664 0.619015 0 0 0 0 0 0 0 0 0 0 0 0 0.02427589 0.03461515 0.9679124 0.1069098 0.02427518 0.1069098 0.7250444 0.3320108 0.7980644 0.5288954 0.7980644 0.3320108 0 0 0 0 0 0 0.9679116 0.3701229 0.02427589 0.5200724 0.02427375 0.3701232 0.9276531 0.9853488 0.0570079 0.01421988 0.05701005 0.9853491 0 0 0 0 0 0 0.9679138 0.2153217 0.02427375 0.3701232 0.02427589 0.2153219 0.9789935 0.8202185 0.02100682 0.9543926 0.0210067 0.820219 0.07276141 0.2106215 0.07304286 0.1655253 0.1136155 0.1831896 0.4027293 0.3331484 0.1099961 0.2629111 0.5723057 0.2197336 0.3301302 0.08800739 0.3974381 0.191564 0.2780342 0.212304 0.1684548 0.02497297 0.7761247 0.9742516 0.7761247 0.02497303 0.4185748 0.1831896 0.3785083 0.2111666 0.3791306 0.1655253 0.8826079 0.02887928 0.9259981 0.9781579 0.925998 0.02887922 0.02870756 0.4522008 0.9305573 0.5239996 0.9305573 0.4522008 0.01233065 0.08552211 0.9616093 0.3309265 0.9616093 0.08552211 0 0 0 0 0 0 0 0 0 0 0 0 0.02427518 0.1069098 0.9679124 0.1069098 0.9679138 0.2153217 0.2644929 0.3320108 0.1914731 0.3320108 0.191473 0.5288954 0 0 0 0 0 0 0.9143104 0.9411557 0.91431 0.09315484 0.05276685 0.09315484 0.3407173 0.3320108 0.2676975 0.3320108 0.2676975 0.5288954 0 0 0 0 0 0 0.0593397 0.9545542 0.0593397 0.08751386 0.9611895 0.08751451 0.343922 0.3320108 0.343922 0.5288954 0.4169418 0.5288954 0 0 0 0 0 0 0.9570112 0.046875 0.02569055 0.046875 0.02569103 0.9487248 0.1489225 0.9999994 0 0.9999994 7.11628e-7 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1.23877e-6 1 0.9999992 0.6911211 0.9999994 0 0 0 0 0 0 0 0 0 0 0 0 0.691122 0 0.6911211 0.9999994 0.3722415 1 0 0 0 0 0 0 0 0 0 0 0 0 0.3722415 1 0.1489225 0.9999994 0.1489232 8.14684e-7 0 0 0 0 0 0 0 0 0 0 0 0 0.02100658 0.05341994 0.978992 0.05341994 0.9789934 0.3317148 0 0 0 0 0 0 0 0 0 0 0 0 0.02100735 0.3317151 0.9789934 0.3317148 0.9789921 0.6190143 0 0 0 0 0 0 0 0 0 0 0 0 0.9789921 0.6190143 0.9789935 0.8202185 0.0210067 0.820219 0 0 0 0 0 0 0 0 0 0 0 0 0.02427589 0.03461515 0.9679138 0.03461503 0.9679124 0.1069098 0.7250444 0.3320108 0.7250444 0.5288954 0.7980644 0.5288954 0 0 0 0 0 0 0.9679116 0.3701229 0.9679138 0.5200723 0.02427589 0.5200724 0.9276531 0.9853488 0.9276525 0.01421982 0.0570079 0.01421988 0 0 0 0 0 0 0.9679138 0.2153217 0.9679116 0.3701229 0.02427375 0.3701232 0.9789935 0.8202185 0.9789922 0.954392 0.02100682 0.9543926 0.1530597 0.165525 0.1873781 0.1319215 0.1882684 0.1774185 0.1882684 0.1774185 0.1536816 0.2111667 0.1530597 0.165525 0.1138548 0.2287616 0.07276141 0.2106215 0.1136155 0.1831896 0.03902405 0.1764116 0.03979969 0.1319215 0.07304286 0.1655253 0.1136155 0.1831896 0.1530597 0.165525 0.1536816 0.2111667 0.03902405 0.1764116 0.07304286 0.1655253 0.07276141 0.2106215 0.1136155 0.1831896 0.1536816 0.2111667 0.1138548 0.2287616 0.5911533 0.4147191 0.939262 0.4628213 0.4889443 0.5082769 0.4889443 0.5082769 0.1345849 0.459563 0.5911533 0.4147191 -0.05878168 0.3771904 0.1099961 0.2629111 0.4027293 0.3331484 0.4435785 0.1455842 0.9044854 0.1032025 0.5723057 0.2197336 0.4027293 0.3331484 0.5911533 0.4147191 0.1345849 0.459563 0.4435785 0.1455842 0.5723057 0.2197336 0.1099961 0.2629111 0.4027293 0.3331484 0.1345849 0.459563 -0.05878168 0.3771904 0.2144435 0.3121391 0.1865947 0.4406995 0.1160018 0.3379912 0.1160018 0.3379912 0.1442471 0.2086952 0.2144435 0.3121391 0.208818 0.1084435 0.3301302 0.08800739 0.2780342 0.212304 0.4588366 0.1154088 0.5241019 0.2183243 0.3974381 0.191564 0.2780342 0.212304 0.2144435 0.3121391 0.1442471 0.2086952 0.4588366 0.1154088 0.3974381 0.191564 0.3301302 0.08800739 0.2780342 0.212304 0.1442471 0.2086952 0.208818 0.1084435 0.1684548 0.02497297 0.1684565 0.9742516 0.7761247 0.9742516 0.4591478 0.1655253 0.4923909 0.1319215 0.4931663 0.1764115 0.4931663 0.1764115 0.459429 0.2106215 0.4591478 0.1655253 0.4183357 0.2287615 0.3785083 0.2111666 0.4185748 0.1831896 0.343922 0.1774189 0.3448122 0.1319215 0.3791306 0.1655253 0.4185748 0.1831896 0.4591478 0.1655253 0.459429 0.2106215 0.343922 0.1774189 0.3791306 0.1655253 0.3785083 0.2111666 0.4185748 0.1831896 0.459429 0.2106215 0.4183357 0.2287615 0.8826079 0.02887928 0.8826079 0.9781579 0.9259981 0.9781579 0.02870756 0.4522008 0.02870756 0.5239996 0.9305573 0.5239996 0.01233065 0.08552211 0.01233059 0.3309272 0.9616093 0.3309265 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</float_array>
           <technique_common>
             <accessor source="#Plane_008-mesh-map-0-array" count="414" stride="2">
               <param name="S" type="float"/>
@@ -2889,7 +2913,7 @@
         <vertices id="Plane_008-mesh-vertices">
           <input semantic="POSITION" source="#Plane_008-mesh-positions"/>
         </vertices>
-        <polylist material="aluminum1Material_bumpScale_0_85-material" count="138">
+        <polylist material="aluminum1Material-material" count="138">
           <input semantic="VERTEX" source="#Plane_008-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Plane_008-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Plane_008-mesh-map-0" offset="2" set="0"/>
@@ -6072,7 +6096,7 @@
         <vertices id="Plane_025-mesh-vertices">
           <input semantic="POSITION" source="#Plane_025-mesh-positions"/>
         </vertices>
-        <polylist material="floorMaterial-material" count="2">
+        <polylist material="floorMaterial_bumpScale_0_3-material" count="2">
           <input semantic="VERTEX" source="#Plane_025-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Plane_025-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Plane_025-mesh-map-0" offset="2" set="0"/>
@@ -6115,7 +6139,7 @@
         <vertices id="Plane_027-mesh-vertices">
           <input semantic="POSITION" source="#Plane_027-mesh-positions"/>
         </vertices>
-        <polylist material="frontWallMaterial-material" count="2">
+        <polylist material="frontWallMaterial_bumpScale_0_3-material" count="2">
           <input semantic="VERTEX" source="#Plane_027-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Plane_027-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Plane_027-mesh-map-0" offset="2" set="0"/>
@@ -6158,7 +6182,7 @@
         <vertices id="Plane_026-mesh-vertices">
           <input semantic="POSITION" source="#Plane_026-mesh-positions"/>
         </vertices>
-        <polylist material="frontWallMaterial-material" count="2">
+        <polylist material="frontWallMaterial_bumpScale_0_3-material" count="2">
           <input semantic="VERTEX" source="#Plane_026-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Plane_026-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Plane_026-mesh-map-0" offset="2" set="0"/>
@@ -6201,7 +6225,7 @@
         <vertices id="Plane_032-mesh-vertices">
           <input semantic="POSITION" source="#Plane_032-mesh-positions"/>
         </vertices>
-        <polylist material="frontWallMaterial-material" count="2">
+        <polylist material="frontWallMaterial_bumpScale_0_3-material" count="2">
           <input semantic="VERTEX" source="#Plane_032-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Plane_032-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Plane_032-mesh-map-0" offset="2" set="0"/>
@@ -6250,6 +6274,49 @@
           <input semantic="TEXCOORD" source="#Cube_011-mesh-map-0" offset="2" set="0"/>
           <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
           <p>4 0 0 17 1 1 5 2 2 11 3 3 12 4 4 0 5 5 1 6 6 14 7 7 2 8 8 8 9 9 21 10 10 9 11 11 5 2 12 18 12 13 6 13 14 2 8 15 15 14 16 3 15 17 9 11 18 22 16 19 10 17 20 6 13 21 19 18 22 7 19 23 3 15 24 16 20 25 4 0 26 10 17 27 23 21 28 11 3 29 0 5 30 13 22 31 1 6 32 7 19 33 20 23 34 8 9 35 16 20 36 27 24 37 28 25 38 23 21 39 34 26 40 35 27 41 12 4 42 25 28 43 13 22 44 19 18 45 32 29 46 20 23 47 17 1 48 28 25 49 29 30 50 23 21 51 24 31 52 12 4 53 13 22 54 26 32 55 14 7 56 20 23 57 33 33 58 21 10 59 18 12 60 29 30 61 30 34 62 14 7 63 27 24 64 15 14 65 22 16 66 33 33 67 34 26 68 19 18 69 30 34 70 31 35 71 34 26 72 28 25 73 26 32 74 3 36 75 38 36 76 2 36 77 10 37 78 45 37 79 9 37 80 43 38 81 6 38 82 7 38 83 4 39 84 39 39 85 3 39 86 47 40 87 10 40 88 11 40 89 1 41 90 36 41 91 0 41 92 8 42 93 43 42 94 7 42 95 5 36 96 40 36 97 4 36 98 0 36 99 47 36 100 11 36 101 38 36 102 1 36 103 2 36 104 45 43 105 8 43 106 9 43 107 42 44 108 5 44 109 6 44 110 39 45 111 50 46 112 38 47 113 46 48 114 57 49 115 45 50 116 43 51 117 54 52 118 42 53 119 52 54 120 39 45 121 40 55 122 47 56 123 58 57 124 46 48 125 49 58 126 36 59 127 37 60 128 56 61 129 43 51 130 44 62 131 53 63 132 40 55 133 41 64 134 48 65 135 47 56 136 36 59 137 38 47 138 49 58 139 37 60 140 57 49 141 44 62 142 45 50 143 42 53 144 53 63 145 41 64 146 4 0 147 16 20 148 17 1 149 11 3 150 23 21 151 12 4 152 1 6 153 13 22 154 14 7 155 8 9 156 20 23 157 21 10 158 5 2 159 17 1 160 18 12 161 2 8 162 14 7 163 15 14 164 9 11 165 21 10 166 22 16 167 6 13 168 18 12 169 19 18 170 3 15 171 15 14 172 16 20 173 10 17 174 22 16 175 23 21 176 0 5 177 12 4 178 13 22 179 7 19 180 19 18 181 20 23 182 16 20 183 15 14 184 27 24 185 23 21 186 22 16 187 34 26 188 12 4 189 24 31 190 25 28 191 19 18 192 31 35 193 32 29 194 17 1 195 16 20 196 28 25 197 23 21 198 35 27 199 24 31 200 13 22 201 25 28 202 26 32 203 20 23 204 32 29 205 33 33 206 18 12 207 17 1 208 29 30 209 14 7 210 26 32 211 27 24 212 22 16 213 21 10 214 33 33 215 19 18 216 18 12 217 30 34 218 26 32 219 25 28 220 24 31 221 24 31 222 35 27 223 34 26 224 34 26 225 33 33 226 32 29 227 32 29 228 31 35 229 30 34 230 30 34 231 29 30 232 28 25 233 28 25 234 27 24 235 26 32 236 26 32 237 24 31 238 34 26 239 34 26 240 32 29 241 30 34 242 30 34 243 28 25 244 34 26 245 3 66 246 39 66 247 38 66 248 10 36 249 46 36 250 45 36 251 43 67 252 42 67 253 6 67 254 4 36 255 40 36 256 39 36 257 47 68 258 46 68 259 10 68 260 1 36 261 37 36 262 36 36 263 8 36 264 44 36 265 43 36 266 5 36 267 41 36 268 40 36 269 0 69 270 36 69 271 47 69 272 38 70 273 37 70 274 1 70 275 45 71 276 44 71 277 8 71 278 42 72 279 41 72 280 5 72 281 39 45 282 51 73 283 50 46 284 46 48 285 58 57 286 57 49 287 43 51 288 55 74 289 54 52 290 52 54 291 51 73 292 39 45 293 47 56 294 59 75 295 58 57 296 49 58 297 48 65 298 36 59 299 56 61 300 55 74 301 43 51 302 53 63 303 52 54 304 40 55 305 48 65 306 59 75 307 47 56 308 38 47 309 50 46 310 49 58 311 57 49 312 56 61 313 44 62 314 42 53 315 54 52 316 53 63 317</p>
+        </polylist>
+      </mesh>
+    </geometry>
+    <geometry id="Cube_012-mesh" name="Cube.012">
+      <mesh>
+        <source id="Cube_012-mesh-positions">
+          <float_array id="Cube_012-mesh-positions-array" count="12">1.00136e-4 -0.5284381 0.2273818 1.00136e-4 0.5284383 0.2273818 -9.9659e-5 -0.5284381 -0.2273817 -9.9659e-5 0.5284383 -0.2273817</float_array>
+          <technique_common>
+            <accessor source="#Cube_012-mesh-positions-array" count="4" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Cube_012-mesh-normals">
+          <float_array id="Cube_012-mesh-normals-array" count="6">-1 0 4.39338e-4 -1 0 4.39338e-4</float_array>
+          <technique_common>
+            <accessor source="#Cube_012-mesh-normals-array" count="2" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Cube_012-mesh-map-0">
+          <float_array id="Cube_012-mesh-map-0-array" count="12">0 1 1 0 1 0.9999997 0 1 0 3.57628e-7 1 0</float_array>
+          <technique_common>
+            <accessor source="#Cube_012-mesh-map-0-array" count="6" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Cube_012-mesh-vertices">
+          <input semantic="POSITION" source="#Cube_012-mesh-positions"/>
+        </vertices>
+        <polylist count="2">
+          <input semantic="VERTEX" source="#Cube_012-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Cube_012-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Cube_012-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 </vcount>
+          <p>1 0 0 2 0 1 0 0 2 1 1 3 3 1 4 2 1 5</p>
         </polylist>
       </mesh>
     </geometry>
@@ -6417,13 +6484,7 @@
       </node>
       <node id="aktakomPowerSupplyScreen" name="aktakomPowerSupplyScreen" type="NODE">
         <matrix sid="transform">-4.37114e-8 -1 0 11.11992 1 -4.37114e-8 0 -4.665175 0 0 1 15.2423 0 0 0 1</matrix>
-        <instance_geometry url="#Cube_003-mesh" name="aktakomPowerSupplyScreen">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="aktakomPowerSupplyScreenMaterial-material" target="#aktakomPowerSupplyScreenMaterial-material"/>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cube_003-mesh" name="aktakomPowerSupplyScreen"/>
       </node>
       <node id="akatakomPowerSupplyHandleVF" name="akatakomPowerSupplyHandleVF" type="NODE">
         <matrix sid="transform">7.54979e-8 -1 -4.37114e-8 10.73867 0 -4.37114e-8 1 -4.695807 -1 -7.54979e-8 -3.30012e-15 14.48996 0 0 0 1</matrix>
@@ -6466,7 +6527,7 @@
         <instance_geometry url="#Cube_009-mesh" name="aktakomPowerSupply">
           <bind_material>
             <technique_common>
-              <instance_material symbol="aktakomPowerSupplyMaterial-material" target="#aktakomPowerSupplyMaterial-material">
+              <instance_material symbol="aktakomPowerSupplyMaterial_bumpScale_-0_02-material" target="#aktakomPowerSupplyMaterial_bumpScale_-0_02-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>
@@ -6602,7 +6663,7 @@
         <instance_geometry url="#Plane_008-mesh" name="tableTopFrame">
           <bind_material>
             <technique_common>
-              <instance_material symbol="aluminum1Material_bumpScale_0_85-material" target="#aluminum1Material_bumpScale_0_85-material">
+              <instance_material symbol="aluminum1Material-material" target="#aluminum1Material-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>
@@ -7032,7 +7093,7 @@
         <instance_geometry url="#Plane_025-mesh" name="floor">
           <bind_material>
             <technique_common>
-              <instance_material symbol="floorMaterial-material" target="#floorMaterial-material">
+              <instance_material symbol="floorMaterial_bumpScale_0_3-material" target="#floorMaterial_bumpScale_0_3-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>
@@ -7044,7 +7105,7 @@
         <instance_geometry url="#Plane_027-mesh" name="frontWall">
           <bind_material>
             <technique_common>
-              <instance_material symbol="frontWallMaterial-material" target="#frontWallMaterial-material">
+              <instance_material symbol="frontWallMaterial_bumpScale_0_3-material" target="#frontWallMaterial_bumpScale_0_3-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>
@@ -7056,7 +7117,7 @@
         <instance_geometry url="#Plane_026-mesh" name="leftWall">
           <bind_material>
             <technique_common>
-              <instance_material symbol="frontWallMaterial-material" target="#frontWallMaterial-material">
+              <instance_material symbol="frontWallMaterial_bumpScale_0_3-material" target="#frontWallMaterial_bumpScale_0_3-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>
@@ -7068,7 +7129,7 @@
         <instance_geometry url="#Plane_032-mesh" name="rightWall">
           <bind_material>
             <technique_common>
-              <instance_material symbol="frontWallMaterial-material" target="#frontWallMaterial-material">
+              <instance_material symbol="frontWallMaterial_bumpScale_0_3-material" target="#frontWallMaterial_bumpScale_0_3-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>
@@ -7086,6 +7147,10 @@
             </technique_common>
           </bind_material>
         </instance_geometry>
+      </node>
+      <node id="aktakomPowerSupplyScreenBack" name="aktakomPowerSupplyScreenBack" type="NODE">
+        <matrix sid="transform">-4.87719e-8 -1.11577 0 11.11992 1.11577 -4.87719e-8 0 -4.658714 0 0 1.11577 15.2423 0 0 0 1</matrix>
+        <instance_geometry url="#Cube_012-mesh" name="aktakomPowerSupplyScreenBack"/>
       </node>
     </visual_scene>
   </library_visual_scenes>

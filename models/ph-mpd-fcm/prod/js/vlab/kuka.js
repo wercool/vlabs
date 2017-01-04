@@ -13,6 +13,8 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
     self.ikChain = undefined;
     self.l2l3initialAngle = 0;
 
+    self.serverIK = false;
+
     self.path = [];
     self.positioningStage = 0;
     self.XYPositioning = true;
@@ -83,10 +85,6 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
             gripperContructorArgs[1] = self; // kuka instance
             self.gripper = Gripper.apply({}, gripperContructorArgs);
         }
-        if (basePosition != undefined && basePosition != null)
-        {
-            self.kukaBase.position.copy(basePosition);
-        }
 
         self.kukaBase.updateMatrixWorld();
         var link2Pos = new THREE.Vector3().setFromMatrixPosition(self.kukaLink2.matrixWorld);
@@ -110,8 +108,13 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
         var l3l4Dir = new Fullik.V3(l3l4Vec.x, l3l4Vec.y, l3l4Vec.z);
         self.ikChain.addConsecutiveBone(l3l4Dir, l3l4DirLength);
 
-        self.ikSolver.add(self.ikChain, link4Pos, false);
+        self.ikSolver.add(self.ikChain, link4Pos, test);
         self.ikSolver.update();
+
+        if (basePosition != undefined && basePosition != null)
+        {
+            self.kukaBase.position.copy(basePosition);
+        }
 
         if (initialLinksAngles != null)
         {
@@ -377,89 +380,123 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
             self.L1 = -Math.PI + xDir.angleTo(xzEEFDir.clone());
 
             requestForEEFPos.x = xzEEFDir.length();
-            requestForEEFPos.y = (endEffectorPos.y - self.kukaBase.position.y + l4l5Height).toFixed(2);
-            requestForEEFPos.z = "0.00";
+            requestForEEFPos.y = (endEffectorPos.y - self.kukaBase.position.y + l4l5Height);
+            requestForEEFPos.z = 0.00;
         }
         else
         {
             requestForEEFPos.x = (endEffectorPos.x - self.kukaBase.position.x).toFixed(2);
             requestForEEFPos.y = (endEffectorPos.y - self.kukaBase.position.y + l4l5Height).toFixed(2);
-            requestForEEFPos.z = ((endEffectorPos.z - self.kukaBase.position.z).toFixed(2));
+            requestForEEFPos.z = (endEffectorPos.z - self.kukaBase.position.z).toFixed(2);
         }
 
-        $.ajax({
-            url: "http://127.0.0.1:11111/ikxyz", 
-            type: 'POST', 
-            contentType: "application/json", 
-            data: JSON.stringify(requestForEEFPos)
-        }).done(function(res){
-            if (res.length)
-            {
-                vlab.trace(res.length + " Kuka solutions found");
-                var kukaIKSolutionId = 0;
-                var minDistance = 0;
-                for (var i = 0; i < res.length; i++)
+        if (self.serverIK)
+        {
+            $.ajax({
+                url: "http://127.0.0.1:11111/ikxyz", 
+                type: 'POST', 
+                contentType: "application/json", 
+                data: JSON.stringify(requestForEEFPos)
+            }).done(function(res){
+                if (res.length)
                 {
-                    var solution = new THREE.Vector3(res[i].x, res[i].y, res[i].z);
-                    var solutionDistance = solution.distanceTo(endEffectorPos);
-                    if (solutionDistance < minDistance || i == 0)
+                    vlab.trace(res.length + " Kuka solutions found");
+                    var kukaIKSolutionId = 0;
+                    var minDistance = 0;
+                    for (var i = 0; i < res.length; i++)
                     {
-                        kukaIKSolutionId = i;
-                        minDistance = solutionDistance;
+                        var solution = new THREE.Vector3(res[i].x, res[i].y, res[i].z);
+                        var solutionDistance = solution.distanceTo(endEffectorPos);
+                        if (solutionDistance < minDistance || i == 0)
+                        {
+                            kukaIKSolutionId = i;
+                            minDistance = solutionDistance;
+                        }
                     }
-                }
 
-                var kukaIK = res[kukaIKSolutionId];
+                    var kukaIK = res[kukaIKSolutionId];
 
-                // get l4 angle to eef
-                var kukaLink1Cur = self.kukaLink1.rotation.y;
-                var kukaLink2Cur = self.kukaLink2.rotation.z;
-                var kukaLink3Cur = self.kukaLink3.rotation.z;
-                var kukaLink4Cur = self.kukaLink4.rotation.z;
+                    kukaIK = self.estimateLink4Rotation(kukaIK, endEffectorPos, requestForEEFPos);
 
-                if (self.XYPositioning)
-                {
-                    kukaIK.l1 = self.L1;
+                    // set links
+                    var angles = {
+                        link1:kukaIK.l1, 
+                        link2:kukaIK.l2, 
+                        link3:kukaIK.l3, 
+                        link4:kukaIK.l4
+                    };
+
+                    self.setKukaAngles(angles);
                 }
                 else
                 {
-                    kukaIK.l1 = ((requestForEEFPos.x < 0) ? -Math.PI : 0.0) + ((requestForEEFPos.x < 0) ? -1 : 1) * kukaIK.l1;
+                    vlab.trace("Solution not found for Kuka EEF");
+                    self.path = [];
                 }
+            });
+        }
+        else
+        {
+            self.ikChain.updateTarget(requestForEEFPos);
+            var l2l3Dir = self.ikChain.bones[0].getDirectionUV().clone();
+            var l3l4Dir = self.ikChain.bones[1].getDirectionUV().clone();
 
-                self.kukaLink1.rotation.y = kukaIK.l1;
-                self.kukaLink2.rotation.z = kukaIK.l2;
-                self.kukaLink3.rotation.z = kukaIK.l3;
-                self.kukaLink4.rotation.z = 0;
+            var kukaIK = {l1:0.0, l2:0.0, l3:0.0, l4:0.0};
 
-                self.kukaBase.updateMatrixWorld();
-                var l4Pos = new THREE.Vector3().setFromMatrixPosition(self.kukaLink4.matrixWorld);
-                var l5Pos = new THREE.Vector3().setFromMatrixPosition(self.kukaLink5.matrixWorld);
-                var l4EEFDir = l4Pos.clone().sub(endEffectorPos); 
-                var l4l5Dir  = l4Pos.clone().sub(l5Pos); 
+            kukaIK.l1 = self.L1;
+            kukaIK.l2 = -l2l3Dir.angleTo(new THREE.Vector3(0,1,0));
+            kukaIK.l3 = -self.l2l3initialAngle - l3l4Dir.angleTo(l2l3Dir);
 
-                var link4 = l4EEFDir.angleTo(l4l5Dir);
+            kukaIK = self.estimateLink4Rotation(kukaIK, endEffectorPos, requestForEEFPos);
 
-                self.kukaLink1.rotation.y = kukaLink1Cur;
-                self.kukaLink2.rotation.z = kukaLink2Cur;
-                self.kukaLink3.rotation.z = kukaLink3Cur;
-                self.kukaLink4.rotation.z = kukaLink4Cur;
+            // set links
+            var angles = {
+                link1:kukaIK.l1, 
+                link2:kukaIK.l2, 
+                link3:kukaIK.l3, 
+                link4:kukaIK.l4
+            };
 
-                // set links
-                var angles = {
-                    link1:kukaIK.l1, 
-                    link2:kukaIK.l2, 
-                    link3:kukaIK.l3, 
-                    link4:-link4
-                };
+            self.setKukaAngles(angles);
+        }
+    };
 
-                self.setKukaAngles(angles);
-            }
-            else
-            {
-                vlab.trace("Solution not found for Kuka EEF");
-                self.path = [];
-            }
-        });
+    self.estimateLink4Rotation = function(kukaIK, endEffectorPos, requestForEEFPos)
+    {
+        // get l4 angle to eef
+        var kukaLink1Cur = self.kukaLink1.rotation.y;
+        var kukaLink2Cur = self.kukaLink2.rotation.z;
+        var kukaLink3Cur = self.kukaLink3.rotation.z;
+        var kukaLink4Cur = self.kukaLink4.rotation.z;
+
+        if (self.XYPositioning)
+        {
+            kukaIK.l1 = self.L1;
+        }
+        else
+        {
+            kukaIK.l1 = ((requestForEEFPos.x < 0) ? -Math.PI : 0.0) + ((requestForEEFPos.x < 0) ? -1 : 1) * kukaIK.l1;
+        }
+
+        self.kukaLink1.rotation.y = kukaIK.l1;
+        self.kukaLink2.rotation.z = kukaIK.l2;
+        self.kukaLink3.rotation.z = kukaIK.l3;
+        self.kukaLink4.rotation.z = 0;
+
+        self.kukaBase.updateMatrixWorld();
+        var l4Pos = new THREE.Vector3().setFromMatrixPosition(self.kukaLink4.matrixWorld);
+        var l5Pos = new THREE.Vector3().setFromMatrixPosition(self.kukaLink5.matrixWorld);
+        var l4EEFDir = l4Pos.clone().sub(endEffectorPos); 
+        var l4l5Dir  = l4Pos.clone().sub(l5Pos); 
+
+        kukaIK.l4 = -l4EEFDir.angleTo(l4l5Dir);
+
+        self.kukaLink1.rotation.y = kukaLink1Cur;
+        self.kukaLink2.rotation.z = kukaLink2Cur;
+        self.kukaLink3.rotation.z = kukaLink3Cur;
+        self.kukaLink4.rotation.z = kukaLink4Cur;
+
+        return kukaIK;
     };
 
     self.setKukaAngles = function(angles)
