@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.78.0 commit date:2016-10-24, commit time:12:20, hash:e8299c8</authoring_tool>
     </contributor>
-    <created>2017-01-04T18:59:05</created>
-    <modified>2017-01-04T18:59:05</modified>
+    <created>2017-01-05T14:14:03</created>
+    <modified>2017-01-05T14:14:03</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -524,7 +524,7 @@
         </technique>
       </profile_COMMON>
     </effect>
-    <effect id="motorWoodenStandMaterial_bumpScale_0_005-effect">
+    <effect id="motorWoodenStandMaterial_bumpScale_0_01-effect">
       <profile_COMMON>
         <newparam sid="motorWoodenStand_jpg-surface">
           <surface type="2D">
@@ -558,10 +558,10 @@
               <texture texture="motorWoodenStand_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
-              <color sid="specular">0.1145826 0.1145826 0.1145826 1</color>
+              <color sid="specular">0.07958405 0.07958405 0.07958405 1</color>
             </specular>
             <shininess>
-              <float sid="shininess">29</float>
+              <float sid="shininess">60</float>
             </shininess>
             <index_of_refraction>
               <float sid="index_of_refraction">1</float>
@@ -1205,8 +1205,8 @@
     <material id="motorMaterial-material" name="motorMaterial">
       <instance_effect url="#motorMaterial-effect"/>
     </material>
-    <material id="motorWoodenStandMaterial_bumpScale_0_005-material" name="motorWoodenStandMaterial_bumpScale_0_005">
-      <instance_effect url="#motorWoodenStandMaterial_bumpScale_0_005-effect"/>
+    <material id="motorWoodenStandMaterial_bumpScale_0_01-material" name="motorWoodenStandMaterial_bumpScale_0_01">
+      <instance_effect url="#motorWoodenStandMaterial_bumpScale_0_01-effect"/>
     </material>
     <material id="buttonMaterial-material" name="buttonMaterial">
       <instance_effect url="#buttonMaterial-effect"/>
@@ -1785,7 +1785,7 @@
         <vertices id="Cube_004-mesh-vertices">
           <input semantic="POSITION" source="#Cube_004-mesh-positions"/>
         </vertices>
-        <polylist material="motorWoodenStandMaterial_bumpScale_0_005-material" count="10">
+        <polylist material="motorWoodenStandMaterial_bumpScale_0_01-material" count="10">
           <input semantic="VERTEX" source="#Cube_004-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cube_004-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cube_004-mesh-map-0" offset="2" set="0"/>
@@ -6740,7 +6740,7 @@
         <instance_geometry url="#Cube_004-mesh" name="motorWoodenStand">
           <bind_material>
             <technique_common>
-              <instance_material symbol="motorWoodenStandMaterial_bumpScale_0_005-material" target="#motorWoodenStandMaterial_bumpScale_0_005-material">
+              <instance_material symbol="motorWoodenStandMaterial_bumpScale_0_01-material" target="#motorWoodenStandMaterial_bumpScale_0_01-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>
