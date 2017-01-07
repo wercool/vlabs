@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Title of the document</title>
+</head
+<body>
+    <script>
+var hello = new Promise(function(resolve, reject) {  
+    resolve("Привет");
+});
+
+
+hello.then((str) => `${str} Мир`)
+     .then((str) => `${str}!`)
+     .then((str) => console.log(str)) // Привет Мир!
+
+
+    </script>
+</body>
+</html>

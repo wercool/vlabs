@@ -24,7 +24,7 @@ function PhMpdFcm(webGLContainer)
 
     var origin = new THREE.Vector3(0, 0, 0);
     var pulleyPos;
-    var ropeLineWidth = 3.0;
+    var ropeLineWidth = 4.0;
     var initialDefaultCameraPosVectorLength;
     var labSwitchState = 1;
     var stopButtonTopState = true;
@@ -81,8 +81,9 @@ function PhMpdFcm(webGLContainer)
         var light = new THREE.AmbientLight(0xecf5ff, 0.05); // soft white light
         self.getVlabScene().add(light);
 
-        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.3);
+        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.1);
         self.getVlabScene().add(light);
+
 /*
         var spotLight = new THREE.SpotLight(0xecf5ff, 0.8, 250, 45, 1.0, 10);
         spotLight.target = self.getVlabScene().getObjectByName("frontWall");
@@ -130,8 +131,15 @@ function PhMpdFcm(webGLContainer)
                                      linewidth: ropeLineWidth
         });
         activeObjects["rope"] = new THREE.Line(ropeGeometry, ropeMaterial);
-        activeObjects["rope"].castShadow = true;
+        activeObjects["rope"].castShadow = false;
+        activeObjects["ropeShadow"] = new THREE.Line(ropeGeometry, new THREE.LineBasicMaterial({
+                                     color:     0x000000,
+                                     opacity:   0.0,
+                                     linewidth: 0.1
+        }));
+        activeObjects["ropeShadow"].castShadow = true;
         self.getVlabScene().add(activeObjects["rope"]);
+        self.getVlabScene().add(activeObjects["ropeShadow"]);
 
         // position pusher
         activeObjects["pusher"].geometry.rotateX(Math.PI / 2);
@@ -221,9 +229,9 @@ var powerSupply = new AktakomPowerSupply(self);
     self.cameraControlsEvent = function()
     {
         var cameraRelativeDistance = initialDefaultCameraPosVectorLength / self.getDefaultCamera().position.length();
-        if (3 * cameraRelativeDistance < 5)
+        if (4 * cameraRelativeDistance < 5)
         {
-            ropeLineWidth = activeObjects["rope"].material.linewidth = 3 * cameraRelativeDistance;
+            ropeLineWidth = activeObjects["rope"].material.linewidth = 4 * cameraRelativeDistance;
         }
 
         if (self.getDefaultCamera().controls.enabled)
@@ -256,7 +264,9 @@ var powerSupply = new AktakomPowerSupply(self);
                 framePivotPos.setFromMatrixPosition(activeObjects["framePivot"].matrixWorld);
 
                 activeObjects["rope"].geometry.vertices[0].copy(framePivotPos);
+                activeObjects["ropeShadow"].geometry.vertices[0].copy(framePivotPos);
                 activeObjects["rope"].geometry.verticesNeedUpdate = true;
+                activeObjects["ropeShadow"].geometry.verticesNeedUpdate = true;
 
                 var ropeTrembling = Math.random() * 0.5;
                 activeObjects["rope"].material.linewidth = ropeLineWidth + ((ropeTrembling > 0.25) ? ropeTrembling : -ropeTrembling);
