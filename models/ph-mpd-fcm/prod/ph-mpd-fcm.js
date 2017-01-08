@@ -81,7 +81,7 @@ function PhMpdFcm(webGLContainer)
         var light = new THREE.AmbientLight(0xecf5ff, 0.05); // soft white light
         self.getVlabScene().add(light);
 
-        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.4);
+        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.15);
         self.getVlabScene().add(light);
 
 /*
