@@ -48,7 +48,7 @@ function PhMpdFcm(webGLContainer)
 
         self.getDefaultCamera().controls.minDistance = 5;
         self.getDefaultCamera().controls.maxDistance = 15;
-        self.getDefaultCamera().controls.maxPolarAngle = Math.PI/2 - 0.2; 
+        self.getDefaultCamera().controls.maxPolarAngle = Math.PI/2 - 0.2;
         self.getDefaultCamera().controls.minPolarAngle = 0.75;
         self.getDefaultCamera().controls.maxXPan    = tableTopPos.x + 3;
         self.getDefaultCamera().controls.minXPan    = tableTopPos.x - 3;
@@ -81,7 +81,7 @@ function PhMpdFcm(webGLContainer)
         var light = new THREE.AmbientLight(0xecf5ff, 0.05); // soft white light
         self.getVlabScene().add(light);
 
-        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.1);
+        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.4);
         self.getVlabScene().add(light);
 
 /*
@@ -94,10 +94,10 @@ function PhMpdFcm(webGLContainer)
 
         // kuka
         kuka = new Kuka(self,
-                        false, 
-                        self.getVlabScene().getObjectByName("kukabasePlate").position, 
-                        null, 
-                        KukaVacuumGripper, 
+                        false,
+                        self.getVlabScene().getObjectByName("kukabasePlate").position,
+                        null,
+                        KukaVacuumGripper,
                         [self, null, false, "slopingBody", [2, 28]]);
 
         // this VLab constants
@@ -175,7 +175,7 @@ var powerSupply = new AktakomPowerSupply(self);
         aktakomPowerSupplyScreenCanvas2D.fillText("V", 190, 172);
         aktakomPowerSupplyScreenCanvas2D.fillText("A", 190, 222);
         // canvas contents will be used for a texture
-        var aktakomPowerSupplyScreenTexture = new THREE.Texture(aktakomPowerSupplyScreenCanvas) 
+        var aktakomPowerSupplyScreenTexture = new THREE.Texture(aktakomPowerSupplyScreenCanvas)
         aktakomPowerSupplyScreenTexture.needsUpdate = true;
         var aktakomPowerSupplyScreenMaterial = new THREE.MeshBasicMaterial({map:aktakomPowerSupplyScreenTexture, side:THREE.FrontSide});
         aktakomPowerSupplyScreenMaterial.transparent = true;
@@ -254,8 +254,8 @@ var powerSupply = new AktakomPowerSupply(self);
         this.process = function()
         {
             if (
-                   (!stopButtonTopState && !stopButtonLowerState && labSwitchState != 0)    || 
-                   (stopButtonTopState && labSwitchState == 1)                              || 
+                   (!stopButtonTopState && !stopButtonLowerState && labSwitchState != 0)    ||
+                   (stopButtonTopState && labSwitchState == 1)                              ||
                    (stopButtonLowerState && labSwitchState == -1)
                )
             {
@@ -284,8 +284,8 @@ var powerSupply = new AktakomPowerSupply(self);
         this.process = function()
         {
             if (
-                   (!stopButtonTopState && !stopButtonLowerState && labSwitchState != 0)    || 
-                   (stopButtonTopState && labSwitchState == 1)                              || 
+                   (!stopButtonTopState && !stopButtonLowerState && labSwitchState != 0)    ||
+                   (stopButtonTopState && labSwitchState == 1)                              ||
                    (stopButtonLowerState && labSwitchState == -1)
                )
             {
@@ -311,7 +311,7 @@ var powerSupply = new AktakomPowerSupply(self);
 
                 frameAngle = Math.asin( ( pulleyPos.length() * Math.sin( pulleyPos.angleTo(framePos) ) ) / pulleyPos.distanceTo(framePos));
                 frameAngle -= (Math.PI / 2) - framePosY.angleTo(framePos);
-     
+
                 activeObjects["frame"].rotation.z = -(Math.PI / 2 + activeObjects["slopingSurface"].rotation.z - frameAngle);
                 activeObjects["plumb"].rotation.z = -activeObjects["slopingSurface"].rotation.z;
 
@@ -332,8 +332,8 @@ var powerSupply = new AktakomPowerSupply(self);
         this.process = function()
         {
             if (
-                   (!stopButtonTopState && !stopButtonLowerState && labSwitchState != 0)    || 
-                   (stopButtonTopState && labSwitchState == 1)                              || 
+                   (!stopButtonTopState && !stopButtonLowerState && labSwitchState != 0)    ||
+                   (stopButtonTopState && labSwitchState == 1)                              ||
                    (stopButtonLowerState && labSwitchState == -1)
                )
             {
