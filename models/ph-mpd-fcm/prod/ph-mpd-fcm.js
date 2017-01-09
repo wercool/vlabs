@@ -33,19 +33,26 @@ function PhMpdFcm(webGLContainer)
     var initialSlopingBodyPosition = null;
     var slopingSurfaceFixtureContact = false;
     var kukaReturnsSlopingBodyStep = 0;
+    var valter = null;
 
     var scenePostBuilt = function()
     {
-        self.getDefaultCamera().position.set(-0.25, 20.0, 14.0);
-
         var tableTopPos = self.getVlabScene().getObjectByName("tableTop").position.clone();
 
+        // PointerLockControls
+        self.pointerLockControlsEnable(new THREE.Vector3(0.0, 20.0, 20.0));
+
+/*
+        // OrbitControls
+        self.getDefaultCamera().position.set(-0.25, 20.0, 14.0);
         self.getDefaultCamera().controls = new THREE.OrbitControls(self.getDefaultCamera(), self.getWebglContainerDOM());
         self.getDefaultCamera().controls.setTarget(tableTopPos);
         self.getDefaultCamera().controls.addEventListener("change", self.cameraControlsEvent);
         self.getDefaultCamera().controls.autoRotate = false;
         self.getDefaultCamera().controls.enableKeys = false;
-
+*/
+/*
+        // user mode
         self.getDefaultCamera().controls.minDistance = 5;
         self.getDefaultCamera().controls.maxDistance = 15;
         self.getDefaultCamera().controls.maxPolarAngle = Math.PI/2 - 0.2;
@@ -55,7 +62,8 @@ function PhMpdFcm(webGLContainer)
         self.getDefaultCamera().controls.maxYPan    = tableTopPos.y + 2;
         self.getDefaultCamera().controls.minYPan    = tableTopPos.y;
         self.getDefaultCamera().controls.update();
-
+*/
+        // test mode
 //        self.getDefaultCamera().controls.testMode = true;
 
         activeObjects["slopingSurface"] = self.getVlabScene().getObjectByName("slopingSurface");
@@ -100,9 +108,13 @@ function PhMpdFcm(webGLContainer)
                         KukaVacuumGripper,
                         [self, null, false, "slopingBody", [2, 28]]);
 
+        // Valter
+        valter = new Valter(self, new THREE.Vector3(0, 2.57, 20), true);
+
         // this VLab constants
         pulleyPos = activeObjects["pulley"].position.clone();
         pulleyPos.y += 0.25;
+
         initialDefaultCameraPosVectorLength = self.getDefaultCamera().position.length();
 
         // position frame

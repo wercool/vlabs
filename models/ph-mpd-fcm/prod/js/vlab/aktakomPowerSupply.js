@@ -17,7 +17,7 @@ AktakomPowerSupply.prototype.voltageInstability = function()
 {
     var self = this;
     setTimeout(function(){ self.voltageInstability(); }, 500);
-    console.log(this.voltage);
+    //console.log(this.voltage);
 };
 
 AktakomPowerSupply.prototype.getVoltage = function()

@@ -22,6 +22,8 @@ function VLab(vlabNature)
     var sceneRenderPause = true;
     var physijsScenePause = true;
 
+    var pointerLockControls = false;
+
     var vlabInitializedEvent = new Event("vlabInitialized");
     var sceneLoadedEvent     = new Event("sceneLoaded");
     var sceneBuiltEvent      = new Event("sceneBuilt");
@@ -130,7 +132,7 @@ function VLab(vlabNature)
             return;
         }
 
-        defaultCamera = new THREE.PerspectiveCamera(70, webglContainer.width() / webglContainer.height(), 0.1, 2000);
+        defaultCamera = new THREE.PerspectiveCamera(70, webglContainer.width() / webglContainer.height(), 0.1, 100);
 
         webglContainerDOM.addEventListener("mousemove", mouseMove, false);
         webglContainerDOM.addEventListener("mousedown", mouseDown, false);
@@ -143,9 +145,9 @@ function VLab(vlabNature)
 
         if (self.vlabNature.isPhysijsScene)
         {
-            Physijs.scripts.worker = "/js/physijs_worker.js";
-            Physijs.scripts.ammo = "/js/ammo.js";
-            vlabScene = new Physijs.Scene({ fixedTimeStep: 1 / 120});
+            Physijs.scripts.worker = "js/physijs_worker.js";
+            Physijs.scripts.ammo = "ammo.js";
+            vlabScene = new Physijs.Scene({fixedTimeStep: 1 / 120});
             vlabScene.setGravity(new THREE.Vector3( 0, -30, 0 ));
 
             if (self.vlabNature.isPhysijsScene)
@@ -554,6 +556,7 @@ function VLab(vlabNature)
     {
         if (!sceneRenderPause)
         {
+            self.WebGLRenderer.clear();
             self.WebGLRenderer.render(vlabScene, defaultCamera);
             requestAnimationFrame(render);
             if (webGLStatistics != null)
@@ -577,6 +580,10 @@ function VLab(vlabNature)
                 }
             }
             TWEEN.update(time);
+            if (pointerLockControls)
+            {
+                self.getDefaultCamera().controls.update();
+            }
         }
         else
         {
@@ -835,6 +842,17 @@ function VLab(vlabNature)
         }
     };
 
+    self.pointerLockControlsEnable = function(initialPosition)
+    {
+        if (!pointerLockControls)
+        {
+            self.getDefaultCamera().controls = new THREE.PointerLockControls(self, self.getDefaultCamera());
+            self.getDefaultCamera().controls.getObject().position.copy(initialPosition);
+            self.getVlabScene().add(self.getDefaultCamera().controls.getObject());
+            pointerLockControls = true;
+        }
+    };
+
     var toScreenPosition = function(obj)
     {
         var vector = new THREE.Vector3();
@@ -858,7 +876,10 @@ function VLab(vlabNature)
     self.getWebglContainerDOM = function(){return webglContainerDOM};
     self.getWebglContainer = function(){return webglContainer};
     self.getVlabScene = function(){return vlabScene};
-    self.getDefaultCamera = function(){return defaultCamera};
+    self.getDefaultCamera = function()
+    {
+        return defaultCamera;
+    };
     self.setSceneRenderPause = function(pause)
     {
         sceneRenderPause = pause;
