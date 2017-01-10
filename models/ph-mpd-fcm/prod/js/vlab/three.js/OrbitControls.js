@@ -243,8 +243,8 @@ THREE.OrbitControls = function ( object, domElement , vlab) {
 
 	}();
 
-	this.dispose = function() {
-
+	this.dispose = function()
+	{
 		scope.domElement.removeEventListener( 'contextmenu', onContextMenu, false );
 		scope.domElement.removeEventListener( 'mousedown', onMouseDown, false );
 		scope.domElement.removeEventListener( 'wheel', onMouseWheel, false );
@@ -259,7 +259,6 @@ THREE.OrbitControls = function ( object, domElement , vlab) {
 		window.removeEventListener( 'keydown', onKeyDown, false );
 
 		//scope.dispatchEvent( { type: 'dispose' } ); // should this be added here?
-
 	};
 
 	//
@@ -682,13 +681,7 @@ THREE.OrbitControls = function ( object, domElement , vlab) {
 	//
 	// event handlers - FSM: listen for events and reset state
 	//
-
 	function onMouseDown( event ) {
-
-		if (event.ctrlKey === true && event.button == 1)
-		{
-			self.vlab.pointerLockControlsEnable(self.vlab.getDefaultCameraPosition(), true);
-		}
 
 		if ( scope.enabled === false ) return;
 
@@ -720,53 +713,46 @@ THREE.OrbitControls = function ( object, domElement , vlab) {
 
 		}
 
-		if ( state !== STATE.NONE ) {
-
+		if ( state !== STATE.NONE )
+		{
 			document.addEventListener( 'mousemove', onMouseMove, false );
 			document.addEventListener( 'mouseup', onMouseUp, false );
 
 			scope.dispatchEvent( startEvent );
-
 		}
 
 	}
 
-	function onMouseMove( event ) {
-
+	function onMouseMove( event )
+	{
 		if ( scope.enabled === false ) return;
 
 		event.preventDefault();
 
-		if ( state === STATE.ROTATE ) {
-
+		if ( state === STATE.ROTATE )
+		{
 			if ( scope.enableRotate === false ) return;
-
 			handleMouseMoveRotate( event );
-
-		} else if ( state === STATE.DOLLY ) {
-
-			if ( scope.enableZoom === false ) return;
-
-			handleMouseMoveDolly( event );
-
-		} else if ( state === STATE.PAN ) {
-
-			if ( scope.enablePan === false ) return;
-
-			handleMouseMovePan( event );
-
 		}
-
+		else if ( state === STATE.DOLLY )
+		{
+			if ( scope.enableZoom === false ) return;
+			handleMouseMoveDolly( event );
+		} else if ( state === STATE.PAN )
+		{
+			if ( scope.enablePan === false ) return;
+			handleMouseMovePan( event );
+		}
 	}
 
 	function onMouseUp( event ) {
 
+		document.removeEventListener( 'mousemove', onMouseMove, false );
+		document.removeEventListener( 'mouseup', onMouseUp, false );
+
 		if ( scope.enabled === false ) return;
 
 		handleMouseUp( event );
-
-		document.removeEventListener( 'mousemove', onMouseMove, false );
-		document.removeEventListener( 'mouseup', onMouseUp, false );
 
 		scope.dispatchEvent( endEvent );
 
@@ -788,7 +774,15 @@ THREE.OrbitControls = function ( object, domElement , vlab) {
 
 	}
 
-	function onKeyDown( event ) {
+	function onKeyDown( event )
+	{
+		switch (event.keyCode)
+		{
+			case 80:
+				self.vlab.pointerLockControlsEnable(self.vlab.getDefaultCameraPosition().clone(), true);
+				self.dispose();
+			break;
+		}
 
 		if ( scope.enabled === false || scope.enableKeys === false || scope.enablePan === false ) return;
 

@@ -37,13 +37,14 @@ function PhMpdFcm(webGLContainer)
 
     var scenePostBuilt = function()
     {
+        self.initialCameraPos = new THREE.Vector3(-0.25, 20.0, 14.0);
+
         var tableTopPos = self.getVlabScene().getObjectByName("tableTop").position.clone();
 
         // PointerLockControls
-        // self.pointerLockControlsEnable(new THREE.Vector3(0.0, 20.0, 18.0));
-
+        // self.pointerLockControlsEnable(self.initialCameraPos);
         // OrbitControls
-        self.orbitControlsEnable(new THREE.Vector3(-0.25, 20.0, 14.0), tableTopPos, false, false);
+        self.orbitControlsEnable(self.initialCameraPos, tableTopPos, false, false);
 
         activeObjects["slopingSurface"] = self.getVlabScene().getObjectByName("slopingSurface");
         activeObjects["slopingBody"] = self.getVlabScene().getObjectByName("slopingBody");

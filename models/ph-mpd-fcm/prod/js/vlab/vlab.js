@@ -22,6 +22,8 @@ function VLab(vlabNature)
     var sceneRenderPause = true;
     var physijsScenePause = true;
 
+    self.initialCameraPos = null;
+
     var pointerLockControls = false;
     var orbitControls = false;
     var initialOrbitControlTarget = undefined;
@@ -849,19 +851,28 @@ function VLab(vlabNature)
 
     self.pointerLockControlsEnable = function(initialPosition, autoActivate)
     {
-        if (orbitControls === true)
-        {
-            self.getDefaultCamera().controls.dispose();
-            orbitControls = false;
-        }
+        orbitControls = false;
+        self.getDefaultCamera().controls.dispose();
+        self.getDefaultCamera().controls = null;
+
+        var curCameraPos  = self.getDefaultCameraPosition().clone();
+        var curCameraQuat = self.getDefaultCameraQuaternion().clone();
 
         self.getDefaultCamera().controls = new THREE.PointerLockControls(self, self.getDefaultCamera());
         if (autoActivate === true)
         {
             self.getDefaultCamera().controls.pointerLock();
         }
-        self.getDefaultCamera().controls.getObject().position.copy(initialPosition);
+
+        self.getDefaultCamera().controls.getObject().position.copy(self.initialCameraPos);
         self.getVlabScene().add(self.getDefaultCamera().controls.getObject());
+
+        self.getDefaultCamera().controls.getYawObject().position.x = curCameraPos.x;
+        self.getDefaultCamera().controls.getYawObject().position.z = curCameraPos.z;
+
+        self.getDefaultCamera().controls.getYawObject().quaternion.y = curCameraQuat.y;
+        self.getDefaultCamera().controls.getPitchObject().quaternion.x = curCameraQuat.x;
+
         pointerLockControls = true;
     };
 
@@ -872,7 +883,7 @@ function VLab(vlabNature)
             initialOrbitControlTarget = targetPos;
         }
 
-        if ( initialOrbitControlCameraPos == undefined && cameraPos != undefined)
+        if (initialOrbitControlCameraPos == undefined && cameraPos != undefined)
         {
             initialOrbitControlCameraPos = cameraPos;
         }
@@ -884,26 +895,12 @@ function VLab(vlabNature)
         if (pointerLockControls === true)
         {
             pointerLockControls = false;
-            var curCameraPos = self.getDefaultCameraPosition();
-            self.getVlabScene().remove(self.getDefaultCamera().parent);
-            self.getDefaultCamera().parent = null;
             self.getDefaultCamera().controls.dispose();
-            // self.setDefaultCameraPosition(curCameraPos);
+            self.getDefaultCamera().controls = null;
+            self.getDefaultCamera().parent = null;
+            self.getVlabScene().remove(self.getVlabScene().getObjectByName("pointerControlPitchObject"));
+            self.getVlabScene().remove(self.getVlabScene().getObjectByName("pointerControlYawObject"));
         }
-        // var curCameraQuaternion = self.getDefaultCameraQuaternion().clone();
-        // self.getDefaultCamera().lookAt(initialOrbitControlTarget);
-        // var finalCameraQuaternion = self.getDefaultCameraQuaternion().clone();
-        // self.setDefaultCameraQuaternion(curCameraQuaternion);
-        //
-        // var cameraQuatReset = new TWEEN.Tween(self.getDefaultCameraQuaternion());
-        // cameraQuatReset.to({x:finalCameraQuaternion.x, y:finalCameraQuaternion.y, z:finalCameraQuaternion.z}, 1200);
-        // cameraQuatReset.start();
-
-        // var cameraPosReset = new TWEEN.Tween(self.getDefaultCameraPosition());
-        // cameraPosReset.to({x:initialOrbitControlCameraPos.x, y:initialOrbitControlCameraPos.y, z:initialOrbitControlCameraPos.z}, 200);
-        // cameraPosReset.onComplete(function(){
-        // });
-        // cameraPosReset.start();
 
         self.setDefaultCameraPosition(initialOrbitControlCameraPos);
 
@@ -912,6 +909,7 @@ function VLab(vlabNature)
         {
             self.getDefaultCamera().controls.setTarget(initialOrbitControlTarget);
         }
+
         self.getDefaultCamera().controls.addEventListener("change", self.cameraControlsEvent);
         self.getDefaultCamera().controls.autoRotate = false;
         self.getDefaultCamera().controls.enableKeys = false;
