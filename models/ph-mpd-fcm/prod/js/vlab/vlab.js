@@ -23,6 +23,9 @@ function VLab(vlabNature)
     var physijsScenePause = true;
 
     var pointerLockControls = false;
+    var orbitControls = false;
+    var initialOrbitControlTarget = undefined;
+    var initialOrbitControlCameraPos = undefined;
 
     var vlabInitializedEvent = new Event("vlabInitialized");
     var sceneLoadedEvent     = new Event("sceneLoaded");
@@ -90,7 +93,7 @@ function VLab(vlabNature)
         webglContainer = $("#" + webglContainerDOM.id);
 
         self.WebGLRenderer = new THREE.WebGLRenderer({
-                                                      alpha: false, 
+                                                      alpha: false,
                                                       antialias: (self.vlabNature.antialias != undefined) ? self.vlabNature.antialias : false
                                                      });
 //        self.WebGLRenderer.setClearColor(0xbababa);
@@ -154,7 +157,7 @@ function VLab(vlabNature)
             {
                 vlabScene.addEventListener(
                     "update",
-                    function() 
+                    function()
                     {
                         self.vlabPhysijsSceneReady = true;
                     }
@@ -367,8 +370,8 @@ function VLab(vlabNature)
                             }
                             else
                             {
-                                self.error("Collision callback [" + 
-                                            self.vlabNature.physijs[meshObjectName].collision + 
+                                self.error("Collision callback [" +
+                                            self.vlabNature.physijs[meshObjectName].collision +
                                             "] for the [" + meshObjectName + "] mesh is defined in VLab nature, but not implemented in VLab");
                             }
                         }
@@ -452,8 +455,8 @@ function VLab(vlabNature)
             {
                 if (vlabScene.getObjectByName(self.vlabNature.interactionHelpers[interactionHelperName].parent) != undefined) // check parent for helpers existence
                 {
-                    var spriteMaterial = new THREE.SpriteMaterial( 
-                    { 
+                    var spriteMaterial = new THREE.SpriteMaterial(
+                    {
                         map: maps[self.vlabNature.interactionHelpers[interactionHelperName].map],
                         color: ((self.vlabNature.interactionHelpers[interactionHelperName].color != undefined) ? parseInt(self.vlabNature.interactionHelpers[interactionHelperName].color) : 0xffffff),
                         blending: THREE.AdditiveBlending
@@ -470,12 +473,12 @@ function VLab(vlabNature)
 
                     if (self.vlabNature.interactionHelpers[interactionHelperName].scale != undefined)
                     {
-                        sprite.scale.set(self.vlabNature.interactionHelpers[interactionHelperName].scale.x, 
+                        sprite.scale.set(self.vlabNature.interactionHelpers[interactionHelperName].scale.x,
                                          self.vlabNature.interactionHelpers[interactionHelperName].scale.y, 1.0);
                     }
                     if (self.vlabNature.interactionHelpers[interactionHelperName].offset != undefined)
                     {
-                        sprite.position.set(self.vlabNature.interactionHelpers[interactionHelperName].offset.x, 
+                        sprite.position.set(self.vlabNature.interactionHelpers[interactionHelperName].offset.x,
                                             self.vlabNature.interactionHelpers[interactionHelperName].offset.y,
                                             self.vlabNature.interactionHelpers[interactionHelperName].offset.z);
                     }
@@ -579,8 +582,10 @@ function VLab(vlabNature)
                     }
                 }
             }
+
             TWEEN.update(time);
-            if (pointerLockControls)
+
+            if (pointerLockControls === true)
             {
                 self.getDefaultCamera().controls.update();
             }
@@ -625,7 +630,7 @@ function VLab(vlabNature)
         {
             vlabScene.addEventListener(
                 "update",
-                function() 
+                function()
                 {
                     self.vlabPhysijsSceneReady = true;
                 }
@@ -635,8 +640,8 @@ function VLab(vlabNature)
 
     var webglContainerResized = function(event)
     {
-        if (self.webglContainerWidth != (webglContainer.width() - webglContainer.offset().left) 
-            || 
+        if (self.webglContainerWidth != (webglContainer.width() - webglContainer.offset().left)
+            ||
             self.webglContainerHeight != (webglContainer.height() - webglContainer.offset().top))
         {
             defaultCamera.aspect = webglContainer.width() / webglContainer.height();
@@ -660,12 +665,12 @@ function VLab(vlabNature)
     var mouseMove = function(event)
     {
         event.preventDefault();
-        mouseCoords.set(((event.clientX - webglContainer.offset().left) / webglContainer.width()) * 2 - 1, 
+        mouseCoords.set(((event.clientX - webglContainer.offset().left) / webglContainer.width()) * 2 - 1,
                         1 -((event.clientY - webglContainer.offset().top) / webglContainer.height()) * 2);
         raycaster.setFromCamera(mouseCoords, defaultCamera);
-        var intersects = raycaster.intersectObjects(self.hoverResponsiveObjects); 
+        var intersects = raycaster.intersectObjects(self.hoverResponsiveObjects);
 
-        if (intersects.length > 0) 
+        if (intersects.length > 0)
         {
             if (self.intersectedObjectName != intersects[0].object.name)
             {
@@ -716,7 +721,7 @@ function VLab(vlabNature)
     var mouseDown = function(event)
     {
         event.preventDefault();
-        mouseCoords.set(((event.clientX - webglContainer.offset().left) / webglContainer.width()) * 2 - 1, 
+        mouseCoords.set(((event.clientX - webglContainer.offset().left) / webglContainer.width()) * 2 - 1,
                         1 -((event.clientY - webglContainer.offset().top) / webglContainer.height()) * 2);
         mouseDownEvent = event;
     };
@@ -724,7 +729,7 @@ function VLab(vlabNature)
     var mouseUp = function(event)
     {
         event.preventDefault();
-        mouseCoords.set(((event.clientX - webglContainer.offset().left) / webglContainer.width()) * 2 - 1, 
+        mouseCoords.set(((event.clientX - webglContainer.offset().left) / webglContainer.width()) * 2 - 1,
                         1 -((event.clientY - webglContainer.offset().top) / webglContainer.height()) * 2);
         mouseUpEvent = event;
         self.getDefaultCamera().controls.enabled = true;
@@ -736,7 +741,7 @@ function VLab(vlabNature)
         {
             raycaster.setFromCamera(mouseCoords, defaultCamera);
             var intersects = raycaster.intersectObjects(self.clickResponsiveObjects);
-            if (intersects.length > 0) 
+            if (intersects.length > 0)
             {
                 var pressedObject = intersects[0].object;
 
@@ -760,7 +765,7 @@ function VLab(vlabNature)
         {
             raycaster.setFromCamera(mouseCoords, defaultCamera);
             var intersects = raycaster.intersectObjects(self.clickResponsiveObjects);
-            if (intersects.length > 0) 
+            if (intersects.length > 0)
             {
                 var releasedObject = intersects[0].object;
 
@@ -805,8 +810,8 @@ function VLab(vlabNature)
                 }
                 else
                 {
-                    self.error("MousePress callback [" + 
-                                self.vlabNature.interactors[object.name].press.callback + 
+                    self.error("MousePress callback [" +
+                                self.vlabNature.interactors[object.name].press.callback +
                                 "] for [" + object.name + "] object is defined in VLab nature, but not implemented in VLab");
                 }
             }
@@ -834,23 +839,99 @@ function VLab(vlabNature)
                 }
                 else
                 {
-                    self.error("MouseRelease callback [" + 
-                                self.vlabNature.interactors[object.name].release.callback + 
+                    self.error("MouseRelease callback [" +
+                                self.vlabNature.interactors[object.name].release.callback +
                                 "] for [" + object.name + "] object is defined in VLab nature, but not implemented in VLab");
                 }
             }
         }
     };
 
-    self.pointerLockControlsEnable = function(initialPosition)
+    self.pointerLockControlsEnable = function(initialPosition, autoActivate)
     {
-        if (!pointerLockControls)
+        if (orbitControls === true)
         {
-            self.getDefaultCamera().controls = new THREE.PointerLockControls(self, self.getDefaultCamera());
-            self.getDefaultCamera().controls.getObject().position.copy(initialPosition);
-            self.getVlabScene().add(self.getDefaultCamera().controls.getObject());
-            pointerLockControls = true;
+            self.getDefaultCamera().controls.dispose();
+            orbitControls = false;
         }
+
+        self.getDefaultCamera().controls = new THREE.PointerLockControls(self, self.getDefaultCamera());
+        if (autoActivate === true)
+        {
+            self.getDefaultCamera().controls.pointerLock();
+        }
+        self.getDefaultCamera().controls.getObject().position.copy(initialPosition);
+        self.getVlabScene().add(self.getDefaultCamera().controls.getObject());
+        pointerLockControls = true;
+    };
+
+    self.orbitControlsEnable = function(cameraPos, targetPos, initiOnly, test)
+    {
+        if (initialOrbitControlTarget == undefined && targetPos != undefined)
+        {
+            initialOrbitControlTarget = targetPos;
+        }
+
+        if ( initialOrbitControlCameraPos == undefined && cameraPos != undefined)
+        {
+            initialOrbitControlCameraPos = cameraPos;
+        }
+        if (initiOnly === true)
+        {
+            return;
+        }
+
+        if (pointerLockControls === true)
+        {
+            pointerLockControls = false;
+            var curCameraPos = self.getDefaultCameraPosition();
+            self.getVlabScene().remove(self.getDefaultCamera().parent);
+            self.getDefaultCamera().parent = null;
+            self.getDefaultCamera().controls.dispose();
+            // self.setDefaultCameraPosition(curCameraPos);
+        }
+        // var curCameraQuaternion = self.getDefaultCameraQuaternion().clone();
+        // self.getDefaultCamera().lookAt(initialOrbitControlTarget);
+        // var finalCameraQuaternion = self.getDefaultCameraQuaternion().clone();
+        // self.setDefaultCameraQuaternion(curCameraQuaternion);
+        //
+        // var cameraQuatReset = new TWEEN.Tween(self.getDefaultCameraQuaternion());
+        // cameraQuatReset.to({x:finalCameraQuaternion.x, y:finalCameraQuaternion.y, z:finalCameraQuaternion.z}, 1200);
+        // cameraQuatReset.start();
+
+        // var cameraPosReset = new TWEEN.Tween(self.getDefaultCameraPosition());
+        // cameraPosReset.to({x:initialOrbitControlCameraPos.x, y:initialOrbitControlCameraPos.y, z:initialOrbitControlCameraPos.z}, 200);
+        // cameraPosReset.onComplete(function(){
+        // });
+        // cameraPosReset.start();
+
+        self.setDefaultCameraPosition(initialOrbitControlCameraPos);
+
+        self.getDefaultCamera().controls = new THREE.OrbitControls(self.getDefaultCamera(), self.getWebglContainerDOM(), self);
+        if (initialOrbitControlTarget != undefined)
+        {
+            self.getDefaultCamera().controls.setTarget(initialOrbitControlTarget);
+        }
+        self.getDefaultCamera().controls.addEventListener("change", self.cameraControlsEvent);
+        self.getDefaultCamera().controls.autoRotate = false;
+        self.getDefaultCamera().controls.enableKeys = false;
+        // test mode
+        if (test === true)
+        {
+            self.getDefaultCamera().controls.testMode = true;
+        }
+        // user mode
+        self.getDefaultCamera().controls.minDistance = 5;
+        self.getDefaultCamera().controls.maxDistance = 15;
+        self.getDefaultCamera().controls.maxPolarAngle = Math.PI/2 - 0.2;
+        self.getDefaultCamera().controls.minPolarAngle = 0.75;
+        self.getDefaultCamera().controls.maxXPan    = initialOrbitControlTarget.x + 3;
+        self.getDefaultCamera().controls.minXPan    = initialOrbitControlTarget.x - 3;
+        self.getDefaultCamera().controls.maxYPan    = initialOrbitControlTarget.y + 2;
+        self.getDefaultCamera().controls.minYPan    = initialOrbitControlTarget.y;
+        self.getDefaultCamera().controls.update();
+
+        orbitControls = true;
     };
 
     var toScreenPosition = function(obj)
@@ -867,7 +948,7 @@ function VLab(vlabNature)
         vector.x = (vector.x * widthHalf) + widthHalf + webglContainer.offset().left;
         vector.y = - (vector.y * heightHalf) + heightHalf + webglContainer.offset().top;
 
-        return { 
+        return {
             x: vector.x,
             y: vector.y
         };
@@ -876,9 +957,61 @@ function VLab(vlabNature)
     self.getWebglContainerDOM = function(){return webglContainerDOM};
     self.getWebglContainer = function(){return webglContainer};
     self.getVlabScene = function(){return vlabScene};
-    self.getDefaultCamera = function()
+    self.getDefaultCamera = function(){return defaultCamera};
+    self.getDefaultCameraObject = function()
     {
-        return defaultCamera;
+        if (self.getDefaultCamera().parent === null)
+        {
+            return self.getDefaultCamera();
+        }
+        if (self.getDefaultCamera().parent.parent.type == "Object3D")
+        {
+            return self.getDefaultCamera().parent.parent;
+        }
+    };
+    self.getDefaultCameraPosition = function()
+    {
+        if (self.getDefaultCamera().parent === null)
+        {
+            return self.getDefaultCamera().position;
+        }
+        if (self.getDefaultCamera().parent.parent.type == "Object3D")
+        {
+            return self.getDefaultCamera().parent.parent.position;
+        }
+    };
+    self.getDefaultCameraQuaternion = function()
+    {
+        if (self.getDefaultCamera().parent === null)
+        {
+            return self.getDefaultCamera().quaternion;
+        }
+        if (self.getDefaultCamera().parent.parent.type == "Object3D")
+        {
+            return self.getDefaultCamera().parent.parent.quaternion;
+        }
+    };
+    self.setDefaultCameraPosition = function(pos)
+    {
+        if (self.getDefaultCamera().parent === null)
+        {
+            self.getDefaultCamera().position.copy(pos);
+        }
+        else if (self.getDefaultCamera().parent.parent.type == "Object3D")
+        {
+            self.getDefaultCamera().parent.parent.position.copy(pos);
+        }
+    };
+    self.setDefaultCameraQuaternion = function(quaternion)
+    {
+        if (self.getDefaultCamera().parent === null)
+        {
+            self.getDefaultCamera().quaternion.copy(quaternion);
+        }
+        else if (self.getDefaultCamera().parent.parent.type == "Object3D")
+        {
+            self.getDefaultCamera().parent.parent.quaternion.copy(quaternion);
+        }
     };
     self.setSceneRenderPause = function(pause)
     {

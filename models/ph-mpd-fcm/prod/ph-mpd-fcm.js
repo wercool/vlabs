@@ -24,7 +24,7 @@ function PhMpdFcm(webGLContainer)
 
     var origin = new THREE.Vector3(0, 0, 0);
     var pulleyPos;
-    var ropeLineWidth = 4.0;
+    var ropeLineWidth = 3.0;
     var initialDefaultCameraPosVectorLength;
     var labSwitchState = 1;
     var stopButtonTopState = true;
@@ -40,31 +40,10 @@ function PhMpdFcm(webGLContainer)
         var tableTopPos = self.getVlabScene().getObjectByName("tableTop").position.clone();
 
         // PointerLockControls
-        self.pointerLockControlsEnable(new THREE.Vector3(0.0, 20.0, 20.0));
+        // self.pointerLockControlsEnable(new THREE.Vector3(0.0, 20.0, 18.0));
 
-/*
         // OrbitControls
-        self.getDefaultCamera().position.set(-0.25, 20.0, 14.0);
-        self.getDefaultCamera().controls = new THREE.OrbitControls(self.getDefaultCamera(), self.getWebglContainerDOM());
-        self.getDefaultCamera().controls.setTarget(tableTopPos);
-        self.getDefaultCamera().controls.addEventListener("change", self.cameraControlsEvent);
-        self.getDefaultCamera().controls.autoRotate = false;
-        self.getDefaultCamera().controls.enableKeys = false;
-*/
-/*
-        // user mode
-        self.getDefaultCamera().controls.minDistance = 5;
-        self.getDefaultCamera().controls.maxDistance = 15;
-        self.getDefaultCamera().controls.maxPolarAngle = Math.PI/2 - 0.2;
-        self.getDefaultCamera().controls.minPolarAngle = 0.75;
-        self.getDefaultCamera().controls.maxXPan    = tableTopPos.x + 3;
-        self.getDefaultCamera().controls.minXPan    = tableTopPos.x - 3;
-        self.getDefaultCamera().controls.maxYPan    = tableTopPos.y + 2;
-        self.getDefaultCamera().controls.minYPan    = tableTopPos.y;
-        self.getDefaultCamera().controls.update();
-*/
-        // test mode
-//        self.getDefaultCamera().controls.testMode = true;
+        self.orbitControlsEnable(new THREE.Vector3(-0.25, 20.0, 14.0), tableTopPos, false, false);
 
         activeObjects["slopingSurface"] = self.getVlabScene().getObjectByName("slopingSurface");
         activeObjects["slopingBody"] = self.getVlabScene().getObjectByName("slopingBody");
@@ -115,7 +94,7 @@ function PhMpdFcm(webGLContainer)
         pulleyPos = activeObjects["pulley"].position.clone();
         pulleyPos.y += 0.25;
 
-        initialDefaultCameraPosVectorLength = self.getDefaultCamera().position.length();
+        initialDefaultCameraPosVectorLength = self.getDefaultCameraPosition().length();
 
         // position frame
         new slopingSurfaceFrameAnimaiton().process();
@@ -240,21 +219,21 @@ var powerSupply = new AktakomPowerSupply(self);
 
     self.cameraControlsEvent = function()
     {
-        var cameraRelativeDistance = initialDefaultCameraPosVectorLength / self.getDefaultCamera().position.length();
-        if (4 * cameraRelativeDistance < 5)
+        if (!self.getSceneRenderPause())
         {
-            ropeLineWidth = activeObjects["rope"].material.linewidth = 4 * cameraRelativeDistance;
-        }
+            var cameraRelativeDistance = initialDefaultCameraPosVectorLength / self.getDefaultCameraPosition().length();
+            ropeLineWidth = activeObjects["rope"].material.linewidth = 3 * cameraRelativeDistance;
 
-        if (self.getDefaultCamera().controls.enabled)
-        {
-            if (self.getDefaultCamera().quaternion.y < -0.7 || self.getDefaultCamera().quaternion.y > 0.7)
+            if (self.getDefaultCamera().controls.enabled)
             {
-                self.interactionHelpersVisibility(false);
-            }
-            else
-            {
-                self.interactionHelpersVisibility(true);
+                if (self.getDefaultCamera().quaternion.y < -0.7 || self.getDefaultCamera().quaternion.y > 0.7)
+                {
+                    self.interactionHelpersVisibility(false);
+                }
+                else
+                {
+                    self.interactionHelpersVisibility(true);
+                }
             }
         }
     };

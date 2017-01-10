@@ -24,16 +24,16 @@ function ZoomHelper()
             targetPos.y += (argsObj.yOffset != undefined) ? argsObj.yOffset : 0.0;
             targetPos.z += (argsObj.zOffset != undefined) ? argsObj.zOffset : 0.0;
 
-            vlab.getDefaultCamera().position.copy(targetPos);
-            vlab.getDefaultCamera().lookAt(targetPos);
+            vlab.setDefaultCameraPosition(targetPos);
+            vlab.getDefaultCameraObject().lookAt(targetPos);
 
             var cameraLookAtQuaternion = new THREE.Quaternion();
-            cameraLookAtQuaternion.copy(vlab.getDefaultCamera().quaternion);
+            cameraLookAtQuaternion.copy(vlab.getDefaultCameraQuaternion());
 
-            vlab.getDefaultCamera().quaternion.copy(initialCameraQuaternion);
-            vlab.getDefaultCamera().position.copy(initialCameraPosition);
+            vlab.setDefaultCameraQuaternion(initialCameraQuaternion);
+            vlab.setDefaultCameraPosition(initialCameraPosition);
 
-            cameraPosTween = new TWEEN.Tween(vlab.getDefaultCamera().position);
+            cameraPosTween = new TWEEN.Tween(vlab.getDefaultCameraPosition());
             cameraPosTween.to({x:targetPos.x, y:targetPos.y, z:targetPos.z}, 300);
             cameraPosTween.onComplete(function(){
             if (typeof vlab.cameraControlsEvent === "function")
@@ -42,7 +42,7 @@ function ZoomHelper()
             }});
             cameraPosTween.start();
 
-            cameraRotTween = new TWEEN.Tween(vlab.getDefaultCamera().quaternion);
+            cameraRotTween = new TWEEN.Tween(vlab.getDefaultCameraQuaternion());
             cameraRotTween.to({x:cameraLookAtQuaternion.x, y:cameraLookAtQuaternion.y, z:cameraLookAtQuaternion.z}, 300);
             cameraRotTween.onComplete(function(){
             if (typeof vlab.cameraControlsEvent === "function")
@@ -64,7 +64,7 @@ function ZoomHelper()
             cameraRotTween.stop();
             removeEventListener("mouseup", self.reset);
 
-            cameraPosTween = new TWEEN.Tween(vlab.getDefaultCamera().position);
+            cameraPosTween = new TWEEN.Tween(vlab.getDefaultCameraPosition());
             cameraPosTween.to({x:initialCameraPosition.x, y:initialCameraPosition.y, z:initialCameraPosition.z}, 150);
             cameraPosTween.onComplete(function(){
             if (typeof vlab.cameraControlsEvent === "function")
@@ -73,7 +73,7 @@ function ZoomHelper()
             }});
             cameraPosTween.start();
 
-            cameraRotTween = new TWEEN.Tween(vlab.getDefaultCamera().quaternion);
+            cameraRotTween = new TWEEN.Tween(vlab.getDefaultCameraQuaternion());
             cameraRotTween.to({x:initialCameraQuaternion.x, y:initialCameraQuaternion.y, z:initialCameraQuaternion.z}, 150);
             cameraRotTween.onComplete(function(){
             if (typeof vlab.cameraControlsEvent === "function")
@@ -83,9 +83,6 @@ function ZoomHelper()
             cameraRotTween.start();
 
             vlab.getDefaultCamera().controls.enabled = true;
-
-//            vlab.getDefaultCamera().position.copy(initialCameraPosition);
-//            vlab.getDefaultCamera().quaternion.copy(initialCameraQuaternion);
 
             if (typeof vlab.cameraControlsEvent === "function")
             {
@@ -98,8 +95,8 @@ function ZoomHelper()
 
     var initialCameraPosition = new THREE.Vector3();
     var initialCameraQuaternion = new THREE.Quaternion();
-    initialCameraPosition.copy(vlab.getDefaultCamera().position);
-    initialCameraQuaternion.copy(vlab.getDefaultCamera().quaternion);
+    initialCameraPosition.copy(vlab.getDefaultCameraPosition());
+    initialCameraQuaternion.copy(vlab.getDefaultCameraQuaternion());
 
     sprite.visible = false;
 

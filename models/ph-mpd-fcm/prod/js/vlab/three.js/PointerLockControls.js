@@ -7,11 +7,11 @@ THREE.PointerLockControls = function (vlab, camera)
     camera.rotation.set(0, 0, 0);
 
     var pitchObject = new THREE.Object3D();
-    pitchObject.add( camera );
+    pitchObject.add(camera);
 
     var yawObject = new THREE.Object3D();
     yawObject.position.y = 10;
-    yawObject.add( pitchObject );
+    yawObject.add(pitchObject);
 
     var PI_2 = Math.PI / 2;
 
@@ -24,6 +24,8 @@ THREE.PointerLockControls = function (vlab, camera)
     var velocity = new THREE.Vector3();
     var prevTime = performance.now();
 
+    scope.activated = false;
+
     var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 
     if (havePointerLock)
@@ -33,27 +35,37 @@ THREE.PointerLockControls = function (vlab, camera)
         {
             if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element)
             {
-                scope.enabled = true;
+                scope.activated = true;
             }
             else
             {
-                scope.enabled = false;
+                scope.activated = false;
+                scope.vlab.orbitControlsEnable(scope.vlab.getDefaultCameraPosition());
             }
         };
 
         var pointerLockRequest = function(event)
         {
-            // Ask the browser to lock the pointer
-            element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-            element.requestPointerLock();
+            event.preventDefault();
+            if((event.button == 1 || event.button == 0) && event.ctrlKey === true)
+            {
+                // Ask the browser to lock the pointer
+                element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+                element.requestPointerLock();
+            }
         };
-
         scope.vlab.getWebglContainerDOM().addEventListener('click', pointerLockRequest, false);
     }
 
+    this.pointerLock = function()
+    {
+        element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+        element.requestPointerLock();
+    };
+
     var onMouseMove = function (event)
     {
-        if (scope.enabled === false) return;
+        if (scope.activated === false) return;
 
         var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
         var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
@@ -61,7 +73,7 @@ THREE.PointerLockControls = function (vlab, camera)
         yawObject.rotation.y -= movementX * 0.002;
         pitchObject.rotation.x -= movementY * 0.002;
 
-        pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
+        pitchObject.rotation.x = Math.max(-PI_2, Math.min( PI_2, pitchObject.rotation.x));
     };
 
     var onKeyDown = function (event)
@@ -74,7 +86,7 @@ THREE.PointerLockControls = function (vlab, camera)
                 break;
             case 37: // left
             case 65: // a
-                moveLeft = true; 
+                moveLeft = true;
                 break;
             case 40: // down
             case 83: // s
@@ -115,7 +127,7 @@ THREE.PointerLockControls = function (vlab, camera)
         document.removeEventListener('mousemove', onMouseMove, false);
         document.removeEventListener('keydown', onKeyDown, false);
         document.removeEventListener('keyup', onKeyUp, false);
-        self.getWebglContainerDOM.removeEventListener('click', pointerLockRequest, false);
+        scope.vlab.getWebglContainerDOM().removeEventListener('click', pointerLockRequest, false);
     };
 
     document.addEventListener('mousemove', onMouseMove, false);
@@ -127,8 +139,6 @@ THREE.PointerLockControls = function (vlab, camera)
     document.addEventListener('mozpointerlockchange', pointerlockchange, false);
     document.addEventListener('webkitpointerlockchange', pointerlockchange, false);
 
-    this.enabled = false;
-
     this.getObject = function ()
     {
         return yawObject;
@@ -137,13 +147,12 @@ THREE.PointerLockControls = function (vlab, camera)
     this.getDirection = function()
     {
         // assumes the camera itself is not rotated
-
-        var direction = new THREE.Vector3( 0, 0, - 1 );
-        var rotation = new THREE.Euler( 0, 0, 0, "YXZ" );
+        var direction = new THREE.Vector3(0, 0, - 1);
+        var rotation = new THREE.Euler(0, 0, 0, "YXZ");
         return function( v )
         {
             rotation.set( pitchObject.rotation.x, yawObject.rotation.y, 0 );
-            v.copy( direction ).applyEuler( rotation );
+            v.copy(direction).applyEuler(rotation);
             return v;
         };
     }();
@@ -151,7 +160,7 @@ THREE.PointerLockControls = function (vlab, camera)
 
     this.update = function()
     {
-        if (scope.enabled === true)
+        if (scope.activated === true)
         {
             scope.vlab.cameraControlsEvent();
 

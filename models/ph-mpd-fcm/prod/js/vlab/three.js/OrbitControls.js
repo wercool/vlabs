@@ -13,7 +13,11 @@
 //    Zoom - middle mouse, or mousewheel / touch: two finger spread or squish
 //    Pan - right mouse, or arrow keys / touch: three finter swipe
 
-THREE.OrbitControls = function ( object, domElement ) {
+THREE.OrbitControls = function ( object, domElement , vlab) {
+
+	var self = this;
+
+	self.vlab = vlab;
 
 	this.object = object;
 
@@ -680,6 +684,11 @@ THREE.OrbitControls = function ( object, domElement ) {
 	//
 
 	function onMouseDown( event ) {
+
+		if (event.ctrlKey === true && event.button == 1)
+		{
+			self.vlab.pointerLockControlsEnable(self.vlab.getDefaultCameraPosition(), true);
+		}
 
 		if ( scope.enabled === false ) return;
 
