@@ -1,9 +1,11 @@
+'use strict';
+
 var Sequelize = require('sequelize');
 
 module.exports = function(sequelize)
 {
     var User = sequelize.define(
-        'user',
+        'User',
         {
             username:   Sequelize.STRING,
             password:   Sequelize.STRING,
@@ -17,10 +19,5 @@ module.exports = function(sequelize)
         }
     );
 
-    User.sync({force: false});
-
-    return
-    {
-        User: User
-    };
+    return User;
 };
