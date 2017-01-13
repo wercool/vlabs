@@ -5,7 +5,8 @@
         "password": "vlabs",
         "database": "vlabs",
         "host": "127.0.0.1",
-        "dialect": "mysql"
+        "dialect": "mysql",
+        "sequelizeSyncForce": false
     },
     "test":
     {
@@ -13,7 +14,8 @@
         "password": "vlabs",
         "database": "vlabs",
         "host": "127.0.0.1",
-        "dialect": "mysql"
+        "dialect": "mysql",
+        "sequelizeSyncForce": false
     },
     "production":
     {
@@ -21,6 +23,7 @@
         "password": "vlabs",
         "database": "vlabs",
         "host": "127.0.0.1",
-        "dialect": "mysql"
+        "dialect": "mysql",
+        "sequelizeSyncForce": false
     }
 }
