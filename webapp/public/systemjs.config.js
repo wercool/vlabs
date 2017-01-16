@@ -1,12 +1,8 @@
-/**
- * System configuration for Angular 2 samples
- * Adjust as necessary for your application needs.
- */
 (function (global) {
     System.config({
         // map tells the System loader where to look for things
         map: {
-            // our app is within the app folder
+            // actual app is within the app folder
             app: 'js/app',
 
             // angular bundles

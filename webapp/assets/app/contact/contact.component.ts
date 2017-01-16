@@ -2,9 +2,9 @@
 
 @Component({
     moduleId: module.id,
-    templateUrl: 'home.component.html'
+    templateUrl: 'contact.component.html'
 })
 
-export class HomeComponent {
+export class ContactComponent {
 
 }
