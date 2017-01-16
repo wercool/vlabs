@@ -1,0 +1,29 @@
+{
+    "development":
+    {
+        "username": "vlabs",
+        "password": "vlabs",
+        "database": "vlabs",
+        "host": "127.0.0.1",
+        "dialect": "mysql",
+        "sequelizeSyncForce": false
+    },
+    "test":
+    {
+        "username": "vlabs",
+        "password": "vlabs",
+        "database": "vlabs",
+        "host": "127.0.0.1",
+        "dialect": "mysql",
+        "sequelizeSyncForce": false
+    },
+    "production":
+    {
+        "username": "vlabs",
+        "password": "vlabs",
+        "database": "vlabs",
+        "host": "127.0.0.1",
+        "dialect": "mysql",
+        "sequelizeSyncForce": false
+    }
+}

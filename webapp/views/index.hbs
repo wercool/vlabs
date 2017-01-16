@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base href="/">
+    <title>VLabs</title>
+    <link rel="stylesheet" href="/vendors/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+    <!-- 1. Load libraries -->
+    <!-- Polyfill(s) for older browsers -->
+    <script src="js/vendor/es6-shim/es6-shim.min.js"></script>
+
+    <script src="js/vendor/zone.js/dist/zone.js"></script>
+    <script src="js/vendor/reflect-metadata/Reflect.js"></script>
+    <script src="js/vendor/systemjs/dist/system.src.js"></script>
+
+    <!-- 2. Configure SystemJS -->
+    <script src="systemjs.config.js"></script>
+</head>
+<body>
+
+<vlabs-app>Loading...</vlabs-app>
+
+<script>
+    System.import('app').catch(function(err){ console.error(err);  });
+</script>
+
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="/vendors/jquery-3.1.1.min.js"></script>
+<script src="/vendors/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="/vendors/ie10-viewport-bug-workaround.js"></script>
+
+
+</body>
+</html>
