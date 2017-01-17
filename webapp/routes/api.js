@@ -4,7 +4,7 @@ var router      = express.Router();
 
 router.get('/user', function(req, res, next) {
     models.User.findAll().then(function(users){
-        console.log(res.json(users));
+        res.json(users);
     });
 });
 

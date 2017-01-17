@@ -28,6 +28,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 //     next();
 // });
 
+// app.use(function (req, res, next) {
+//     console.log(req.headers);
+//     next();
+// });
+
 app.use('/', appRoutes);
 app.use('/api', apiRoutes);
 
