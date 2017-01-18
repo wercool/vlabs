@@ -14,14 +14,14 @@ import { AuthGuard }                from './guards/index';
 
 const appRoutes: Routes = [
     // front face components
-    { path: '', component: HomeComponent },
-    { path: 'about', component: AboutComponent },
-    { path: 'contact', component: ContactComponent },
-    { path: 'login', component: LoginComponent },
-    { path: 'register', component: RegisterComponent },
+    { path: '',             component: HomeComponent },
+    { path: 'about',        component: AboutComponent },
+    { path: 'contact',      component: ContactComponent },
+    { path: 'login',        component: LoginComponent },
+    { path: 'register',     component: RegisterComponent },
 
     // authorized components
-    { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+    { path: 'dashboard',    component: DashboardComponent, canActivate: [AuthGuard] },
 
     // otherwise redirect to home
     { path: '**', redirectTo: '' }

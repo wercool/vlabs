@@ -16,10 +16,17 @@
       <ul class="nav navbar-nav">
         <li [routerLinkActive]="['active']"><a [routerLink]="['/about']">About</a></li>
         <li [routerLinkActive]="['active']"><a [routerLink]="['/contact']">Contact</a></li>
+        <template [ngIf]="authenticationService.isAuthenticated()">
+            <li [routerLinkActive]="['active']"><a [routerLink]="['/dashboard']">Dashboard</a></li>
+        </template>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li [routerLinkActive]="['active']"><a [routerLink]="['/login']">Log In</a></li>
-        <li [routerLinkActive]="['active']"><a [routerLink]="['/register']">Register</a></li>
+        <li [routerLinkActive]="['active']">
+            <a [routerLink]="['/login']">
+                {{authenticationService.isAuthenticated() ? "Log Out" : "Log In"}}
+            </a>
+        </li>
+        <li *ngIf="!authenticationService.isAuthenticated()" [routerLinkActive]="['active']"><a [routerLink]="['/register']">Register</a></li>
       </ul>
     </div>
   </div>

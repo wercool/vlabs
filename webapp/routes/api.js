@@ -3,6 +3,7 @@ var express     = require('express');
 var jwt         = require('jsonwebtoken');
 var router      = express.Router();
 
+// non-tokenized routes
 router.post('/authenticate', function(req, res, next) {
     models.User.findOne({ where: {email: req.body.email, password: req.body.password} }).then(function(user){
         if (user === null)
@@ -25,6 +26,33 @@ router.post('/authenticate', function(req, res, next) {
             res.json(authenticatedUser);
         }
     });
+});
+
+router.use(function(req, res, next) {
+    var token = req.headers['x-access-token'];
+
+    if (token)
+    {
+        // verifies secret and checks exp
+        jwt.verify(token, req.app.get('jwtSecret'), function(err, decoded) {
+        if (err) {
+          return res.json({ success: false, message: 'Failed to authenticate token.' });
+        } else {
+          // if everything is good, save to request for use in other routes
+          req.decoded = decoded;
+          next();
+        }
+        });
+    }
+    else
+    {
+        // if there is no token
+        // return an error
+        return res.status(403).send({
+          success: false,
+          message: 'No token provided.'
+        });
+    }
 });
 
 router.get('/user', function(req, res, next) {

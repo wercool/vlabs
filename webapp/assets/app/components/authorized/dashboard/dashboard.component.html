@@ -1,10 +1,12 @@
-﻿<div class="col-md-6 col-md-offset-3">
-    <h1>Hi {{currentUser.firstName}}!</h1>
-    <p>You're logged in with Angular 2!!</p>
+<iframe src="http://localhost:8000/models/ph-mpd-fcm/prod/testVLab.html" id="vlabIframe" style="margin-left:0px;" width="800" height="600"></iframe>
+
+<div class="col-md-6 col-md-offset-3">
+    <h1>Hi {{currentUser.firstname}}!</h1>
+    <p>You're logged into VLabs</p>
     <h3>All registered users:</h3>
     <ul>
         <li *ngFor="let user of users">
-            {{user.username}} ({{user.firstName}} {{user.lastName}})
+            {{user.email}} ({{user.firstname}} {{user.lastname}})
             - <a (click)="deleteUser(user.id)">Delete</a>
         </li>
     </ul>

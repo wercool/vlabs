@@ -26,7 +26,7 @@ export class LoginComponent implements OnInit {
         // reset login status
         this.authenticationService.logout();
 
-        // get return url from route parameters or default to '/'
+        // get return url from route parameters or default to '/dashboard'
         this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
     }
 
@@ -35,7 +35,15 @@ export class LoginComponent implements OnInit {
         this.authenticationService.login(this.model.email, this.model.password)
             .subscribe(
                 data => {
-                    this.router.navigate([this.returnUrl]);
+                    if (!this.authenticationService.isAuthenticated())
+                    {
+                        this.alertService.error("Authentication failed. Check you email and password.");
+                    }
+                    else
+                    {
+                        this.router.navigate([this.returnUrl]);
+                    }
+                    this.loading = false;
                 },
                 error => {
                     this.alertService.error(error);

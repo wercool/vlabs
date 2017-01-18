@@ -778,7 +778,7 @@ THREE.OrbitControls = function ( object, domElement , vlab) {
 	{
 		switch (event.keyCode)
 		{
-			case 80:
+			case 80: //p
 				self.vlab.pointerLockControlsEnable(self.vlab.getDefaultCameraPosition().clone(), true);
 				self.dispose();
 			break;

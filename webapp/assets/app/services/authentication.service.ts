@@ -1,10 +1,17 @@
-﻿import { Injectable }                   from '@angular/core';
-import { Http, Headers, Response }      from '@angular/http';
-import { Observable }                   from 'rxjs/Observable';
+﻿import { Injectable }         from '@angular/core';
+import {
+        Http,
+        Headers,
+        Response,
+        RequestOptions }       from '@angular/http';
+import { Observable }          from 'rxjs/Observable';
 import 'rxjs/add/operator/map'
 
 @Injectable()
 export class AuthenticationService {
+
+    private authenticated: boolean = false;
+
     constructor(private http: Http) { }
 
     login(email: string, password: string) {
@@ -15,6 +22,7 @@ export class AuthenticationService {
                 if (user && user.token) {
                     // store user details and jwt token in local storage to keep user logged in between page refreshes
                     localStorage.setItem('currentUser', JSON.stringify(user));
+                    this.authenticated = true;
                 }
             });
     }
@@ -22,5 +30,19 @@ export class AuthenticationService {
     logout() {
         // remove user from local storage to log user out
         localStorage.removeItem('currentUser');
+        this.authenticated = false;
+    }
+
+    public isAuthenticated() {
+        return this.authenticated;
+    }
+
+    public jwt() {
+        // create authorization header with jwt token
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser && currentUser.token) {
+            let headers = new Headers({ 'x-access-token': currentUser.token });
+            return new RequestOptions({ headers: headers });
+        }
     }
 }
