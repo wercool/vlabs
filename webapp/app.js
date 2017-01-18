@@ -5,14 +5,21 @@ var logger              = require('morgan');
 var cookieParser        = require('cookie-parser');
 var bodyParser          = require('body-parser');
 
-var appRoutes = require('./routes/app');
-var apiRoutes = require('./routes/api');
+var env         = process.env.NODE_ENV || 'development';
+var config      = require('./config/config.json')[env];
 
 var app = express();
+
+// app routes definitions
+var appRoutes = require('./routes/app');
+var apiRoutes = require('./routes/api');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
+
+// secret variable for jwt
+app.set('jwtSecret', config.secret);
 
 app.use(favicon(path.join(__dirname, 'public/images', 'favicon.ico')));
 app.use(logger('dev'));
@@ -29,10 +36,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 // });
 
 // app.use(function (req, res, next) {
-//     console.log(req.headers);
+//     // console.log(req.headers);
+//     // console.log(req.body);
 //     next();
 // });
 
+// app routes
 app.use('/', appRoutes);
 app.use('/api', apiRoutes);
 

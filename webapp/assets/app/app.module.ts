@@ -1,25 +1,30 @@
-﻿import { NgModule }        from '@angular/core';
-import { BrowserModule }   from '@angular/platform-browser';
-import { FormsModule }     from '@angular/forms';
-import { HttpModule }      from '@angular/http';
+﻿import { NgModule }             from '@angular/core';
+import { BrowserModule }        from '@angular/platform-browser';
+import { FormsModule }          from '@angular/forms';
+import { HttpModule }           from '@angular/http';
 
-// used to create fake backend
-import { fakeBackendProvider }          from './_helpers/index';
-import { MockBackend, MockConnection }  from '@angular/http/testing';
-import { BaseRequestOptions }           from '@angular/http';
+import { AppComponent }         from './app.component';
+import { routing }              from './app.routing';
 
-import { AppComponent }     from './app.component';
-import { routing }          from './app.routing';
+import { AuthGuard }                                            from './guards/index';
+import {
+         AlertService,
+         AuthenticationService,
+         UserService
+       }                                                        from './services/index';
 
-import { AlertComponent }                                       from './_directives/index';
-import { AuthGuard }                                            from './_guards/index';
-import { AlertService, AuthenticationService, UserService }     from './_services/index';
-import { HomeComponent }                                        from './home/index';
-import { AboutComponent }                                       from './about/index';
-import { ContactComponent }                                     from './contact/index';
-import { LoginComponent }                                       from './login/index';
-import { RegisterComponent }                                    from './register/index';
-import { DashboardComponent }                                   from './dashboard/index';
+// shared components
+import { AlertComponent }                                       from './components/shared/alert/index';
+
+// front face components
+import { HomeComponent }                                        from './components/frontface/home/index';
+import { AboutComponent }                                       from './components/frontface/about/index';
+import { ContactComponent }                                     from './components/frontface/contact/index';
+import { LoginComponent }                                       from './components/frontface/login/index';
+import { RegisterComponent }                                    from './components/frontface/register/index';
+
+// authorized components
+import { DashboardComponent }                                   from './components/authorized/dashboard/index';
 
 @NgModule({
     imports: [
@@ -42,12 +47,7 @@ import { DashboardComponent }                                   from './dashboar
         AuthGuard,
         AlertService,
         AuthenticationService,
-        UserService,
-
-        // providers used to create fake backend
-        fakeBackendProvider,
-        MockBackend,
-        BaseRequestOptions
+        UserService
     ],
     bootstrap: [AppComponent]
 })
