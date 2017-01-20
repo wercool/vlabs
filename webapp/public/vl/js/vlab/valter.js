@@ -7,7 +7,7 @@ class Valter
         this.vlab = vlab;
         this.model = undefined;
         this.initialModelPosition = pos;
-        this.valterJSON = "/models/valter/valter.json";
+        this.valterJSON = "/vl/models/valter/valter.json";
         this.testMode = testMode;
         this.vlab.trace("Valter initializing...");
 

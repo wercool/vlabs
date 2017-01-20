@@ -150,7 +150,7 @@ function VLab(vlabNature)
 
         if (self.vlabNature.isPhysijsScene)
         {
-            Physijs.scripts.worker = "js/physijs_worker.js";
+            Physijs.scripts.worker = "/vl/js/physijs_worker.js";
             Physijs.scripts.ammo = "ammo.js";
             vlabScene = new Physijs.Scene({fixedTimeStep: 1 / 120});
             vlabScene.setGravity(new THREE.Vector3( 0, -30, 0 ));

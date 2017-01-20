@@ -28,10 +28,4 @@ export class DashboardComponent implements OnInit {
         this.userService.getAll().subscribe(users => { this.users = users; });
     }
 
-    ngAfterViewInit() {
-      console.log("ngAfterViewInit");
-      var vlabIframe = this.elementRef.nativeElement.querySelector('#vlabIframe');
-
-      console.log(vlabIframe.contentWindow);
-    }
 }

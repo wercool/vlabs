@@ -234,5 +234,5 @@ function KukaVacuumGripper(vlab, kuka, test, contactObjectName, contactSurfaceFa
     };
 
     // append Kuka Vacuum Gripper model to VLab scene
-    vlab.appendScene("scene/kuka-vacuum-gripper.dae", sceneAppendedCallBack);
+    vlab.appendScene("/vl/models/kuka/kuka-vacuum-gripper.dae", sceneAppendedCallBack);
 };

@@ -143,7 +143,7 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
                 {
                     var loader = new THREE.TextureLoader();
                     loader.load(
-                        "js/vlab/maps/kuka/cablesleeve.jpg",
+                        "/vl/js/vlab/maps/kuka/cablesleeve.jpg",
                         function (texture) {
                             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
                             texture.repeat.set(8, 0);
@@ -573,5 +573,5 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
     };
 
     // append Kuka model to VLab scene 
-    vlab.appendScene("scene/kuka.dae", sceneAppendedCallBack);
+    vlab.appendScene("/vl/models/kuka/kuka.dae", sceneAppendedCallBack);
 }

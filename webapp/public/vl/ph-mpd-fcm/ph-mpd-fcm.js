@@ -608,7 +608,7 @@ var powerSupply = new AktakomPowerSupply(self);
 
     //this VLab is ready to be initialized
 
-    $.getJSON("ph-mpd-fcm.json", function(jsonObj) {
+    $.getJSON("/vl/ph-mpd-fcm/ph-mpd-fcm.json", function(jsonObj) {
         VLab.apply(self, [jsonObj]);
         self.initialize(webGLContainer);
     });
