@@ -375,7 +375,7 @@ var powerSupply = new AktakomPowerSupply(self);
                 {
                     activeObjects["stopButton3Lever"].rotateZ(-0.016 * labSwitchState);
                     activeObjects["stopButton4Lever"].rotateZ(-0.016 * labSwitchState);
-                    activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.y -= 0.03 * labSwitchState;
+                    activeObjects["stopButton3Pin"].scale.y = activeObjects["stopButton4Pin"].scale.y -= 0.037 * labSwitchState;
                 }
             }
         }
