@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.78.0 commit date:2016-10-24, commit time:12:20, hash:e8299c8</authoring_tool>
     </contributor>
-    <created>2017-01-23T18:52:58</created>
-    <modified>2017-01-23T18:52:58</modified>
+    <created>2017-01-24T01:41:55</created>
+    <modified>2017-01-24T01:41:55</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -1490,7 +1490,7 @@
               <texture texture="m5Screw_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
-              <color sid="specular">1 1 1 1</color>
+              <color sid="specular">0.04894242 0.04894242 0.04894242 1</color>
             </specular>
             <shininess>
               <float sid="shininess">80</float>
@@ -1595,7 +1595,7 @@
               <texture texture="stopButton_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
-              <color sid="specular">0.5 0.5 0.5 1</color>
+              <color sid="specular">0.05955373 0.05955373 0.05955373 1</color>
             </specular>
             <shininess>
               <float sid="shininess">50</float>
@@ -1618,7 +1618,7 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <color sid="diffuse">0.4198492 0.3972404 0.2778939 1</color>
+              <color sid="diffuse">0.2169119 0.2137757 0.2200748 1</color>
             </diffuse>
             <specular>
               <color sid="specular">0.5 0.5 0.5 1</color>
@@ -3298,6 +3298,10 @@
         <vertices id="Cube_003-mesh-vertices">
           <input semantic="POSITION" source="#Cube_003-mesh-positions"/>
         </vertices>
+        <lines count="1">
+          <input semantic="VERTEX" source="#Cube_003-mesh-vertices" offset="0"/>
+          <p>2 2</p>
+        </lines>
         <polylist count="2">
           <input semantic="VERTEX" source="#Cube_003-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cube_003-mesh-normals" offset="1"/>
