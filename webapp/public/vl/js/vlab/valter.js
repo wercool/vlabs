@@ -39,7 +39,7 @@ class Valter
         });
 
         this.model = valterScene.children[0];
-        this.model.scale.set(15, 15, 15);
+        this.model.scale.set(14, 14, 14);
         this.model.position.copy(this.initialModelPosition);
         this.vlab.getVlabScene().add(this.model);
 
