@@ -31,15 +31,26 @@ class Valter
             {
                 obj.material.side = THREE.DoubleSide;
             }
-            var shadowCasted = ["baseFrame", "base", "rightWheel", "leftWheel", "manGripperFrame"];
+            var shadowCasted = [
+                                "baseFrame", "base", "rightWheel", "leftWheel", "manGripperFrame",
+                                "valterBodyP1", "valterBodyP2", "bodyFrame", "bodyFrameL", "bodyFrameR",
+                                "pg20RMiddle", "pg20LMiddle"
+                               ];
             if (shadowCasted.indexOf(obj.name) > -1)
             {
                 obj.castShadow = true;
             }
+            var shadowReceive = [
+                                "cap", "valterBodyP1", "valterBodyP2"
+                               ];
+            if (shadowReceive.indexOf(obj.name) > -1)
+            {
+                obj.receiveShadow = true;
+            }
         });
 
         this.model = valterScene.children[0];
-        this.model.scale.set(14, 14, 14);
+        this.model.scale.set(13.5, 13.5, 13.5);
         this.model.position.copy(this.initialModelPosition);
         this.vlab.getVlabScene().add(this.model);
 
