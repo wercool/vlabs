@@ -47,10 +47,20 @@ class Valter
             {
                 obj.receiveShadow = true;
             }
+            // apply opacity
+            switch (obj.name)
+            {
+                case "bodyFrameGlass":
+                    obj.material.opacity = 0.35;
+                break;
+                case "headGlass":
+                    obj.material.opacity = 0.35;
+                break;
+            }
         });
 
         this.model = valterScene.children[0];
-        this.model.scale.set(13.5, 13.5, 13.5);
+        this.model.scale.set(13.25, 13.25, 13.25);
         this.model.position.copy(this.initialModelPosition);
         this.vlab.getVlabScene().add(this.model);
 
