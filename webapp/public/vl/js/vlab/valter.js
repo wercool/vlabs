@@ -32,8 +32,8 @@ class Valter
                 obj.material.side = THREE.DoubleSide;
             }
             var shadowCasted = [
-                                "baseFrame", "base", "rightWheel", "leftWheel", "manGripperFrame",
-                                "valterBodyP1", "valterBodyP2", "bodyFrame", "bodyFrameL", "bodyFrameR",
+                                "baseFrame", "base", "rightWheel", "rightWheelDiskBack", "leftWheel", "leftWheelDiskBack",
+                                "manGripperFrame", "valterBodyP1", "valterBodyP2", "bodyFrame", "bodyFrameL", "bodyFrameR",
                                 "pg20RMiddle", "pg20LMiddle"
                                ];
             if (shadowCasted.indexOf(obj.name) > -1)
@@ -55,6 +55,21 @@ class Valter
                 break;
                 case "headGlass":
                     obj.material.opacity = 0.35;
+                break;
+                case "valterBodyP1":
+                    obj.material.side = THREE.DoubleSide;
+                break;
+                case "valterBodyP2":
+                    obj.material.side = THREE.DoubleSide;
+                break;
+                case "bodyKinectFrame":
+                    obj.material.side = THREE.DoubleSide;
+                break;
+                default:
+                    if (obj.material != undefined)
+                    {
+                        obj.material.side = THREE.FrontSide;
+                    }
                 break;
             }
         });
