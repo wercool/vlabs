@@ -23,11 +23,24 @@ app.set('port', port);
  */
 var server = http.createServer(app);
 
-/**
- * Listen on provided port, on all network interfaces.
- */
-
-models.sequelize.sync({force: config.sequelizeSyncForce}).then(function(){
+// Initially fill DB with values
+if (config.sequelizeSyncForce)
+{
+    var administratorRole;
+}
+models.sequelize.sync({force: config.sequelizeSyncForce})
+.then(function(){
+    if (config.sequelizeSyncForce)
+    {
+        models.Role.create({ title: 'Administrator' }).then(function(role){
+            administratorRole = role;
+            models.User.create({ email: 'maska@mail.ru', password: '123', firstname: 'Alexey', lastname: 'Maistrenko' }).then(function(user){
+                user.addRole(administratorRole.id);
+            })
+        });
+    }
+})
+.then(function(){
   /**
    * Listen on provided port, on all network interfaces.
    */
