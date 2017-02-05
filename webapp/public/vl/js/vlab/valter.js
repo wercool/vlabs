@@ -54,7 +54,7 @@ class Valter
                     obj.material.opacity = 0.35;
                 break;
                 case "headGlass":
-                    obj.material.opacity = 0.35;
+                    obj.material.opacity = 0.3;
                 break;
                 case "valterBodyP1":
                     obj.material.side = THREE.DoubleSide;
@@ -63,6 +63,9 @@ class Valter
                     obj.material.side = THREE.DoubleSide;
                 break;
                 case "bodyKinectFrame":
+                    obj.material.side = THREE.DoubleSide;
+                break;
+                case "neckFabrickCover":
                     obj.material.side = THREE.DoubleSide;
                 break;
                 default:
