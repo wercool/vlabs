@@ -5,7 +5,10 @@ var router      = express.Router();
 
 // non-tokenized routes
 router.post('/authenticate', function(req, res, next) {
-    models.User.findOne({ where: {email: req.body.email, password: req.body.password} }).then(function(user){
+    models.User.findOne({
+                            where: {email: req.body.email, password: req.body.password},
+                            include:[{model:models.Role}]
+                        }).then(function(user){
         if (user === null)
         {
             res.json({});
@@ -16,12 +19,14 @@ router.post('/authenticate', function(req, res, next) {
             var jwtToken = jwt.sign({id: user.id, email: user.email, password: user.password}, req.app.get('jwtSecret'), {
               expiresIn: 60*60*24 // expires in 24 hours
             });
+            // console.log(user);
             var authenticatedUser = {
-                id: user.id,
-                email: user.email,
-                firstname: user.firstname,
-                lastname: user.lastname,
-                token: jwtToken
+                id:         user.id,
+                email:      user.email,
+                firstname:  user.firstname,
+                lastname:   user.lastname,
+                roles:      user.Roles,
+                token:      jwtToken
             };
             res.json(authenticatedUser);
         }
