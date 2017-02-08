@@ -10,10 +10,11 @@
     "forceShadows":         false,
     "shadowsMapSize":       512,
     "antialias":            false,
+    "advanceLighting":      true,
     "castShadows":
     [
         "Lamp1",
-        "slopingBody", "tableTopFrame", "tableTop", "slopingSurface", "support", "supportRod", "frame", "acPlug", "acWire", "aktakomPowerSupply", 
+        "slopingBody", "tableTopFrame", "tableTop", "slopingSurface", "support", "supportRod", "frame", "acPlug", "acWire", "aktakomPowerSupply",
         "minusWire", "pulleyMotor", "motorFixture", "slopingSurfaceFixture",
         "motor", "button", "tableTop_001", "Circle_015", "Circle_010", "Plane_007",
         "Plane_010", "Plane_011", "Circle_012", "Circle_013", "pusher", "framePivot", "BezierCurve_009",
@@ -22,7 +23,7 @@
         "BezierCurve_004", "BezierCurve_002", "BezierCurve_003", "slopingSurfaceFixtureHandle1",
         "slopingSurfaceFixtureHandle2", "tableBottomFrame", "tableStand", "pulley",
         "supportFixator1", "stopbuttonTopPlate", "Sphere_001", "Circle_011", "Plane_049", "Plane_050", "kukabasePlate",
-        "tableBottomFrameOutletsBox", "Plane_007", "Plane_010", "Plane_011"
+        "tableBottomFrameOutletsBox", "Plane_007", "Plane_010", "Plane_011", "ceilingLightBox"
     ],
     "receiveShadows":
     [
@@ -47,7 +48,7 @@
     ],
     "interactionHelpers":
     {
-        "plumbScaleHelper": 
+        "plumbScaleHelper":
         {
             "parent":"scale",
             "map":"magnifier",
@@ -166,14 +167,14 @@
         },
         "slopingSurface":
         {
-            "shape":"ConvexMesh", 
+            "shape":"ConvexMesh",
             "mass":0.0,
             "friction":0.2,
             "restitution":1.0
         },
         "slopingSurfaceFixture":
         {
-            "shape":"ConvexMesh", 
+            "shape":"ConvexMesh",
             "mass":0.0,
             "friction":0.5,
             "restitution":0.1,
@@ -181,7 +182,7 @@
         },
         "tableTop":
         {
-            "shape":"BoxMesh", 
+            "shape":"BoxMesh",
             "mass":0.0,
             "friction":0.5,
             "restitution":0.1,
@@ -189,7 +190,7 @@
         },
         "support":
         {
-            "shape":"BoxMesh", 
+            "shape":"BoxMesh",
             "mass":0.0,
             "friction":0.2,
             "restitution":0.5,

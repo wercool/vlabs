@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.78.0 commit date:2016-10-24, commit time:12:20, hash:e8299c8</authoring_tool>
     </contributor>
-    <created>2017-02-01T14:10:33</created>
-    <modified>2017-02-01T14:10:33</modified>
+    <created>2017-02-08T02:28:29</created>
+    <modified>2017-02-08T02:28:29</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -82,7 +82,7 @@
     <light id="Lamp1_001-light" name="Lamp.000">
       <technique_common>
         <point>
-          <color sid="color">0.1522014 0.1566091 0.1513283</color>
+          <color sid="color">0.09132087 0.09396544 0.090797</color>
           <constant_attenuation>1</constant_attenuation>
           <linear_attenuation>0</linear_attenuation>
           <quadratic_attenuation>10e-5</quadratic_attenuation>
@@ -111,7 +111,7 @@
           <clipsta>1.000799</clipsta>
           <compressthresh>0.04999995</compressthresh>
           <dist sid="blender_dist">100</dist>
-          <energy sid="blender_energy">0.25</energy>
+          <energy sid="blender_energy">0.15</energy>
           <falloff_type>2</falloff_type>
           <filtertype>0</filtertype>
           <flag>0</flag>
@@ -301,6 +301,12 @@
     </image>
     <image id="labSwitchContact-p1-bump_jpg" name="labSwitchContact-p1-bump_jpg">
       <init_from>labSwitchContact-p1-bump.jpg</init_from>
+    </image>
+    <image id="whitePaint_green_subtone_jpg" name="whitePaint_green_subtone_jpg">
+      <init_from>whitePaint_green_subtone.jpg</init_from>
+    </image>
+    <image id="paint2Bump_jpg" name="paint2Bump_jpg">
+      <init_from>paint2Bump.jpg</init_from>
     </image>
   </library_images>
   <library_effects>
@@ -2282,6 +2288,85 @@
         </technique>
       </profile_COMMON>
     </effect>
+    <effect id="ceilingMaterial_bumpScale_0_05-effect">
+      <profile_COMMON>
+        <newparam sid="whitePaint_green_subtone_jpg-surface">
+          <surface type="2D">
+            <init_from>whitePaint_green_subtone_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="whitePaint_green_subtone_jpg-sampler">
+          <sampler2D>
+            <source>whitePaint_green_subtone_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="paint2Bump_jpg-surface">
+          <surface type="2D">
+            <init_from>paint2Bump_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="paint2Bump_jpg-sampler">
+          <sampler2D>
+            <source>paint2Bump_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0.25 0.25 0.25 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="whitePaint_green_subtone_jpg-sampler" texcoord="UVMap"/>
+            </diffuse>
+            <specular>
+              <color sid="specular">1 1 1 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">50</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="paint2Bump_jpg-sampler" texcoord="UVMap"/>
+              </bump>
+            </technique>
+          </extra>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="ceilingLightBoxMaterial-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0.15 0.15 0.15 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color sid="diffuse">1 1 1 1</color>
+            </diffuse>
+            <specular>
+              <color sid="specular">0.1 0.1 0.1 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">4</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
   </library_effects>
   <library_materials>
     <material id="supportFixator1Material_bumpScale_-0_01-material" name="supportFixator1Material_bumpScale_-0_01">
@@ -2430,6 +2515,12 @@
     </material>
     <material id="labSwitchContactMaterial-p1_bumpScale_-0_15-material" name="labSwitchContactMaterial-p1_bumpScale_-0_15">
       <instance_effect url="#labSwitchContactMaterial-p1_bumpScale_-0_15-effect"/>
+    </material>
+    <material id="ceilingMaterial_bumpScale_0_05-material" name="ceilingMaterial_bumpScale_0_05">
+      <instance_effect url="#ceilingMaterial_bumpScale_0_05-effect"/>
+    </material>
+    <material id="ceilingLightBoxMaterial-material" name="ceilingLightBoxMaterial">
+      <instance_effect url="#ceilingLightBoxMaterial-effect"/>
     </material>
   </library_materials>
   <library_geometries>
@@ -6805,7 +6896,7 @@
     <geometry id="Plane_025-mesh" name="Plane.025">
       <mesh>
         <source id="Plane_025-mesh-positions">
-          <float_array id="Plane_025-mesh-positions-array" count="12">-28.28668 -28.18851 0 28.28668 -28.18851 0 -28.28668 40.3143 0 28.28668 40.3143 0</float_array>
+          <float_array id="Plane_025-mesh-positions-array" count="12">-28.28668 -34.2514 0 28.28668 -34.2514 0 -28.28668 34.25141 0 28.28668 34.25141 0</float_array>
           <technique_common>
             <accessor source="#Plane_025-mesh-positions-array" count="4" stride="3">
               <param name="X" type="float"/>
@@ -8300,6 +8391,92 @@
         </polylist>
       </mesh>
     </geometry>
+    <geometry id="Plane_021-mesh" name="Plane.021">
+      <mesh>
+        <source id="Plane_021-mesh-positions">
+          <float_array id="Plane_021-mesh-positions-array" count="12">-28.28668 -34.2514 0 28.28668 -34.2514 0 -28.28668 34.25141 0 28.28668 34.25141 0</float_array>
+          <technique_common>
+            <accessor source="#Plane_021-mesh-positions-array" count="4" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_021-mesh-normals">
+          <float_array id="Plane_021-mesh-normals-array" count="3">0 0 1</float_array>
+          <technique_common>
+            <accessor source="#Plane_021-mesh-normals-array" count="1" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_021-mesh-map-0">
+          <float_array id="Plane_021-mesh-map-0-array" count="12">0.9999001 1.00115e-4 9.998e-5 0.9999001 1.00115e-4 9.998e-5 0.9999001 1.00115e-4 0.9999001 0.9999001 9.998e-5 0.9999001</float_array>
+          <technique_common>
+            <accessor source="#Plane_021-mesh-map-0-array" count="6" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Plane_021-mesh-vertices">
+          <input semantic="POSITION" source="#Plane_021-mesh-positions"/>
+        </vertices>
+        <polylist material="ceilingMaterial_bumpScale_0_05-material" count="2">
+          <input semantic="VERTEX" source="#Plane_021-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Plane_021-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Plane_021-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 </vcount>
+          <p>1 0 0 2 0 1 0 0 2 1 0 3 3 0 4 2 0 5</p>
+        </polylist>
+      </mesh>
+    </geometry>
+    <geometry id="Plane_022-mesh" name="Plane.022">
+      <mesh>
+        <source id="Plane_022-mesh-positions">
+          <float_array id="Plane_022-mesh-positions-array" count="36">-28.28668 -34.2514 0 28.28668 -34.2514 0 -28.28668 34.25141 0 28.28668 34.25141 0 -25.66049 -31.07143 0 25.66049 -31.07143 0 -25.66049 31.07143 0 25.66049 31.07143 0 -25.66049 -31.07143 -1.403629 25.66049 -31.07143 -1.403629 -25.66049 31.07143 -1.403629 25.66049 31.07143 -1.403629</float_array>
+          <technique_common>
+            <accessor source="#Plane_022-mesh-positions-array" count="12" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_022-mesh-normals">
+          <float_array id="Plane_022-mesh-normals-array" count="15">0 0 1 -1 0 0 1 0 0 0 -1 0 0 1 0</float_array>
+          <technique_common>
+            <accessor source="#Plane_022-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_022-mesh-map-0">
+          <float_array id="Plane_022-mesh-map-0-array" count="96">0.1669954 0.8330047 0.7447494 0.8020877 0.772875 0.8330046 0.7728748 0.1669953 0.1951208 0.1979123 0.1669953 0.1669954 0.772875 0.8330046 0.7447493 0.1979122 0.7728748 0.1669953 0.1669953 0.1669954 0.195121 0.8020879 0.1669954 0.8330047 0.7879075 0.1669953 0.8029398 0.771171 0.7879075 0.771171 0.772875 0.1669953 0.7879075 0.771171 0.7728751 0.771171 0.8179723 0.6659566 0.8029398 0.1669953 0.8179722 0.1669953 0.8179723 0.1669953 0.8330046 0.6659565 0.8179723 0.6659565 0.1669954 0.8330047 0.195121 0.8020879 0.7447494 0.8020877 0.7728748 0.1669953 0.7447493 0.1979122 0.1951208 0.1979123 0.772875 0.8330046 0.7447494 0.8020877 0.7447493 0.1979122 0.1669953 0.1669954 0.1951208 0.1979123 0.195121 0.8020879 0.7879075 0.1669953 0.8029398 0.1669953 0.8029398 0.771171 0.772875 0.1669953 0.7879073 0.1669953 0.7879075 0.771171 0.8179723 0.6659566 0.8029399 0.6659566 0.8029398 0.1669953 0.8179723 0.1669953 0.8330046 0.1669953 0.8330046 0.6659565</float_array>
+          <technique_common>
+            <accessor source="#Plane_022-mesh-map-0-array" count="48" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Plane_022-mesh-vertices">
+          <input semantic="POSITION" source="#Plane_022-mesh-positions"/>
+        </vertices>
+        <polylist material="ceilingLightBoxMaterial-material" count="16">
+          <input semantic="VERTEX" source="#Plane_022-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Plane_022-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Plane_022-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>2 0 0 7 0 1 3 0 2 1 0 3 4 0 4 0 0 5 3 0 6 5 0 7 1 0 8 0 0 9 6 0 10 2 0 11 7 1 12 9 1 13 5 1 14 4 2 15 10 2 16 6 2 17 6 3 18 11 3 19 7 3 20 5 4 21 8 4 22 4 4 23 2 0 24 6 0 25 7 0 26 1 0 27 5 0 28 4 0 29 3 0 30 7 0 31 5 0 32 0 0 33 4 0 34 6 0 35 7 1 36 11 1 37 9 1 38 4 2 39 8 2 40 10 2 41 6 3 42 10 3 43 11 3 44 5 4 45 9 4 46 8 4 47</p>
+        </polylist>
+      </mesh>
+    </geometry>
   </library_geometries>
   <library_controllers/>
   <library_visual_scenes>
@@ -8625,7 +8802,7 @@
         </instance_geometry>
       </node>
       <node id="Lamp1" name="Lamp1" type="NODE">
-        <matrix sid="transform">-0.955171 0.1998836 -0.2183914 -2.730055 -0.2908649 -0.7711008 0.5663931 -20.47278 -0.05518905 0.6045247 0.7946723 36.34471 0 0 0 1</matrix>
+        <matrix sid="transform">-0.955171 0.1998836 -0.2183914 0 -0.2908649 -0.7711008 0.5663931 -20.47278 -0.05518905 0.6045247 0.7946723 36.34471 0 0 0 1</matrix>
         <instance_light url="#Lamp1-light"/>
       </node>
       <node id="Plane" name="Plane" type="NODE">
@@ -9457,7 +9634,7 @@
         </instance_geometry>
       </node>
       <node id="floor" name="floor" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 -20.33742 0 0 1 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 0 0 1 0 -14.27453 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Plane_025-mesh" name="floor">
           <bind_material>
             <technique_common>
@@ -9599,7 +9776,7 @@
         </instance_geometry>
       </node>
       <node id="Lamp1_001" name="Lamp1_001" type="NODE">
-        <matrix sid="transform">-0.955171 0.1998836 -0.2183914 0 -0.2908649 -0.7711008 0.5663931 -57.16171 -0.05518905 0.6045247 0.7946723 1.692708 0 0 0 1</matrix>
+        <matrix sid="transform">-0.955171 0.1998836 -0.2183914 0 -0.2908649 -0.7711008 0.5663931 -20.47278 -0.05518905 0.6045247 0.7946723 6.369198 0 0 0 1</matrix>
         <instance_light url="#Lamp1_001-light"/>
       </node>
       <node id="kukabasePlateHandle2_001" name="kukabasePlateHandle2_001" type="NODE">
@@ -9862,6 +10039,30 @@
           <bind_material>
             <technique_common>
               <instance_material symbol="m5ScrewMaterial_bumpScale_0_02-material" target="#m5ScrewMaterial_bumpScale_0_02-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="ceiling" name="ceiling" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 -1 3.25841e-7 -14.27453 0 -3.25841e-7 -1 40.1699 0 0 0 1</matrix>
+        <instance_geometry url="#Plane_021-mesh" name="ceiling">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="ceilingMaterial_bumpScale_0_05-material" target="#ceilingMaterial_bumpScale_0_05-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="ceilingLightBox" name="ceilingLightBox" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 -1 3.25841e-7 -14.27453 0 -3.25841e-7 -1 37.66248 0 0 0 1</matrix>
+        <instance_geometry url="#Plane_022-mesh" name="ceilingLightBox">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="ceilingLightBoxMaterial-material" target="#ceilingLightBoxMaterial-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>

@@ -72,6 +72,17 @@ function PhMpdFcm(webGLContainer)
         var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.15);
         self.getVlabScene().add(light);
 
+        if (self.vlabNature.advanceLighting)
+        {
+            var rectLight = new THREE.RectAreaLight(0xFFFFFF, undefined, 57.0, 2.0);
+            rectLight.matrixAutoUpdate = true;
+            rectLight.intensity = 70.0;
+            rectLight.position.set(0, 39.5, -17.5);
+            rectLight.rotation.set(-0.5, 0, 0);
+            var rectLightHelper = new THREE.RectAreaLightHelper( rectLight );
+            rectLight.add( rectLightHelper );
+            self.getVlabScene().add(rectLight);
+        }
 /*
         var spotLight = new THREE.SpotLight(0xecf5ff, 0.8, 250, 45, 1.0, 10);
         spotLight.target = self.getVlabScene().getObjectByName("frontWall");
