@@ -10,7 +10,9 @@
     "forceShadows":         false,
     "shadowsMapSize":       512,
     "antialias":            false,
-    "advanceLighting":      true,
+    "canvasAlphaBuffer":    true,
+    "advanceLighting":      false,
+    "advanceLighting1src":  true,
     "castShadows":
     [
         "Lamp1",
@@ -23,7 +25,7 @@
         "BezierCurve_004", "BezierCurve_002", "BezierCurve_003", "slopingSurfaceFixtureHandle1",
         "slopingSurfaceFixtureHandle2", "tableBottomFrame", "tableStand", "pulley",
         "supportFixator1", "stopbuttonTopPlate", "Sphere_001", "Circle_011", "Plane_049", "Plane_050", "kukabasePlate",
-        "tableBottomFrameOutletsBox", "Plane_007", "Plane_010", "Plane_011", "ceilingLightBox"
+        "tableBottomFrameOutletsBox", "Plane_007", "Plane_010", "Plane_011"
     ],
     "receiveShadows":
     [

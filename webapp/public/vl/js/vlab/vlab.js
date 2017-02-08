@@ -95,7 +95,7 @@ function VLab(vlabNature)
         webglContainer = $("#" + webglContainerDOM.id);
 
         self.WebGLRenderer = new THREE.WebGLRenderer({
-                                                      alpha: false,
+                                                      alpha: (self.vlabNature.canvasAlphaBuffer != undefined) ? self.vlabNature.canvasAlphaBuffer : false,
                                                       antialias: (self.vlabNature.antialias != undefined) ? self.vlabNature.antialias : false
                                                      });
 //        self.WebGLRenderer.setClearColor(0xbababa);
@@ -109,6 +109,10 @@ function VLab(vlabNature)
             self.WebGLRenderer.shadowMapSoft                    = true;
             self.WebGLRenderer.shadowMap.type                   = THREE.PCFSoftShadowMap;
         }
+
+
+        // self.WebGLRenderer.gammaInput = true;
+        // self.WebGLRenderer.gammaOutput = true;
 
         webglContainer.append(self.WebGLRenderer.domElement);
 
