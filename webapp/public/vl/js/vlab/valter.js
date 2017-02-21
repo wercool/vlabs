@@ -68,6 +68,39 @@ class Valter
                 case "neckFabrickCover":
                     obj.material.side = THREE.DoubleSide;
                 break;
+                case "armCover1":
+                    obj.material.side = THREE.DoubleSide;
+                break;
+                case "armCover2":
+                    obj.material.side = THREE.DoubleSide;
+                break;
+                case "armCover3":
+                    obj.material.side = THREE.DoubleSide;
+                break;
+                case "armCover4":
+                    obj.material.side = THREE.DoubleSide;
+                break;
+                case "armCover5":
+                    obj.material.side = THREE.DoubleSide;
+                break;
+                case "armCover6":
+                    obj.material.side = THREE.DoubleSide;
+                break;
+                case "armCover7":
+                    obj.material.side = THREE.DoubleSide;
+                break;
+                case "armCover8":
+                    obj.material.side = THREE.DoubleSide;
+                break;
+                case "armCover9":
+                    obj.material.side = THREE.DoubleSide;
+                break;
+                case "armCover10":
+                    obj.material.side = THREE.DoubleSide;
+                break;
+                case "forearmCover":
+                    obj.material.side = THREE.DoubleSide;
+                break;
                 default:
                     if (obj.material != undefined)
                     {
