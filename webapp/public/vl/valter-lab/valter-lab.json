@@ -1,0 +1,37 @@
+{
+    "presets": {"tetha": 0},
+    "title":                "Valter Lab",
+    "sceneFile":            "/vl/valter-lab/scene/valter-lab.dae",
+    "isPhysijsScene":       false,
+    "showStatistics":       true,
+    "showAxis":             false,
+    "showTooltips":         true,
+    "shadows":              true,
+    "forceShadows":         false,
+    "shadowsMapSize":       512,
+    "antialias":            false,
+    "canvasAlphaBuffer":    true,
+    "advanceLighting":      false,
+    "advanceLighting1src":  true,
+    "castShadows":
+    [
+    ],
+    "receiveShadows":
+    [
+    ],
+    "castShadowsExecptions":
+    [
+    ],
+    "receiveShadowsExecptions":
+    [
+    ],
+    "maps":
+    [
+    ],
+    "interactionHelpers":
+    {
+    },
+    "interactors":
+    {
+    }
+}

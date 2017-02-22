@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Friction coefficient measurement [ph-mpd-fcm]</title>
+    <title>Valter Lab</title>
     <link rel="stylesheet" type="text/css" href="/vl/css/important.css">
     <!-- Include this VLab specific styles -->
     <link rel="stylesheet" type="text/css" href="/vl/ph-mpd-fcm/css/ph-mpd-fcm.css">
@@ -20,9 +20,6 @@
     <script src="/vl/js/stats.js/build/stats.min.js"></script>
     <script src="/vl/js/three.js/examples/js/controls/TransformControls.js"></script>
 
-    <!-- Fullik -->
-    <script src="/vl/js/fullik/fullik.js"></script>
-
     <!-- Include VLab generic modules -->
     <script src="/vl/js/physi.js"></script>
     <script src="/vl/js/utils.js"></script>
@@ -36,15 +33,12 @@
     <script src="/vl/js/vlab/valter.js"></script>
 
     <!-- Include this VLab specific modules -->
-    <script src="/vl/js/vlab/kuka.js"></script>
-    <script src="/vl/js/vlab/kukaVacuumGripper.js"></script>
-    <script src="/vl/js/vlab/aktakomPowerSupply.js"></script>
-    <script src="/vl/ph-mpd-fcm/ph-mpd-fcm.js"></script>
+    <script src="/vl/valter-lab/valter-lab.js"></script>
+    <script src="/vl/js/three.js/examples/js/lights/RectAreaLightUniformsLib.js"></script>
 
     <div id="webGLContainer" class="webGLContainer"></div>
     <div id="notificationPopup"></div>
     <div id="canvases" style="display:hidden;"></canvas>
-    <span style="font-family: 'AktakomPowerSupplyScreenFont', bold;">&nbsp;</span>
 
     <script>
         $(document).ready(function() {
@@ -52,7 +46,7 @@
                 opacity: 0.2
             });
 
-            new PhMpdFcm("webGLContainer");
+            new ValterLab("webGLContainer");
         });
     </script>
 </body>
