@@ -36,6 +36,13 @@ class Valter
                                 "manGripperFrame", "valterBodyP1", "valterBodyP2", "bodyFrame", "bodyFrameL", "bodyFrameR",
                                 "pg20RMiddle", "pg20LMiddle"
                                ];
+           var doubleSide = [
+                               "valterBodyP1", "valterBodyP2", "bodyKinectFrame", "neckFabrickCover", "armCover1", "armCover2",
+                               "armCover3", "armCover4", "armCover5", "armCover6", "armCover7", "armCover8", "armCover9",
+                               "armCover10", "forearmCover",
+                               "armCover1l", "armCover2l", "armCover3l", "armCover4l", "armCover5l", "armCover6l",
+                               "armCover7l", "armCover8l", "armCover8ml", "armCover9l", "armCover10l", "forearmCoverl"
+                              ];
             if (shadowCasted.indexOf(obj.name) > -1)
             {
                 obj.castShadow = true;
@@ -47,6 +54,18 @@ class Valter
             {
                 obj.receiveShadow = true;
             }
+
+            //by default render shader only on a front side of a mesh
+            if (obj.material != undefined)
+            {
+                obj.material.side = THREE.FrontSide;
+            }
+            //double side shader on predefined
+            if (doubleSide.indexOf(obj.name) > -1)
+            {
+                obj.material.side = THREE.DoubleSide;
+            }
+
             // apply opacity
             switch (obj.name)
             {
@@ -56,56 +75,7 @@ class Valter
                 case "headGlass":
                     obj.material.opacity = 0.3;
                 break;
-                case "valterBodyP1":
-                    obj.material.side = THREE.DoubleSide;
-                break;
-                case "valterBodyP2":
-                    obj.material.side = THREE.DoubleSide;
-                break;
-                case "bodyKinectFrame":
-                    obj.material.side = THREE.DoubleSide;
-                break;
-                case "neckFabrickCover":
-                    obj.material.side = THREE.DoubleSide;
-                break;
-                case "armCover1":
-                    obj.material.side = THREE.DoubleSide;
-                break;
-                case "armCover2":
-                    obj.material.side = THREE.DoubleSide;
-                break;
-                case "armCover3":
-                    obj.material.side = THREE.DoubleSide;
-                break;
-                case "armCover4":
-                    obj.material.side = THREE.DoubleSide;
-                break;
-                case "armCover5":
-                    obj.material.side = THREE.DoubleSide;
-                break;
-                case "armCover6":
-                    obj.material.side = THREE.DoubleSide;
-                break;
-                case "armCover7":
-                    obj.material.side = THREE.DoubleSide;
-                break;
-                case "armCover8":
-                    obj.material.side = THREE.DoubleSide;
-                break;
-                case "armCover9":
-                    obj.material.side = THREE.DoubleSide;
-                break;
-                case "armCover10":
-                    obj.material.side = THREE.DoubleSide;
-                break;
-                case "forearmCover":
-                    obj.material.side = THREE.DoubleSide;
-                break;
                 default:
-                    if (obj.material != undefined)
-                    {
-                        obj.material.side = THREE.FrontSide;
-                    }
                 break;
             }
         });

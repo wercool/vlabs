@@ -17,3 +17,24 @@ def get_vertex_data(object_reference):
 
 object_reference = bpy.context.active_object
 get_vertex_data(object_reference)
+
+
+
+//recalculate normals on selected objects
+def recalculate_normals():
+ obj_objects = bpy.context.selected_objects[:]
+ print("Starting--------------------------------------------")
+ for obj in obj_objects:
+  print(obj)
+  bpy.ops.object.select_all(action='DESELECT')
+  obj.select = True
+  bpy.context.scene.objects.active = obj
+  # go edit mode
+  bpy.ops.object.mode_set(mode='EDIT')
+  # select al faces
+  bpy.ops.mesh.select_all(action='SELECT')
+  # recalculate outside normals 
+  bpy.ops.mesh.normals_make_consistent(inside=False)
+  # go object mode again
+  bpy.ops.object.editmode_toggle()
+ print("Ending--------------------------------------------")
