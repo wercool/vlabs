@@ -15,9 +15,11 @@
     "advanceLighting1src":  true,
     "castShadows":
     [
+        "Lamp1"
     ],
     "receiveShadows":
     [
+        "floor", "frontWall", "rightWall", "leftWall"
     ],
     "castShadowsExecptions":
     [
