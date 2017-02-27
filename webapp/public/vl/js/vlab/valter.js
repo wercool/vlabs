@@ -5,6 +5,7 @@ class Valter
     constructor (vlab, pos, testMode)
     {
         this.vlab = vlab;
+        this.initialized = false;
         this.model = undefined;
         this.initialModelPosition = pos;
         this.valterJSON = "/vl/models/valter/valter.json";
@@ -21,7 +22,17 @@ class Valter
         loader.convertUpAxis = true;
         loader.load(this.valterJSON, this.initialize.bind(this), this.sceneLoading.bind(this));
 
-        addEventListener("simulationStep", this.simulationStep, false);
+        this.prevValterBasePosition = new THREE.Vector3(0,0,0);
+
+        //cable sleeves
+        this.cableSleeveMaterial = null;
+        this.headToBodyCableSleeve = null;
+        this.baseToBodyRCableSleeve = null;
+        this.baseToBodyLCableSleeve = null;
+
+
+
+        addEventListener("simulationStep", this.simulationStep.bind(this), false);
     }
 
     sceneLoading(bytes)
@@ -40,7 +51,7 @@ class Valter
                 obj.material.side = THREE.DoubleSide;
             }
             var shadowCasted = [
-                                "baseFrame", "base", "rightWheel", "rightWheelDiskBack", "leftWheel", "leftWheelDiskBack",
+                                "ValterBase", "baseFrame", "rightWheel", "rightWheelDiskBack", "leftWheel", "leftWheelDiskBack",
                                 "manGripperFrame", "valterBodyP1", "valterBodyP2", "bodyFrame", "bodyFrameL", "bodyFrameR",
                                 "pg20RMiddle", "pg20LMiddle", "bodyFrameRFixed", "bodyFrameLFixed", "neckFabrickCover", "headFrame",
                                 "kinectBodyHead", "wifiAntennaLeft", "wifiAntennaCenter", "wifiAntennaRight",
@@ -60,7 +71,9 @@ class Valter
                                 "l_3_finger_p1", "l_3_finger_p2", "l_3_finger_p3", "l_3_finger_nail",
                                 "l_4_finger_p1", "l_4_finger_p2", "l_4_finger_p3", "l_4_finger_nail",
                                 "l_5_finger_p1", "l_5_finger_p2", "l_5_finger_p3", "l_5_finger_nail",
-                                "armAxisBearingR", "armAxisBearingL"
+                                "armAxisBearingR", "armAxisBearingL",
+                                "pg20BodyTop", "pg20Head", "pg20RTop", "pg20LTop", "pg20RBot", "pg20LBot", "pg20Head_nut", "pg20BodyTop_nut",
+                                "pg20RTop_nut", "pg20LTop_nut"
                                ];
            var doubleSide = [
                                "valterBodyP1", "valterBodyP2", "bodyKinectFrame", "neckFabrickCover",
@@ -136,6 +149,13 @@ class Valter
         this.activeObjects["headTiltFrame"] = this.vlab.getVlabScene().getObjectByName("headTiltFrame");
         this.activeObjects["headYawFrame"] = this.vlab.getVlabScene().getObjectByName("headYawFrame");
 
+        this.activeObjects["pg20Head"] = this.vlab.getVlabScene().getObjectByName("pg20Head");
+        this.activeObjects["pg20BodyTop"] = this.vlab.getVlabScene().getObjectByName("pg20BodyTop");
+        this.activeObjects["pg20RBot"] = this.vlab.getVlabScene().getObjectByName("pg20RBot");
+        this.activeObjects["pg20RTop"] = this.vlab.getVlabScene().getObjectByName("pg20RTop");
+        this.activeObjects["pg20LBot"] = this.vlab.getVlabScene().getObjectByName("pg20LBot");
+        this.activeObjects["pg20LTop"] = this.vlab.getVlabScene().getObjectByName("pg20LTop");
+
         this.activeObjects["rightHand"] = {
             f0_0: {obj: this.vlab.getVlabScene().getObjectByName("r_0_finger_p1"), angle: this.vlab.getVlabScene().getObjectByName("r_0_finger_p1").rotation.x},
             f0_1: {obj: this.vlab.getVlabScene().getObjectByName("r_0_finger_p2"), angle: this.vlab.getVlabScene().getObjectByName("r_0_finger_p2").rotation.z},
@@ -180,7 +200,9 @@ class Valter
 
         //initial joint values
         this.rightArm_initialRotY = this.activeObjects["rightArm"].rotation.y;
+        this.leftArm_initialRotY = this.activeObjects["leftArm"].rotation.y;
         this.armActuatorP1Right_initialRotX = this.activeObjects["armActuatorP1Right"].rotation.x;
+        this.armActuatorP1Left_initialRotX = this.activeObjects["armActuatorP1Left"].rotation.x;
 
         if (this.testMode)
         {
@@ -189,10 +211,10 @@ class Valter
             control.attach(this.model);
             control.setSize(1.0);
             this.vlab.getVlabScene().add(control);
-console.log(this.activeObjects["rightForearmYaw"].rotation.z);
+
             var GUIcontrols1 = new dat.GUI();
-            GUIcontrols1.add(this.activeObjects["ValterBase"].rotation, 'z', -6.28, 0.0).name("Base Yaw").step(0.01);
-            GUIcontrols1.add(this.activeObjects["valterBodyP1"].rotation, 'z', -1.57, 1.57).name("Body Yaw").step(0.01);
+            GUIcontrols1.add(this.model.rotation, 'z', -6.28, 0.0).name("Base Yaw").step(0.01);
+            GUIcontrols1.add(this.activeObjects["valterBodyP1"].rotation, 'z', -1.57, 1.57).name("Body Yaw").step(0.01).onChange(this.baseToBodyCableSleeveAnimation.bind(this));
             GUIcontrols1.add(this.activeObjects["bodyFrameAxisR"].rotation, 'x', -0.8, 0.0).name("Body Tilt").step(0.01);
             GUIcontrols1.add(this.activeObjects["bodyFrameR"].rotation, 'z', 0.0, 1.0).name("Right Shoulder").step(0.01);
             GUIcontrols1.add(this.activeObjects["bodyFrameL"].rotation, 'z', -1.0, 0.0).name("Left Shoulder").step(0.01);
@@ -208,16 +230,144 @@ console.log(this.activeObjects["rightForearmYaw"].rotation.z);
 
             GUIcontrols1.add(this.activeObjects["forearmFrameRight"].rotation, 'y', -3.14, 0.0).name("Right Forearm Roll").step(0.01);
             GUIcontrols1.add(this.activeObjects["forearmFrameLeft"].rotation, 'y', -3.14, 0.0).name("Left Forearm Roll").step(0.01);
-            GUIcontrols1.add(this.activeObjects["headTiltFrame"].rotation, 'x', -2.8, -1.8).name("Head Tilt").step(0.01);
-            GUIcontrols1.add(this.activeObjects["headYawFrame"].rotation, 'z', -4.71, -1.57).name("Head Yaw").step(0.01);
-            GUIcontrols1.add(this.handGrasping, 'right', 0.0, 1.0).name("Right Hand Grasping").step(0.01).onChange(this.rightHandGrasping.bind(this));;
-            GUIcontrols1.add(this.handGrasping, 'left', 0.0, 1.0).name("Left Hand Grapsing").step(0.01).onChange(this.leftHandGrasping.bind(this));;
+            GUIcontrols1.add(this.activeObjects["headTiltFrame"].rotation, 'x', -2.85, -1.8).name("Head Tilt").step(0.01).onChange(this.headToBodyCableSleeveAnimation.bind(this));
+            GUIcontrols1.add(this.activeObjects["headYawFrame"].rotation, 'z', -4.71, -1.57).name("Head Yaw").step(0.01).onChange(this.headToBodyCableSleeveAnimation.bind(this));
+            GUIcontrols1.add(this.handGrasping, 'right', 0.0, 1.0).name("Right Hand Grasping").step(0.01).onChange(this.rightHandGrasping.bind(this));
+            GUIcontrols1.add(this.handGrasping, 'left', 0.0, 1.0).name("Left Hand Grapsing").step(0.01).onChange(this.leftHandGrasping.bind(this));
         }
+
+        var self = this;
+        var loader = new THREE.TextureLoader();
+        loader.load(
+            "/vl/js/vlab/maps/valter/carbon_fibre.jpg",
+            function (texture) {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                texture.repeat.set(4, 1);
+                self.cableSleeveMaterial = new THREE.MeshPhongMaterial({wireframe: false, shading:THREE.SmoothShading, map: texture});
+                self.cableSleeveMaterial.bumpMap = texture;
+                self.cableSleeveMaterial.bumpScale = 0.05;
+
+                //Head to Body cable sleeve
+                self.headToBodyCableSleeveAnimation();
+                self.baseToBodyCableSleeveAnimation();
+            });
+
+            this.prevValterBasePosition.copy(this.activeObjects["ValterBase"].position);
+
+            this.initialized = true;
     }
 
     simulationStep(event)
     {
+        if (this.initialized)
+        {
+            if (this.prevValterBasePosition.distanceTo(this.activeObjects["ValterBase"].position) > 0.0001)
+            {
+                this.prevValterBasePosition.copy(this.activeObjects["ValterBase"].position);
+            }
+        }
+    }
 
+    headToBodyCableSleeveAnimation()
+    {
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20Head"].matrixWorld);
+        pos1.z += 0.1;
+        var pos1_1 = new THREE.Vector3().copy(pos1);
+        pos1_1.z -= 0.25;
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20BodyTop"].matrixWorld);
+        pos2.z += 0.15;
+        pos2.y -= 0.15;
+        var pos1_2 = new THREE.Vector3().copy(pos2);
+        pos1_2.y += 1.5 + (-2.83 - this.activeObjects["headTiltFrame"].rotation.x);
+        pos1_2.z -= 1.25 + (-2.83 - this.activeObjects["headTiltFrame"].rotation.x);
+        pos1_2.x -= (Math.PI + this.activeObjects["headYawFrame"].rotation.z) / 2.5;
+        var path = new THREE.CatmullRomCurve3([
+            pos1,
+            pos1_1,
+            pos1_2,
+            pos2
+        ]);
+        path.type = 'chordal';
+        path.closed = false;
+        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12, 8, false);
+
+        if (this.headToBodyCableSleeve != null)
+        {
+            this.activeObjects["pg20BodyTop"].remove(this.headToBodyCableSleeve);
+        }
+        this.headToBodyCableSleeve = new THREE.Mesh(geometry, this.cableSleeveMaterial);
+        this.headToBodyCableSleeve.castShadow = true;
+        this.activeObjects["pg20BodyTop"].updateMatrixWorld();
+        this.headToBodyCableSleeve.applyMatrix(new THREE.Matrix4().getInverse(this.activeObjects["pg20BodyTop"].matrixWorld));
+        this.activeObjects["pg20BodyTop"].add(this.headToBodyCableSleeve);
+        geometry = null;
+    }
+
+    baseToBodyCableSleeveAnimation()
+    {
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20RBot"].matrixWorld);
+        var pos1_1 = new THREE.Vector3().copy(pos1);
+        pos1_1.y += 0.5;
+        var pos1_2 = new THREE.Vector3().copy(pos1);
+        pos1_2.z -= 0.8;
+        pos1_2.y += 2.5;
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20RTop"].matrixWorld);
+        pos2.z += 0.1;
+        var pos1_3 = new THREE.Vector3().copy(pos2);
+        pos1_3.z -= 0.5;
+        var path = new THREE.CatmullRomCurve3([
+            pos1,
+            pos1_1,
+            pos1_2,
+            pos1_3,
+            pos2
+        ]);
+        path.type = 'chordal';
+        path.closed = false;
+        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12, 8, false);
+
+        if (this.baseToBodyRCableSleeve != null)
+        {
+            this.activeObjects["pg20RBot"].remove(this.baseToBodyRCableSleeve);
+        }
+        this.baseToBodyRCableSleeve = new THREE.Mesh(geometry, this.cableSleeveMaterial);
+        this.baseToBodyRCableSleeve.castShadow = true;
+        this.activeObjects["pg20RBot"].updateMatrixWorld();
+        this.baseToBodyRCableSleeve.applyMatrix(new THREE.Matrix4().getInverse(this.activeObjects["pg20RBot"].matrixWorld));
+        this.activeObjects["pg20RBot"].add(this.baseToBodyRCableSleeve);
+        geometry = null;
+
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20LBot"].matrixWorld);
+        var pos1_1 = new THREE.Vector3().copy(pos1);
+        pos1_1.y += 0.75;
+        var pos1_2 = new THREE.Vector3().copy(pos1);
+        pos1_2.z -= 0.75;
+        pos1_2.y += 2.4;
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20LTop"].matrixWorld);
+        pos2.z += 0.1;
+        var pos1_3 = new THREE.Vector3().copy(pos2);
+        pos1_3.z -= 0.65;
+        var path = new THREE.CatmullRomCurve3([
+            pos1,
+            pos1_1,
+            pos1_2,
+            pos1_3,
+            pos2
+        ]);
+        path.type = 'chordal';
+        path.closed = false;
+        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12, 8, false);
+
+        if (this.baseToBodyLCableSleeve != null)
+        {
+            this.activeObjects["pg20LBot"].remove(this.baseToBodyLCableSleeve);
+        }
+        this.baseToBodyLCableSleeve = new THREE.Mesh(geometry, this.cableSleeveMaterial);
+        this.baseToBodyLCableSleeve.castShadow = true;
+        this.activeObjects["pg20LBot"].updateMatrixWorld();
+        this.baseToBodyLCableSleeve.applyMatrix(new THREE.Matrix4().getInverse(this.activeObjects["pg20LBot"].matrixWorld));
+        this.activeObjects["pg20LBot"].add(this.baseToBodyLCableSleeve);
+        geometry = null;
     }
 
     rightArmAnimationHelper(value)
@@ -227,7 +377,7 @@ console.log(this.activeObjects["rightForearmYaw"].rotation.z);
 
     leftArmAnimationHelper(value)
     {
-        this.activeObjects["armActuatorP1Left"].rotation.x = this.armActuatorP1Right_initialRotX + (this.rightArm_initialRotY - this.activeObjects["leftArm"].rotation.y);
+        this.activeObjects["armActuatorP1Left"].rotation.x = this.armActuatorP1Right_initialRotX + (this.leftArm_initialRotY - this.activeObjects["leftArm"].rotation.y);
     }
 
     rightForearmAnimationHelper(value)

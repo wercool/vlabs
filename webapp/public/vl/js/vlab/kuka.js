@@ -29,9 +29,9 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
     self.kukaLink4 = null;
     self.kukaLink5 = null;
     self.kukaLinksItialAngles = {
-                                    link1:(-90 * Math.PI / 180), 
-                                    link2:(45 * Math.PI / 180), 
-                                    link3:(-138 * Math.PI / 180), 
+                                    link1:(-90 * Math.PI / 180),
+                                    link2:(45 * Math.PI / 180),
+                                    link3:(-138 * Math.PI / 180),
                                     link4:(-75 * Math.PI / 180)
                                 };
 
@@ -165,10 +165,6 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
                             var pos3 = self.kukaSleeveFixture3.position.clone();
                             var pos4 = self.kukaSleeveFixture4.position.clone();
 
-                            var path = new THREE.CatmullRomCurve3([
-                                pos1,
-                                pos2
-                            ]);
                             var path = new THREE.CatmullRomCurve3([pos1, pos2]);
                             path.type = 'chordal';
                             path.closed = false;
@@ -393,9 +389,9 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
         if (self.serverIK)
         {
             $.ajax({
-                url: "http://127.0.0.1:11111/ikxyz", 
-                type: 'POST', 
-                contentType: "application/json", 
+                url: "http://127.0.0.1:11111/ikxyz",
+                type: 'POST',
+                contentType: "application/json",
                 data: JSON.stringify(requestForEEFPos)
             }).done(function(res){
                 if (res.length)
@@ -420,9 +416,9 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
 
                     // set links
                     var angles = {
-                        link1:kukaIK.l1, 
-                        link2:kukaIK.l2, 
-                        link3:kukaIK.l3, 
+                        link1:kukaIK.l1,
+                        link2:kukaIK.l2,
+                        link3:kukaIK.l3,
                         link4:kukaIK.l4
                     };
 
@@ -451,9 +447,9 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
 
             // set links
             var angles = {
-                link1:kukaIK.l1, 
-                link2:kukaIK.l2, 
-                link3:kukaIK.l3, 
+                link1:kukaIK.l1,
+                link2:kukaIK.l2,
+                link3:kukaIK.l3,
                 link4:kukaIK.l4
             };
 
@@ -486,8 +482,8 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
         self.kukaBase.updateMatrixWorld();
         var l4Pos = new THREE.Vector3().setFromMatrixPosition(self.kukaLink4.matrixWorld);
         var l5Pos = new THREE.Vector3().setFromMatrixPosition(self.kukaLink5.matrixWorld);
-        var l4EEFDir = l4Pos.clone().sub(endEffectorPos); 
-        var l4l5Dir  = l4Pos.clone().sub(l5Pos); 
+        var l4EEFDir = l4Pos.clone().sub(endEffectorPos);
+        var l4l5Dir  = l4Pos.clone().sub(l5Pos);
 
         kukaIK.l4 = -l4EEFDir.angleTo(l4l5Dir);
 
@@ -572,6 +568,6 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
         delete self.completeCallBack;
     };
 
-    // append Kuka model to VLab scene 
+    // append Kuka model to VLab scene
     vlab.appendScene("/vl/models/kuka/kuka.dae", sceneAppendedCallBack);
 }
