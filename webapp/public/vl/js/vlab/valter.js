@@ -29,6 +29,8 @@ class Valter
         this.headToBodyCableSleeve = null;
         this.baseToBodyRCableSleeve = null;
         this.baseToBodyLCableSleeve = null;
+        this.bodyToTorsoRCableSleeve = null;
+        this.bodyToTorsoLCableSleeve = null;
 
 
 
@@ -116,7 +118,6 @@ class Valter
                 break;
             }
         });
-
         this.model = valterScene.children[0];
         this.model.scale.set(13.25, 13.25, 13.25);
         this.model.position.copy(this.initialModelPosition);
@@ -155,6 +156,10 @@ class Valter
         this.activeObjects["pg20RTop"] = this.vlab.getVlabScene().getObjectByName("pg20RTop");
         this.activeObjects["pg20LBot"] = this.vlab.getVlabScene().getObjectByName("pg20LBot");
         this.activeObjects["pg20LTop"] = this.vlab.getVlabScene().getObjectByName("pg20LTop");
+        this.activeObjects["pg20RMiddle"] = this.vlab.getVlabScene().getObjectByName("pg20RMiddle");
+        this.activeObjects["pg20RBodyTop"] = this.vlab.getVlabScene().getObjectByName("pg20RBodyTop");
+        this.activeObjects["pg20LMiddle"] = this.vlab.getVlabScene().getObjectByName("pg20LMiddle");
+        this.activeObjects["pg20LBodyTop"] = this.vlab.getVlabScene().getObjectByName("pg20LBodyTop");
 
         this.activeObjects["rightHand"] = {
             f0_0: {obj: this.vlab.getVlabScene().getObjectByName("r_0_finger_p1"), angle: this.vlab.getVlabScene().getObjectByName("r_0_finger_p1").rotation.x},
@@ -215,7 +220,7 @@ class Valter
             var GUIcontrols1 = new dat.GUI();
             GUIcontrols1.add(this.model.rotation, 'z', -6.28, 0.0).name("Base Yaw").step(0.01);
             GUIcontrols1.add(this.activeObjects["valterBodyP1"].rotation, 'z', -1.57, 1.57).name("Body Yaw").step(0.01).onChange(this.baseToBodyCableSleeveAnimation.bind(this));
-            GUIcontrols1.add(this.activeObjects["bodyFrameAxisR"].rotation, 'x', -0.8, 0.0).name("Body Tilt").step(0.01);
+            GUIcontrols1.add(this.activeObjects["bodyFrameAxisR"].rotation, 'x', -0.8, 0.0).name("Body Tilt").step(0.01).onChange(this.bodyToTorsoCableSleeveAnimation.bind(this));
             GUIcontrols1.add(this.activeObjects["bodyFrameR"].rotation, 'z', 0.0, 1.0).name("Right Shoulder").step(0.01);
             GUIcontrols1.add(this.activeObjects["bodyFrameL"].rotation, 'z', -1.0, 0.0).name("Left Shoulder").step(0.01);
             GUIcontrols1.add(this.activeObjects["armRightShoulderAxis"].rotation, 'x', -0.85, 1.4).name("Right Limb").step(0.01);
@@ -231,7 +236,7 @@ class Valter
             GUIcontrols1.add(this.activeObjects["forearmFrameRight"].rotation, 'y', -3.14, 0.0).name("Right Forearm Roll").step(0.01);
             GUIcontrols1.add(this.activeObjects["forearmFrameLeft"].rotation, 'y', -3.14, 0.0).name("Left Forearm Roll").step(0.01);
             GUIcontrols1.add(this.activeObjects["headTiltFrame"].rotation, 'x', -2.85, -1.8).name("Head Tilt").step(0.01).onChange(this.headToBodyCableSleeveAnimation.bind(this));
-            GUIcontrols1.add(this.activeObjects["headYawFrame"].rotation, 'z', -4.71, -1.57).name("Head Yaw").step(0.01).onChange(this.headToBodyCableSleeveAnimation.bind(this));
+            GUIcontrols1.add(this.activeObjects["headYawFrame"].rotation, 'z', -4.42, -1.86).name("Head Yaw").step(0.01).onChange(this.headToBodyCableSleeveAnimation.bind(this));
             GUIcontrols1.add(this.handGrasping, 'right', 0.0, 1.0).name("Right Hand Grasping").step(0.01).onChange(this.rightHandGrasping.bind(this));
             GUIcontrols1.add(this.handGrasping, 'left', 0.0, 1.0).name("Left Hand Grapsing").step(0.01).onChange(this.leftHandGrasping.bind(this));
         }
@@ -250,6 +255,7 @@ class Valter
                 //Head to Body cable sleeve
                 self.headToBodyCableSleeveAnimation();
                 self.baseToBodyCableSleeveAnimation();
+                self.bodyToTorsoCableSleeveAnimation();
             });
 
             this.prevValterBasePosition.copy(this.activeObjects["ValterBase"].position);
@@ -270,23 +276,63 @@ class Valter
 
     headToBodyCableSleeveAnimation()
     {
-        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20Head"].matrixWorld);
-        pos1.z += 0.1;
-        var pos1_1 = new THREE.Vector3().copy(pos1);
-        pos1_1.z -= 0.25;
-        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20BodyTop"].matrixWorld);
-        pos2.z += 0.15;
-        pos2.y -= 0.15;
-        var pos1_2 = new THREE.Vector3().copy(pos2);
-        pos1_2.y += 1.5 + (-2.83 - this.activeObjects["headTiltFrame"].rotation.x);
-        pos1_2.z -= 1.25 + (-2.83 - this.activeObjects["headTiltFrame"].rotation.x);
-        pos1_2.x -= (Math.PI + this.activeObjects["headYawFrame"].rotation.z) / 2.5;
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20BodyTop"].matrixWorld);
+        var dir1 = this.activeObjects["pg20BodyTop"].getWorldDirection();
+        dir1.normalize();
+
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20Head"].matrixWorld);
+        var dir2 = this.activeObjects["pg20Head"].getWorldDirection();
+        dir2.normalize();
+
+        var pos1_1 = new THREE.Vector3();
+        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.25));
+        var pos1_2 = new THREE.Vector3();
+        pos1_2.addVectors(pos1, dir1.clone().multiplyScalar(1.75));
+        var pos2_1 = new THREE.Vector3();
+        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.25));
+
+        var dir2_1 = pos2_1.clone().sub(pos1_2);
+        dir2_1.normalize().negate();
+
+        var pos2_2 = new THREE.Vector3();
+        pos2_2.addVectors(pos2_1, dir2_1.clone().multiplyScalar(1.0));
+
+        var dir1_1 = pos1_1.clone().sub(pos2_2);
+        dir1_1.normalize().negate();
+
+        // if (this.activeObjects["pg20BodyTopArrowHelper"] == undefined)
+        // {
+        //     this.activeObjects["pg20BodyTopArrowHelper"] = new THREE.ArrowHelper(dir1, pos1, 0.4, 0xffffff, 0.3, 0.05);
+        //     this.vlab.getVlabScene().add(this.activeObjects["pg20BodyTopArrowHelper"]);
+        //     this.activeObjects["pos1_1ArrowHelper"] = new THREE.ArrowHelper(dir1_1, pos1_1, 1.0, 0xffffff, 0.3, 0.05);
+        //     this.vlab.getVlabScene().add(this.activeObjects["pos1_1ArrowHelper"]);
+        //
+        //     this.activeObjects["pg20HeadArrowHelper"] = new THREE.ArrowHelper(dir2, pos2, 0.4, 0xffffff, 0.3, 0.05);
+        //     this.vlab.getVlabScene().add(this.activeObjects["pg20HeadArrowHelper"]);
+        //     this.activeObjects["pos2_1ArrowHelper"] = new THREE.ArrowHelper(dir2_1, pos2_1, 1.0, 0xffffff, 0.3, 0.05);
+        //     this.vlab.getVlabScene().add(this.activeObjects["pos2_1ArrowHelper"]);
+        // }
+        // else
+        // {
+        //     this.activeObjects["pg20BodyTopArrowHelper"].position.copy(pos1);
+        //     this.activeObjects["pg20BodyTopArrowHelper"].setDirection(dir1);
+        //     this.activeObjects["pos1_1ArrowHelper"].position.copy(pos1_1);
+        //     this.activeObjects["pos1_1ArrowHelper"].setDirection(dir1_1);
+        //
+        //     this.activeObjects["pg20HeadArrowHelper"].position.copy(pos2);
+        //     this.activeObjects["pg20HeadArrowHelper"].setDirection(dir2);
+        //     this.activeObjects["pos2_1ArrowHelper"].position.copy(pos2_1);
+        //     this.activeObjects["pos2_1ArrowHelper"].setDirection(dir2_1);
+        // }
+
         var path = new THREE.CatmullRomCurve3([
             pos1,
             pos1_1,
-            pos1_2,
+            pos2_2,
+            pos2_1,
             pos2
         ]);
+
         path.type = 'chordal';
         path.closed = false;
         var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12, 8, false);
@@ -300,28 +346,61 @@ class Valter
         this.activeObjects["pg20BodyTop"].updateMatrixWorld();
         this.headToBodyCableSleeve.applyMatrix(new THREE.Matrix4().getInverse(this.activeObjects["pg20BodyTop"].matrixWorld));
         this.activeObjects["pg20BodyTop"].add(this.headToBodyCableSleeve);
+
         geometry = null;
     }
 
     baseToBodyCableSleeveAnimation()
     {
+        // Right cable sleeve
         var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20RBot"].matrixWorld);
-        var pos1_1 = new THREE.Vector3().copy(pos1);
-        pos1_1.y += 0.5;
-        var pos1_2 = new THREE.Vector3().copy(pos1);
-        pos1_2.z -= 0.8;
-        pos1_2.y += 2.5;
+        var dir1 = this.activeObjects["pg20RBot"].getWorldDirection();
+        dir1.normalize();
+
         var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20RTop"].matrixWorld);
-        pos2.z += 0.1;
-        var pos1_3 = new THREE.Vector3().copy(pos2);
-        pos1_3.z -= 0.5;
+        var dir2 = this.activeObjects["pg20RTop"].getWorldDirection();
+        dir2.normalize();
+
+        var pos1_1 = new THREE.Vector3();
+        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.25));
+
+        var pos2_1 = new THREE.Vector3();
+        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.4));
+
+        // var pos2_2 = new THREE.Vector3();
+        // pos2_2.addVectors(pos2, dir2.clone().multiplyScalar(1.0));
+        //
+        // var dir1_2 = pos1_1.clone().sub(pos2_2);
+        // dir1_2.normalize().negate();
+
+        // if (this.activeObjects["pg20RBotArrowHelper"] == undefined)
+        // {
+        //     this.activeObjects["pg20RBotArrowHelper"] = new THREE.ArrowHelper(dir1, pos1, 0.4, 0xffffff, 0.3, 0.05);
+        //     this.vlab.getVlabScene().add(this.activeObjects["pg20RBotArrowHelper"]);
+        //     this.activeObjects["pos1_1ArrowHelper"] = new THREE.ArrowHelper(dir1_2, pos1_1, 3.0, 0xffffff, 0.3, 0.05);
+        //     this.vlab.getVlabScene().add(this.activeObjects["pos1_1ArrowHelper"]);
+        //
+        //     this.activeObjects["pg20RTopArrowHelper"] = new THREE.ArrowHelper(dir2, pos2, 0.4, 0xffffff, 0.3, 0.05);
+        //     this.vlab.getVlabScene().add(this.activeObjects["pg20RTopArrowHelper"]);
+        // }
+        // else
+        // {
+        //     this.activeObjects["pg20RBotArrowHelper"].position.copy(pos1);
+        //     this.activeObjects["pg20RBotArrowHelper"].setDirection(dir1);
+        //     this.activeObjects["pos1_1ArrowHelper"].position.copy(pos1_1);
+        //     this.activeObjects["pos1_1ArrowHelper"].setDirection(dir1_2);
+        //
+        //     this.activeObjects["pg20RTopArrowHelper"].position.copy(pos2);
+        //     this.activeObjects["pg20RTopArrowHelper"].setDirection(dir2);
+        // }
+
         var path = new THREE.CatmullRomCurve3([
             pos1,
             pos1_1,
-            pos1_2,
-            pos1_3,
+            pos2_1,
             pos2
         ]);
+
         path.type = 'chordal';
         path.closed = false;
         var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12, 8, false);
@@ -335,30 +414,36 @@ class Valter
         this.activeObjects["pg20RBot"].updateMatrixWorld();
         this.baseToBodyRCableSleeve.applyMatrix(new THREE.Matrix4().getInverse(this.activeObjects["pg20RBot"].matrixWorld));
         this.activeObjects["pg20RBot"].add(this.baseToBodyRCableSleeve);
+
         geometry = null;
 
+        // Left cable sleeve
         var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20LBot"].matrixWorld);
-        var pos1_1 = new THREE.Vector3().copy(pos1);
-        pos1_1.y += 0.75;
-        var pos1_2 = new THREE.Vector3().copy(pos1);
-        pos1_2.z -= 0.75;
-        pos1_2.y += 2.4;
+        var dir1 = this.activeObjects["pg20LBot"].getWorldDirection();
+        dir1.normalize();
+
         var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20LTop"].matrixWorld);
-        pos2.z += 0.1;
-        var pos1_3 = new THREE.Vector3().copy(pos2);
-        pos1_3.z -= 0.65;
+        var dir2 = this.activeObjects["pg20LTop"].getWorldDirection();
+        dir2.normalize();
+
+        var pos1_1 = new THREE.Vector3();
+        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.3));
+
+        var pos2_1 = new THREE.Vector3();
+        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.2));
+
         var path = new THREE.CatmullRomCurve3([
             pos1,
             pos1_1,
-            pos1_2,
-            pos1_3,
+            pos2_1,
             pos2
         ]);
+
         path.type = 'chordal';
         path.closed = false;
         var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12, 8, false);
 
-        if (this.baseToBodyLCableSleeve != null)
+        if (this.baseToBodyRCableSleeve != null)
         {
             this.activeObjects["pg20LBot"].remove(this.baseToBodyLCableSleeve);
         }
@@ -367,6 +452,86 @@ class Valter
         this.activeObjects["pg20LBot"].updateMatrixWorld();
         this.baseToBodyLCableSleeve.applyMatrix(new THREE.Matrix4().getInverse(this.activeObjects["pg20LBot"].matrixWorld));
         this.activeObjects["pg20LBot"].add(this.baseToBodyLCableSleeve);
+
+        geometry = null;
+    }
+
+    bodyToTorsoCableSleeveAnimation()
+    {
+        // Right cable sleeve
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20RMiddle"].matrixWorld);
+        var dir1 = this.activeObjects["pg20RMiddle"].getWorldDirection();
+        dir1.normalize();
+
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20RBodyTop"].matrixWorld);
+        var dir2 = this.activeObjects["pg20RBodyTop"].getWorldDirection();
+        dir2.normalize();
+
+        var pos1_1 = new THREE.Vector3();
+        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.8));
+
+        var pos2_1 = new THREE.Vector3();
+        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.25));
+
+        var path = new THREE.CatmullRomCurve3([
+            pos1,
+            pos1_1,
+            pos2_1,
+            pos2
+        ]);
+
+        path.type = 'chordal';
+        path.closed = false;
+        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12, 8, false);
+
+        if (this.baseToBodyRCableSleeve != null)
+        {
+            this.activeObjects["pg20RMiddle"].remove(this.bodyToTorsoRCableSleeve);
+        }
+        this.bodyToTorsoRCableSleeve = new THREE.Mesh(geometry, this.cableSleeveMaterial);
+        this.bodyToTorsoRCableSleeve.castShadow = true;
+        this.activeObjects["pg20RMiddle"].updateMatrixWorld();
+        this.bodyToTorsoRCableSleeve.applyMatrix(new THREE.Matrix4().getInverse(this.activeObjects["pg20RMiddle"].matrixWorld));
+        this.activeObjects["pg20RMiddle"].add(this.bodyToTorsoRCableSleeve);
+
+        geometry = null;
+
+        // Left cable sleeve
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20LMiddle"].matrixWorld);
+        var dir1 = this.activeObjects["pg20RMiddle"].getWorldDirection();
+        dir1.normalize();
+
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["pg20LBodyTop"].matrixWorld);
+        var dir2 = this.activeObjects["pg20RBodyTop"].getWorldDirection();
+        dir2.normalize();
+
+        var pos1_1 = new THREE.Vector3();
+        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.75));
+
+        var pos2_1 = new THREE.Vector3();
+        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.4));
+
+        var path = new THREE.CatmullRomCurve3([
+            pos1,
+            pos1_1,
+            pos2_1,
+            pos2
+        ]);
+
+        path.type = 'chordal';
+        path.closed = false;
+        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12, 8, false);
+
+        if (this.bodyToTorsoLCableSleeve != null)
+        {
+            this.activeObjects["pg20LMiddle"].remove(this.bodyToTorsoLCableSleeve);
+        }
+        this.bodyToTorsoLCableSleeve = new THREE.Mesh(geometry, this.cableSleeveMaterial);
+        this.bodyToTorsoLCableSleeve.castShadow = true;
+        this.activeObjects["pg20LMiddle"].updateMatrixWorld();
+        this.bodyToTorsoLCableSleeve.applyMatrix(new THREE.Matrix4().getInverse(this.activeObjects["pg20LMiddle"].matrixWorld));
+        this.activeObjects["pg20LMiddle"].add(this.bodyToTorsoLCableSleeve);
+
         geometry = null;
     }
 

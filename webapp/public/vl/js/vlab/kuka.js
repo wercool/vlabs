@@ -242,8 +242,6 @@ function Kuka(vlab, test, basePosition, initialLinksAngles, Gripper, gripperCont
                 pos3,
                 pos4
             ]);
-
-            var path = new THREE.CatmullRomCurve3([pos1, pos2, pos3, pos4]);
             path.type = 'chordal';
             path.closed = false;
             var geometry = new THREE.TubeBufferGeometry(path, 22, 0.06, 4, false);
