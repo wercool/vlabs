@@ -32,6 +32,7 @@ class Valter
         this.bodyToTorsoRCableSleeve = null;
         this.bodyToTorsoLCableSleeve = null;
 
+        this.prevValuesArray = {};
 
 
         addEventListener("simulationStep", this.simulationStep.bind(this), false);
@@ -161,6 +162,8 @@ class Valter
         this.activeObjects["pg20LMiddle"] = this.vlab.getVlabScene().getObjectByName("pg20LMiddle");
         this.activeObjects["pg20LBodyTop"] = this.vlab.getVlabScene().getObjectByName("pg20LBodyTop");
 
+        this.activeObjects["armCover2R"] = this.vlab.getVlabScene().getObjectByName("armCover2R");
+
         this.activeObjects["rightHand"] = {
             f0_0: {obj: this.vlab.getVlabScene().getObjectByName("r_0_finger_p1"), angle: this.vlab.getVlabScene().getObjectByName("r_0_finger_p1").rotation.x},
             f0_1: {obj: this.vlab.getVlabScene().getObjectByName("r_0_finger_p2"), angle: this.vlab.getVlabScene().getObjectByName("r_0_finger_p2").rotation.z},
@@ -259,6 +262,14 @@ class Valter
             });
 
             this.prevValterBasePosition.copy(this.activeObjects["ValterBase"].position);
+
+            this.activeObjects["armCover2R"].geometry = new THREE.Geometry().fromBufferGeometry(this.activeObjects["armCover2R"].geometry);
+            this.activeObjects["armCover2R"].initialGeometry = [];
+            for (var i = 0; i < this.activeObjects["armCover2R"].geometry.vertices.length; i++)
+            {
+                this.activeObjects["armCover2R"].initialGeometry[i] = new THREE.Vector3();
+                this.activeObjects["armCover2R"].initialGeometry[i].copy(this.activeObjects["armCover2R"].geometry.vertices[i]);
+            }
 
             this.initialized = true;
     }
@@ -537,12 +548,49 @@ class Valter
 
     rightArmAnimationHelper(value)
     {
-        this.activeObjects["armActuatorP1Right"].rotation.x = this.armActuatorP1Right_initialRotX + (this.rightArm_initialRotY - this.activeObjects["rightArm"].rotation.y);
+        this.activeObjects["armActuatorP1Right"].rotation.x = this.armActuatorP1Right_initialRotX + (this.rightArm_initialRotY - this.activeObjects["rightArm"].rotation.y) * 1.05;
+
+        var shift = Math.abs(this.rightArm_initialRotY - this.activeObjects["rightArm"].rotation.y);
+
+        var xdiv = 50;
+
+        this.activeObjects["armCover2R"].geometry.vertices[1].x  = this.activeObjects["armCover2R"].initialGeometry[1].x  - shift / xdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[2].x  = this.activeObjects["armCover2R"].initialGeometry[2].x  - shift / xdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[12].x = this.activeObjects["armCover2R"].initialGeometry[12].x - shift / xdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[13].x = this.activeObjects["armCover2R"].initialGeometry[13].x - shift / xdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[14].x = this.activeObjects["armCover2R"].initialGeometry[14].x - shift / xdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[15].x = this.activeObjects["armCover2R"].initialGeometry[15].x - shift / xdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[16].x = this.activeObjects["armCover2R"].initialGeometry[16].x - shift / xdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[17].x = this.activeObjects["armCover2R"].initialGeometry[17].x - shift / xdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[18].x = this.activeObjects["armCover2R"].initialGeometry[18].x - shift / xdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[19].x = this.activeObjects["armCover2R"].initialGeometry[19].x - shift / xdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[20].x = this.activeObjects["armCover2R"].initialGeometry[20].x - shift / xdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[21].x = this.activeObjects["armCover2R"].initialGeometry[21].x - shift / xdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[22].x = this.activeObjects["armCover2R"].initialGeometry[22].x - shift / xdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[23].x = this.activeObjects["armCover2R"].initialGeometry[23].x - shift / xdiv;
+
+        var zdiv = 15;
+        this.activeObjects["armCover2R"].geometry.vertices[1].z  = this.activeObjects["armCover2R"].initialGeometry[1].z  + shift / zdiv * 0.65;
+        this.activeObjects["armCover2R"].geometry.vertices[2].z  = this.activeObjects["armCover2R"].initialGeometry[2].z  + shift / zdiv * 0.65;
+        this.activeObjects["armCover2R"].geometry.vertices[12].z = this.activeObjects["armCover2R"].initialGeometry[12].z + shift / zdiv * 0.65;
+        this.activeObjects["armCover2R"].geometry.vertices[13].z = this.activeObjects["armCover2R"].initialGeometry[13].z + shift / zdiv * 0.65;
+        this.activeObjects["armCover2R"].geometry.vertices[14].z = this.activeObjects["armCover2R"].initialGeometry[14].z + shift / zdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[15].z = this.activeObjects["armCover2R"].initialGeometry[15].z + shift / zdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[16].z = this.activeObjects["armCover2R"].initialGeometry[16].z + shift / zdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[17].z = this.activeObjects["armCover2R"].initialGeometry[17].z + shift / zdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[18].z = this.activeObjects["armCover2R"].initialGeometry[18].z + shift / zdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[19].z = this.activeObjects["armCover2R"].initialGeometry[19].z + shift / zdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[20].z = this.activeObjects["armCover2R"].initialGeometry[20].z + shift / zdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[21].z = this.activeObjects["armCover2R"].initialGeometry[21].z + shift / zdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[22].z = this.activeObjects["armCover2R"].initialGeometry[22].z + shift / zdiv;
+        this.activeObjects["armCover2R"].geometry.vertices[23].z = this.activeObjects["armCover2R"].initialGeometry[23].z + shift / zdiv;
+
+        this.activeObjects["armCover2R"].geometry.verticesNeedUpdate = true;
     }
 
     leftArmAnimationHelper(value)
     {
-        this.activeObjects["armActuatorP1Left"].rotation.x = this.armActuatorP1Right_initialRotX + (this.leftArm_initialRotY - this.activeObjects["leftArm"].rotation.y);
+        this.activeObjects["armActuatorP1Left"].rotation.x = this.armActuatorP1Left_initialRotX + (this.leftArm_initialRotY - this.activeObjects["leftArm"].rotation.y);
     }
 
     rightForearmAnimationHelper(value)
