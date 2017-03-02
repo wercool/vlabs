@@ -32,8 +32,22 @@ class Valter
         this.bodyToTorsoRCableSleeve = null;
         this.bodyToTorsoLCableSleeve = null;
 
-        this.prevValuesArray = {};
+        this.coveringsVisibility = true;
 
+        this.initialValuesArray = {};
+
+        this.settings = {
+            coveringsVisibility: true
+        };
+
+        this.joints = {
+            rightArm: 0.0,
+            leftArm: 0.0,
+            rightShoudler: 0.0,
+            leftShoudler: 0.0,
+            rightForearm: 0.0,
+            leftForearm: 0.0,
+        };
 
         addEventListener("simulationStep", this.simulationStep.bind(this), false);
     }
@@ -134,10 +148,42 @@ class Valter
 
         this.activeObjects["armRightShoulderAxis"] = this.vlab.getVlabScene().getObjectByName("armRightShoulderAxis");
         this.activeObjects["armLeftShoulderAxis"] = this.vlab.getVlabScene().getObjectByName("armLeftShoulderAxis");
+
         this.activeObjects["rightArm"] = this.vlab.getVlabScene().getObjectByName("rightArm");
         this.activeObjects["armActuatorP1Right"] = this.vlab.getVlabScene().getObjectByName("armActuatorP1Right");
+        this.activeObjects["armActuatorP1RightFixture"] = this.vlab.getVlabScene().getObjectByName("armActuatorP1RightFixture");
+        this.activeObjects["armActuatorP1RightFixture1"] = this.vlab.getVlabScene().getObjectByName("armActuatorP1RightFixture1");
+        this.activeObjects["armActuatorP1RightStock"] = this.vlab.getVlabScene().getObjectByName("armActuatorP1RightStock");
+        this.activeObjects["armCover1R"] = this.vlab.getVlabScene().getObjectByName("armCover1R");
+        this.activeObjects["armCover2R"] = this.vlab.getVlabScene().getObjectByName("armCover2R");
+        this.activeObjects["armCover3R"] = this.vlab.getVlabScene().getObjectByName("armCover3R");
+        this.activeObjects["armCover4R"] = this.vlab.getVlabScene().getObjectByName("armCover4R");
+        this.activeObjects["armCover5R"] = this.vlab.getVlabScene().getObjectByName("armCover5R");
+        this.activeObjects["armCover6R"] = this.vlab.getVlabScene().getObjectByName("armCover6R");
+        this.activeObjects["armCover7R"] = this.vlab.getVlabScene().getObjectByName("armCover7R");
+        this.activeObjects["armCover8R"] = this.vlab.getVlabScene().getObjectByName("armCover8R");
+        this.activeObjects["armCover9R"] = this.vlab.getVlabScene().getObjectByName("armCover9R");
+        this.activeObjects["armCover10R"] = this.vlab.getVlabScene().getObjectByName("armCover10R");
+        this.activeObjects["armCover11R"] = this.vlab.getVlabScene().getObjectByName("armCover11R");
+        this.activeObjects["forearmCoverR"] = this.vlab.getVlabScene().getObjectByName("forearmCoverR");
+
         this.activeObjects["leftArm"] = this.vlab.getVlabScene().getObjectByName("leftArm");
         this.activeObjects["armActuatorP1Left"] = this.vlab.getVlabScene().getObjectByName("armActuatorP1Left");
+        this.activeObjects["armActuatorP1LeftFixture"] = this.vlab.getVlabScene().getObjectByName("armActuatorP1LeftFixture");
+        this.activeObjects["armActuatorP1LeftFixture1"] = this.vlab.getVlabScene().getObjectByName("armActuatorP1LeftFixture1");
+        this.activeObjects["armActuatorP1LeftStock"] = this.vlab.getVlabScene().getObjectByName("armActuatorP1LeftStock");
+        this.activeObjects["armCover1L"] = this.vlab.getVlabScene().getObjectByName("armCover1L");
+        this.activeObjects["armCover2L"] = this.vlab.getVlabScene().getObjectByName("armCover2L");
+        this.activeObjects["armCover3L"] = this.vlab.getVlabScene().getObjectByName("armCover3L");
+        this.activeObjects["armCover4L"] = this.vlab.getVlabScene().getObjectByName("armCover4L");
+        this.activeObjects["armCover5L"] = this.vlab.getVlabScene().getObjectByName("armCover5L");
+        this.activeObjects["armCover6L"] = this.vlab.getVlabScene().getObjectByName("armCover6L");
+        this.activeObjects["armCover7L"] = this.vlab.getVlabScene().getObjectByName("armCover7L");
+        this.activeObjects["armCover8L"] = this.vlab.getVlabScene().getObjectByName("armCover8L");
+        this.activeObjects["armCover9L"] = this.vlab.getVlabScene().getObjectByName("armCover9L");
+        this.activeObjects["armCover10L"] = this.vlab.getVlabScene().getObjectByName("armCover10L");
+        this.activeObjects["armCover11L"] = this.vlab.getVlabScene().getObjectByName("armCover11L");
+        this.activeObjects["forearmCoverL"] = this.vlab.getVlabScene().getObjectByName("forearmCoverL");
 
         this.activeObjects["rightForearmYaw"] = this.vlab.getVlabScene().getObjectByName("rightForearmYaw");
         this.activeObjects["leftForearmYaw"] = this.vlab.getVlabScene().getObjectByName("leftForearmYaw");
@@ -162,7 +208,25 @@ class Valter
         this.activeObjects["pg20LMiddle"] = this.vlab.getVlabScene().getObjectByName("pg20LMiddle");
         this.activeObjects["pg20LBodyTop"] = this.vlab.getVlabScene().getObjectByName("pg20LBodyTop");
 
-        this.activeObjects["armCover2R"] = this.vlab.getVlabScene().getObjectByName("armCover2R");
+        this.activeObjects["torsoHingeRTop"] = this.vlab.getVlabScene().getObjectByName("torsoHingeRTop");
+        this.activeObjects["torsoHingeRBottom"] = this.vlab.getVlabScene().getObjectByName("torsoHingeRBottom");
+        this.activeObjects["torsoHingeLTop"] = this.vlab.getVlabScene().getObjectByName("torsoHingeLTop");
+        this.activeObjects["torsoHingeLBottom"] = this.vlab.getVlabScene().getObjectByName("torsoHingeLBottom");
+
+        this.activeObjects["forearmActuatorR"] = this.vlab.getVlabScene().getObjectByName("forearmActuatorR");
+        this.activeObjects["forearmActuatorRStock"] = this.vlab.getVlabScene().getObjectByName("forearmActuatorRStock");
+        this.activeObjects["forearmActuatorRFixture1"] = this.vlab.getVlabScene().getObjectByName("forearmActuatorRFixture1");
+        this.activeObjects["forearmActuatorRFixture"] = this.vlab.getVlabScene().getObjectByName("forearmActuatorRFixture");
+        this.activeObjects["forearmActuatorL"] = this.vlab.getVlabScene().getObjectByName("forearmActuatorL");
+        this.activeObjects["forearmActuatorLStock"] = this.vlab.getVlabScene().getObjectByName("forearmActuatorLStock");
+        this.activeObjects["forearmActuatorLFixture"] = this.vlab.getVlabScene().getObjectByName("forearmActuatorLFixture");
+        this.activeObjects["forearmActuatorLFixture1"] = this.vlab.getVlabScene().getObjectByName("forearmActuatorLFixture1");
+
+//DEBUG
+// this.vlab.getVlabScene().getObjectByName("armCover2R").visible = false;
+// this.vlab.getVlabScene().getObjectByName("armCover4R").visible = false;
+// this.vlab.getVlabScene().getObjectByName("armCover2L").visible = false;
+// this.vlab.getVlabScene().getObjectByName("armCover4L").visible = false;
 
         this.activeObjects["rightHand"] = {
             f0_0: {obj: this.vlab.getVlabScene().getObjectByName("r_0_finger_p1"), angle: this.vlab.getVlabScene().getObjectByName("r_0_finger_p1").rotation.x},
@@ -206,12 +270,6 @@ class Valter
             f5_2: {obj: this.vlab.getVlabScene().getObjectByName("l_5_finger_p3"), angle: this.vlab.getVlabScene().getObjectByName("l_5_finger_p3").rotation.z}
         };
 
-        //initial joint values
-        this.rightArm_initialRotY = this.activeObjects["rightArm"].rotation.y;
-        this.leftArm_initialRotY = this.activeObjects["leftArm"].rotation.y;
-        this.armActuatorP1Right_initialRotX = this.activeObjects["armActuatorP1Right"].rotation.x;
-        this.armActuatorP1Left_initialRotX = this.activeObjects["armActuatorP1Left"].rotation.x;
-
         if (this.testMode)
         {
             var control = new THREE.TransformControls(this.vlab.getDefaultCamera(), this.vlab.WebGLRenderer.domElement);
@@ -224,14 +282,14 @@ class Valter
             GUIcontrols1.add(this.model.rotation, 'z', -6.28, 0.0).name("Base Yaw").step(0.01);
             GUIcontrols1.add(this.activeObjects["valterBodyP1"].rotation, 'z', -1.57, 1.57).name("Body Yaw").step(0.01).onChange(this.baseToBodyCableSleeveAnimation.bind(this));
             GUIcontrols1.add(this.activeObjects["bodyFrameAxisR"].rotation, 'x', -0.8, 0.0).name("Body Tilt").step(0.01).onChange(this.bodyToTorsoCableSleeveAnimation.bind(this));
-            GUIcontrols1.add(this.activeObjects["bodyFrameR"].rotation, 'z', 0.0, 1.0).name("Right Shoulder").step(0.01);
-            GUIcontrols1.add(this.activeObjects["bodyFrameL"].rotation, 'z', -1.0, 0.0).name("Left Shoulder").step(0.01);
+            GUIcontrols1.add(this.joints, 'rightShoudler', 0.0, 1.0).name("Right Shoulder").step(0.01).onChange(this.rightShoulderRotate.bind(this));
+            GUIcontrols1.add(this.joints, 'leftShoudler', -1.0, 0.0).name("Left Shoulder").step(0.01).onChange(this.leftShoulderRotate.bind(this));;
             GUIcontrols1.add(this.activeObjects["armRightShoulderAxis"].rotation, 'x', -0.85, 1.4).name("Right Limb").step(0.01);
             GUIcontrols1.add(this.activeObjects["armLeftShoulderAxis"].rotation, 'x', -0.85, 1.4).name("Left Limb").step(0.01);
-            GUIcontrols1.add(this.activeObjects["rightArm"].rotation, 'y', -2.57, -1.22).name("Right Arm").step(0.01).onChange(this.rightArmAnimationHelper.bind(this));
-            GUIcontrols1.add(this.activeObjects["leftArm"].rotation, 'y', -2.57, -1.22).name("Left Arm").step(0.01).onChange(this.leftArmAnimationHelper.bind(this));
-            GUIcontrols1.add(this.activeObjects["rightForearmTilt"].rotation, 'y', -0.85, 0.85).name("Right Forearm Tilt").step(0.01).onChange(this.rightForearmAnimationHelper.bind(this));
-            GUIcontrols1.add(this.activeObjects["leftForearmTilt"].rotation, 'y', -0.85, 0.85).name("Left Forearm Tilt").step(0.01).onChange(this.leftForearmAnimationHelper.bind(this));
+            GUIcontrols1.add(this.joints, 'rightArm', -2.57, -1.22).name("Right Arm").step(0.01).onChange(this.rightArmRotate.bind(this));
+            GUIcontrols1.add(this.joints, 'leftArm', -2.57, -1.22).name("Left Arm").step(0.01).onChange(this.leftArmRotate.bind(this));
+            GUIcontrols1.add(this.joints, 'rightForearm', -0.5, 1.0).name("Right Forearm Tilt").step(0.01).onChange(this.rightForearmRotate.bind(this));
+            GUIcontrols1.add(this.joints, 'leftForearm', -0.5, 1.0).name("Left Forearm Tilt").step(0.01).onChange(this.leftForearmRotate.bind(this));
 
             GUIcontrols1.add(this.activeObjects["rightForearmYaw"].rotation, 'z', -0.25, 0.4).name("Right Forearm Yaw").step(0.01);
             GUIcontrols1.add(this.activeObjects["leftForearmYaw"].rotation, 'z', -0.25, 0.4).name("Left Forearm Yaw").step(0.01);
@@ -242,6 +300,7 @@ class Valter
             GUIcontrols1.add(this.activeObjects["headYawFrame"].rotation, 'z', -4.42, -1.86).name("Head Yaw").step(0.01).onChange(this.headToBodyCableSleeveAnimation.bind(this));
             GUIcontrols1.add(this.handGrasping, 'right', 0.0, 1.0).name("Right Hand Grasping").step(0.01).onChange(this.rightHandGrasping.bind(this));
             GUIcontrols1.add(this.handGrasping, 'left', 0.0, 1.0).name("Left Hand Grapsing").step(0.01).onChange(this.leftHandGrasping.bind(this));
+            GUIcontrols1.add(this.settings, 'coveringsVisibility').name("Coverings Visibility").onChange(this.setCoveringsVisibility.bind(this));
         }
 
         var self = this;
@@ -270,6 +329,76 @@ class Valter
                 this.activeObjects["armCover2R"].initialGeometry[i] = new THREE.Vector3();
                 this.activeObjects["armCover2R"].initialGeometry[i].copy(this.activeObjects["armCover2R"].geometry.vertices[i]);
             }
+
+            this.activeObjects["armCover4R"].geometry = new THREE.Geometry().fromBufferGeometry(this.activeObjects["armCover4R"].geometry);
+            this.activeObjects["armCover4R"].initialGeometry = [];
+            for (var i = 0; i < this.activeObjects["armCover4R"].geometry.vertices.length; i++)
+            {
+                this.activeObjects["armCover4R"].initialGeometry[i] = new THREE.Vector3();
+                this.activeObjects["armCover4R"].initialGeometry[i].copy(this.activeObjects["armCover4R"].geometry.vertices[i]);
+            }
+
+            this.activeObjects["armCover2L"].geometry = new THREE.Geometry().fromBufferGeometry(this.activeObjects["armCover2L"].geometry);
+            this.activeObjects["armCover2L"].initialGeometry = [];
+            for (var i = 0; i < this.activeObjects["armCover2L"].geometry.vertices.length; i++)
+            {
+                this.activeObjects["armCover2L"].initialGeometry[i] = new THREE.Vector3();
+                this.activeObjects["armCover2L"].initialGeometry[i].copy(this.activeObjects["armCover2L"].geometry.vertices[i]);
+            }
+
+            this.activeObjects["armCover4L"].geometry = new THREE.Geometry().fromBufferGeometry(this.activeObjects["armCover4L"].geometry);
+            this.activeObjects["armCover4L"].initialGeometry = [];
+            for (var i = 0; i < this.activeObjects["armCover4L"].geometry.vertices.length; i++)
+            {
+                this.activeObjects["armCover4L"].initialGeometry[i] = new THREE.Vector3();
+                this.activeObjects["armCover4L"].initialGeometry[i].copy(this.activeObjects["armCover4L"].geometry.vertices[i]);
+            }
+
+            var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1RightFixture1"].matrixWorld);
+            var dir1 = this.activeObjects["armActuatorP1RightFixture1"].getWorldDirection();
+            var rotationMatrix = new THREE.Matrix4();
+            rotationMatrix.makeRotationAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+            dir1.applyMatrix4(rotationMatrix);
+            dir1.normalize();
+            var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1RightFixture"].matrixWorld);
+            var dirPos1Pos2 = pos1.clone().sub(pos2);
+            dirPos1Pos2.normalize().negate();
+            this.initialValuesArray["armActuatorP1RightAngle"] = dirPos1Pos2.angleTo(dir1);
+
+            var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1LeftFixture1"].matrixWorld);
+            var dir1 = this.activeObjects["armActuatorP1LeftFixture1"].getWorldDirection();
+            var rotationMatrix = new THREE.Matrix4();
+            rotationMatrix.makeRotationAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+            dir1.applyMatrix4(rotationMatrix);
+            dir1.normalize();
+            var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1LeftFixture"].matrixWorld);
+            var dirPos1Pos2 = pos1.clone().sub(pos2);
+            dirPos1Pos2.normalize().negate();
+            this.initialValuesArray["armActuatorP1LeftAngle"] = dirPos1Pos2.angleTo(dir1);
+
+            var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["forearmActuatorRFixture1"].matrixWorld);
+            var dir1 = this.activeObjects["forearmActuatorRFixture1"].getWorldDirection();
+            var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["forearmActuatorRFixture"].matrixWorld);
+            var dir2 = pos1.clone().sub(pos2);
+            dir2.normalize();
+            this.initialValuesArray["forearmActuatorRAngle"] = dir1.angleTo(dir2);
+
+            //initial values
+            this.initialValuesArray["rightArm_rot_y"] = this.activeObjects["rightArm"].rotation.y;
+            this.initialValuesArray["leftArm_rot_y"] = this.activeObjects["leftArm"].rotation.y;
+            this.initialValuesArray["armActuatorP1Right_rot_x"] = this.activeObjects["armActuatorP1Right"].rotation.x;
+            this.initialValuesArray["armActuatorP1Left_rot_x"] = this.activeObjects["armActuatorP1Left"].rotation.x;
+            this.initialValuesArray["forearmActuatorR_rot_x"] = this.activeObjects["forearmActuatorR"].rotation.x;
+            this.initialValuesArray["rightForearmTilt"] = this.activeObjects["rightForearmTilt"].rotation.y;
+            this.initialValuesArray["forearmActuatorRStock_rot_y"] = this.activeObjects["forearmActuatorRStock"].rotation.y;
+
+            this.joints.rightArm = this.initialValuesArray["rightArm_rot_y"];
+            this.joints.leftArm = this.initialValuesArray["leftArm_rot_y"];
+            this.joints.rightShoudler = this.activeObjects["bodyFrameR"].rotation.z;
+            this.joints.leftShoudler = this.activeObjects["bodyFrameL"].rotation.z;
+
+            this.joints.rightForearm = this.activeObjects["rightForearmTilt"].rotation.y;
+            this.joints.leftForearm = this.activeObjects["leftForearmTilt"].rotation.y;
 
             this.initialized = true;
     }
@@ -546,61 +675,205 @@ class Valter
         geometry = null;
     }
 
-    rightArmAnimationHelper(value)
+    setCoveringsVisibility(value)
     {
-        this.activeObjects["armActuatorP1Right"].rotation.x = this.armActuatorP1Right_initialRotX + (this.rightArm_initialRotY - this.activeObjects["rightArm"].rotation.y) * 1.05;
+        this.settings.coveringsVisibility = value;
 
-        var shift = Math.abs(this.rightArm_initialRotY - this.activeObjects["rightArm"].rotation.y);
+        this.activeObjects["armCover1R"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover2R"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover3R"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover4R"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover5R"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover6R"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover7R"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover8R"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover9R"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover10R"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover11R"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["forearmCoverR"].visible = this.settings.coveringsVisibility;
 
-        var xdiv = 50;
+        this.activeObjects["armCover1L"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover2L"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover3L"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover4L"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover5L"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover6L"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover7L"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover8L"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover9L"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover10L"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["armCover11L"].visible = this.settings.coveringsVisibility;
+        this.activeObjects["forearmCoverL"].visible = this.settings.coveringsVisibility;
+    }
+
+    rightArmRotate(value)
+    {
+        if (this.activeObjects["rightArm"].rotation.y == value) return;
+        this.activeObjects["rightArm"].rotation.y = value;
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1RightFixture1"].matrixWorld);
+        var dir1 = this.activeObjects["armActuatorP1RightFixture1"].getWorldDirection();
+        dir1.normalize();
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1RightFixture"].matrixWorld);
+        var dirPos1Pos2 = pos1.clone().sub(pos2);
+        dirPos1Pos2.normalize().negate();
+        var newAngle = dirPos1Pos2.angleTo(dir1) + 0.06;
+        var angle = this.initialValuesArray["armActuatorP1Right_rot_x"] + (this.initialValuesArray["armActuatorP1RightAngle"] - newAngle);
+        this.activeObjects["armActuatorP1Right"].rotation.x = angle;
+
+        // if (this.activeObjects["arrowHelper1"] == undefined)
+        // {
+        //     this.activeObjects["arrowHelper1"] = new THREE.ArrowHelper(dir1, pos2, 8.0, 0xffffff, 0.3, 0.05);
+        //     this.vlab.getVlabScene().add(this.activeObjects["arrowHelper1"]);
+        // }
+        // else
+        // {
+        //     this.activeObjects["arrowHelper1"].position.copy(pos2);
+        //     this.activeObjects["arrowHelper1"].setDirection(dir1);
+        // }
+
+        if (!this.settings.coveringsVisibility) return;
+
+        var shift = Math.abs(this.initialValuesArray["rightArm_rot_y"] - this.activeObjects["rightArm"].rotation.y) * newAngle;
+        var xdiv = 28;
+
+        this.activeObjects["armCover4R"].geometry.vertices[7].x = this.activeObjects["armCover4R"].initialGeometry[7].x  - shift / xdiv / 2;
+        this.activeObjects["armCover4R"].geometry.vertices[8].x = this.activeObjects["armCover4R"].initialGeometry[8].x  - shift / xdiv / 2;
+        this.activeObjects["armCover4R"].geometry.vertices[9].x = this.activeObjects["armCover4R"].initialGeometry[9].x  - shift / xdiv / 2;
+        this.activeObjects["armCover4R"].geometry.vertices[21].x = this.activeObjects["armCover4R"].initialGeometry[21].x  - shift / xdiv / 2;
+        this.activeObjects["armCover4R"].geometry.vertices[22].x = this.activeObjects["armCover4R"].initialGeometry[22].x  - shift / xdiv / 2;
+        this.activeObjects["armCover4R"].geometry.vertices[23].x = this.activeObjects["armCover4R"].initialGeometry[23].x  - shift / xdiv / 2;
+
+        this.activeObjects["armCover4R"].geometry.verticesNeedUpdate = true;
 
         this.activeObjects["armCover2R"].geometry.vertices[1].x  = this.activeObjects["armCover2R"].initialGeometry[1].x  - shift / xdiv;
         this.activeObjects["armCover2R"].geometry.vertices[2].x  = this.activeObjects["armCover2R"].initialGeometry[2].x  - shift / xdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[12].x = this.activeObjects["armCover2R"].initialGeometry[12].x - shift / xdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[13].x = this.activeObjects["armCover2R"].initialGeometry[13].x - shift / xdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[14].x = this.activeObjects["armCover2R"].initialGeometry[14].x - shift / xdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[15].x = this.activeObjects["armCover2R"].initialGeometry[15].x - shift / xdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[16].x = this.activeObjects["armCover2R"].initialGeometry[16].x - shift / xdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[17].x = this.activeObjects["armCover2R"].initialGeometry[17].x - shift / xdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[18].x = this.activeObjects["armCover2R"].initialGeometry[18].x - shift / xdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[19].x = this.activeObjects["armCover2R"].initialGeometry[19].x - shift / xdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[20].x = this.activeObjects["armCover2R"].initialGeometry[20].x - shift / xdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[21].x = this.activeObjects["armCover2R"].initialGeometry[21].x - shift / xdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[22].x = this.activeObjects["armCover2R"].initialGeometry[22].x - shift / xdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[23].x = this.activeObjects["armCover2R"].initialGeometry[23].x - shift / xdiv;
+        for (var i = 12; i < 24; i++)
+        {
+            this.activeObjects["armCover2R"].geometry.vertices[i].x = this.activeObjects["armCover2R"].initialGeometry[i].x - shift / xdiv;
+        }
 
-        var zdiv = 15;
+        var zdiv = 30;
         this.activeObjects["armCover2R"].geometry.vertices[1].z  = this.activeObjects["armCover2R"].initialGeometry[1].z  + shift / zdiv * 0.65;
         this.activeObjects["armCover2R"].geometry.vertices[2].z  = this.activeObjects["armCover2R"].initialGeometry[2].z  + shift / zdiv * 0.65;
         this.activeObjects["armCover2R"].geometry.vertices[12].z = this.activeObjects["armCover2R"].initialGeometry[12].z + shift / zdiv * 0.65;
         this.activeObjects["armCover2R"].geometry.vertices[13].z = this.activeObjects["armCover2R"].initialGeometry[13].z + shift / zdiv * 0.65;
-        this.activeObjects["armCover2R"].geometry.vertices[14].z = this.activeObjects["armCover2R"].initialGeometry[14].z + shift / zdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[15].z = this.activeObjects["armCover2R"].initialGeometry[15].z + shift / zdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[16].z = this.activeObjects["armCover2R"].initialGeometry[16].z + shift / zdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[17].z = this.activeObjects["armCover2R"].initialGeometry[17].z + shift / zdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[18].z = this.activeObjects["armCover2R"].initialGeometry[18].z + shift / zdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[19].z = this.activeObjects["armCover2R"].initialGeometry[19].z + shift / zdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[20].z = this.activeObjects["armCover2R"].initialGeometry[20].z + shift / zdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[21].z = this.activeObjects["armCover2R"].initialGeometry[21].z + shift / zdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[22].z = this.activeObjects["armCover2R"].initialGeometry[22].z + shift / zdiv;
-        this.activeObjects["armCover2R"].geometry.vertices[23].z = this.activeObjects["armCover2R"].initialGeometry[23].z + shift / zdiv;
+        for (var i = 14; i < 24; i++)
+        {
+            this.activeObjects["armCover2R"].geometry.vertices[i].z = this.activeObjects["armCover2R"].initialGeometry[i].z + shift / zdiv;
+        }
 
         this.activeObjects["armCover2R"].geometry.verticesNeedUpdate = true;
     }
 
-    leftArmAnimationHelper(value)
+    leftArmRotate(value)
     {
-        this.activeObjects["armActuatorP1Left"].rotation.x = this.armActuatorP1Left_initialRotX + (this.leftArm_initialRotY - this.activeObjects["leftArm"].rotation.y);
+        if (this.activeObjects["leftArm"].rotation.y == value) return;
+
+        this.activeObjects["leftArm"].rotation.y = value;
+
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1LeftFixture1"].matrixWorld);
+        var dir1 = this.activeObjects["armActuatorP1LeftFixture1"].getWorldDirection();
+        dir1.normalize();
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1LeftFixture"].matrixWorld);
+        var dirPos1Pos2 = pos1.clone().sub(pos2);
+        dirPos1Pos2.normalize().negate();
+        var newAngle = dirPos1Pos2.angleTo(dir1) + 0.06;
+        var angle = this.initialValuesArray["armActuatorP1Left_rot_x"] + (this.initialValuesArray["armActuatorP1LeftAngle"] - newAngle);
+        this.activeObjects["armActuatorP1Left"].rotation.x = angle;
+
+        var shift = Math.abs(this.initialValuesArray["leftArm_rot_y"] - this.activeObjects["leftArm"].rotation.y) * newAngle;
+
+        if (!this.settings.coveringsVisibility) return;
+
+        var xdiv = -28;
+        this.activeObjects["armCover4L"].geometry.vertices[21].x = this.activeObjects["armCover4L"].initialGeometry[21].x  - shift / xdiv / 2;
+        this.activeObjects["armCover4L"].geometry.vertices[22].x = this.activeObjects["armCover4L"].initialGeometry[22].x  - shift / xdiv / 2;
+        this.activeObjects["armCover4L"].geometry.vertices[47].x = this.activeObjects["armCover4L"].initialGeometry[47].x  - shift / xdiv / 2;
+        this.activeObjects["armCover4L"].geometry.vertices[46].x = this.activeObjects["armCover4L"].initialGeometry[46].x  - shift / xdiv / 2;
+        this.activeObjects["armCover4L"].geometry.vertices[5].x = this.activeObjects["armCover4L"].initialGeometry[5].x  - shift / xdiv / 2;
+        this.activeObjects["armCover4L"].geometry.vertices[30].x = this.activeObjects["armCover4L"].initialGeometry[30].x  - shift / xdiv / 2;
+        this.activeObjects["armCover4L"].geometry.verticesNeedUpdate = true;
+
+        this.activeObjects["armCover2L"].geometry.vertices[1].x  = this.activeObjects["armCover2L"].initialGeometry[1].x  - shift / xdiv;
+        this.activeObjects["armCover2L"].geometry.vertices[2].x  = this.activeObjects["armCover2L"].initialGeometry[2].x  - shift / xdiv;
+        for (var i = 12; i < 24; i++)
+        {
+            this.activeObjects["armCover2L"].geometry.vertices[i].x = this.activeObjects["armCover2L"].initialGeometry[i].x - shift / xdiv;
+        }
+
+        var zdiv = -30;
+        this.activeObjects["armCover2L"].geometry.vertices[1].z  = this.activeObjects["armCover2L"].initialGeometry[1].z  + shift / zdiv * 0.65;
+        this.activeObjects["armCover2L"].geometry.vertices[2].z  = this.activeObjects["armCover2L"].initialGeometry[2].z  + shift / zdiv * 0.65;
+        this.activeObjects["armCover2L"].geometry.vertices[12].z = this.activeObjects["armCover2L"].initialGeometry[12].z + shift / zdiv * 0.65;
+        this.activeObjects["armCover2L"].geometry.vertices[13].z = this.activeObjects["armCover2L"].initialGeometry[13].z + shift / zdiv * 0.65;
+        for (var i = 14; i < 24; i++)
+        {
+            this.activeObjects["armCover2L"].geometry.vertices[i].z = this.activeObjects["armCover2L"].initialGeometry[i].z + shift / zdiv;
+        }
+
+        this.activeObjects["armCover2L"].geometry.verticesNeedUpdate = true;
     }
 
-    rightForearmAnimationHelper(value)
+    rightShoulderRotate(value)
     {
+        if (this.activeObjects["bodyFrameR"].rotation.z == value) return;
 
+        this.activeObjects["bodyFrameR"].rotation.z = value;
+
+        this.activeObjects["torsoHingeRTop"].rotation.z = this.activeObjects["bodyFrameR"].rotation.z;
+        this.activeObjects["torsoHingeRBottom"].rotation.z = this.activeObjects["bodyFrameR"].rotation.z;
     }
 
-    leftForearmAnimationHelper(value)
+    leftShoulderRotate(value)
     {
+        if (this.activeObjects["bodyFrameL"].rotation.z == value) return;
 
+        this.activeObjects["bodyFrameL"].rotation.z = value;
+
+        this.activeObjects["torsoHingeLTop"].rotation.z = this.activeObjects["bodyFrameL"].rotation.z;
+        this.activeObjects["torsoHingeLBottom"].rotation.z = this.activeObjects["bodyFrameL"].rotation.z;
+    }
+
+    rightForearmRotate(value)
+    {
+        if (this.activeObjects["rightForearmTilt"].rotation.y == value) return;
+
+        this.activeObjects["rightForearmTilt"].rotation.y = value;
+
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["forearmActuatorRFixture1"].matrixWorld);
+        var dir1 = this.activeObjects["forearmActuatorRFixture1"].getWorldDirection();
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["forearmActuatorRFixture"].matrixWorld);
+        var dir2 = pos1.clone().sub(pos2);
+        dir2.normalize();
+        var newAngle = dir1.angleTo(dir2);
+        var angle = this.initialValuesArray["forearmActuatorR_rot_x"] - (this.initialValuesArray["forearmActuatorRAngle"] - newAngle);
+        this.activeObjects["forearmActuatorR"].rotation.x = angle;
+
+        var rot_dy = this.initialValuesArray["rightForearmTilt"] - this.activeObjects["rightForearmTilt"].rotation.y;
+        this.activeObjects["forearmActuatorRStock"].rotation.y = this.initialValuesArray["forearmActuatorRStock_rot_y"] - rot_dy * 0.85;
+
+        // if (this.activeObjects["arrowHelper1"] == undefined)
+        // {
+        //     this.activeObjects["arrowHelper1"] = new THREE.ArrowHelper(dir2, pos1, 5.0, 0xffffff, 0.3, 0.05);
+        //     this.vlab.getVlabScene().add(this.activeObjects["arrowHelper1"]);
+        //
+        //     this.activeObjects["arrowHelper2"] = new THREE.ArrowHelper(dir1, pos1, 5.0, 0xffffff, 0.3, 0.05);
+        //     this.vlab.getVlabScene().add(this.activeObjects["arrowHelper2"]);
+        // }
+        // else
+        // {
+        //     this.activeObjects["arrowHelper1"].position.copy(pos1);
+        //     this.activeObjects["arrowHelper1"].setDirection(dir2);
+        //     this.activeObjects["arrowHelper2"].position.copy(pos1);
+        //     this.activeObjects["arrowHelper2"].setDirection(dir1);
+        // }
+    }
+
+    leftForearmRotate(value)
+    {
+        if (this.activeObjects["leftForearmTilt"].rotation.y == value) return;
+
+        this.activeObjects["leftForearmTilt"].rotation.y = value;
     }
 
     rightHandGrasping(value)
