@@ -47,7 +47,29 @@ class Valter
             leftShoudler: 0.0,
             rightForearm: 0.0,
             leftForearm: 0.0,
+            leftPalmYaw: 0.0,
+            rightPalmYaw: 0.0
         };
+
+        this.delayedCalls = [];
+
+        this.mouthPanelFrames = [];
+
+        var self = this;
+
+        this.guiControls = {
+            say:function(){
+                var textToSay = prompt("Text to say", "Привет!");
+
+                if (textToSay != null)
+                {
+                    self.say(textToSay);
+                }
+            }
+        };
+
+        this.sayAudio = undefined;
+        this.mouthAnimationTimer = undefined;
 
         addEventListener("simulationStep", this.simulationStep.bind(this), false);
     }
@@ -90,7 +112,14 @@ class Valter
                                 "l_5_finger_p1", "l_5_finger_p2", "l_5_finger_p3", "l_5_finger_nail",
                                 "armAxisBearingR", "armAxisBearingL",
                                 "pg20BodyTop", "pg20Head", "pg20RTop", "pg20LTop", "pg20RBot", "pg20LBot", "pg20Head_nut", "pg20BodyTop_nut",
-                                "pg20RTop_nut", "pg20LTop_nut"
+                                "pg20RTop_nut", "pg20LTop_nut",
+                                "rightArm", "leftArm",
+                                "forearmFixtureRP1", "rightForearmTilt", "forearmYawFixtureRP1", "SY85STH65Right", "forearmFrameRight",
+                                "forearmFixtureLP1", "leftForearmTilt", "forearmYawFixtureLP1", "SY85STH65Left", "forearmFrameLeft",
+                                "armActuatorP1RightStock", "armActuatorP1RightStockFixture1", "armActuatorP1RightStockFixture2",
+                                "armActuatorP1LeftStock", "armActuatorP1LeftStockFixture1", "armActuatorP1LeftStockFixture2",
+                                "forearmActuatorR", "forearmActuatorRStock", "forearmActuatorRTopFixture",
+                                "forearmActuatorL", "forearmActuatorLStock", "forearmActuatorLTopFixture"
                                ];
            var doubleSide = [
                                "valterBodyP1", "valterBodyP2", "bodyKinectFrame", "neckFabrickCover",
@@ -222,11 +251,10 @@ class Valter
         this.activeObjects["forearmActuatorLFixture"] = this.vlab.getVlabScene().getObjectByName("forearmActuatorLFixture");
         this.activeObjects["forearmActuatorLFixture1"] = this.vlab.getVlabScene().getObjectByName("forearmActuatorLFixture1");
 
-//DEBUG
-// this.vlab.getVlabScene().getObjectByName("armCover2R").visible = false;
-// this.vlab.getVlabScene().getObjectByName("armCover4R").visible = false;
-// this.vlab.getVlabScene().getObjectByName("armCover2L").visible = false;
-// this.vlab.getVlabScene().getObjectByName("armCover4L").visible = false;
+        this.activeObjects["rightPalmFixtureP14"] = this.vlab.getVlabScene().getObjectByName("rightPalmFixtureP14");
+        this.activeObjects["leftPalmFixtureP14"] = this.vlab.getVlabScene().getObjectByName("leftPalmFixtureP14");
+
+        this.activeObjects["mouthPanel"] = this.vlab.getVlabScene().getObjectByName("mouthPanel");
 
         this.activeObjects["rightHand"] = {
             f0_0: {obj: this.vlab.getVlabScene().getObjectByName("r_0_finger_p1"), angle: this.vlab.getVlabScene().getObjectByName("r_0_finger_p1").rotation.x},
@@ -298,9 +326,14 @@ class Valter
             GUIcontrols1.add(this.activeObjects["forearmFrameLeft"].rotation, 'y', -3.14, 0.0).name("Left Forearm Roll").step(0.01);
             GUIcontrols1.add(this.activeObjects["headTiltFrame"].rotation, 'x', -2.85, -1.8).name("Head Tilt").step(0.01).onChange(this.headToBodyCableSleeveAnimation.bind(this));
             GUIcontrols1.add(this.activeObjects["headYawFrame"].rotation, 'z', -4.42, -1.86).name("Head Yaw").step(0.01).onChange(this.headToBodyCableSleeveAnimation.bind(this));
+
+            GUIcontrols1.add(this.joints, 'leftPalmYaw',  -0.5, 0.5).name("Right Palm Yaw").step(0.01).onChange(this.rightPalmYaw.bind(this));
+            GUIcontrols1.add(this.joints, 'rightPalmYaw', -0.5, 0.5).name("Left Palm Yaw").step(0.01).onChange(this.leftPalmYaw.bind(this));
+
             GUIcontrols1.add(this.handGrasping, 'right', 0.0, 1.0).name("Right Hand Grasping").step(0.01).onChange(this.rightHandGrasping.bind(this));
             GUIcontrols1.add(this.handGrasping, 'left', 0.0, 1.0).name("Left Hand Grapsing").step(0.01).onChange(this.leftHandGrasping.bind(this));
             GUIcontrols1.add(this.settings, 'coveringsVisibility').name("Coverings Visibility").onChange(this.setCoveringsVisibility.bind(this));
+            GUIcontrols1.add(this.guiControls, 'say').name("Valter says");
         }
 
         var self = this;
@@ -318,89 +351,110 @@ class Valter
                 self.headToBodyCableSleeveAnimation();
                 self.baseToBodyCableSleeveAnimation();
                 self.bodyToTorsoCableSleeveAnimation();
+        });
+
+        for (var i = 1; i < 5; i++)
+        {
+            var loader = new THREE.TextureLoader();
+            loader.load(
+                "/vl/js/vlab/maps/valter/mouthPanelMaterial-f" + i + ".jpg",
+                function (texture) {
+                    self.mouthPanelFrames.push(texture);
             });
+        }
 
-            this.prevValterBasePosition.copy(this.activeObjects["ValterBase"].position);
+        this.prevValterBasePosition.copy(this.activeObjects["ValterBase"].position);
 
-            this.activeObjects["armCover2R"].geometry = new THREE.Geometry().fromBufferGeometry(this.activeObjects["armCover2R"].geometry);
-            this.activeObjects["armCover2R"].initialGeometry = [];
-            for (var i = 0; i < this.activeObjects["armCover2R"].geometry.vertices.length; i++)
-            {
-                this.activeObjects["armCover2R"].initialGeometry[i] = new THREE.Vector3();
-                this.activeObjects["armCover2R"].initialGeometry[i].copy(this.activeObjects["armCover2R"].geometry.vertices[i]);
-            }
+        this.activeObjects["armCover2R"].geometry = new THREE.Geometry().fromBufferGeometry(this.activeObjects["armCover2R"].geometry);
+        this.activeObjects["armCover2R"].initialGeometry = [];
+        for (var i = 0; i < this.activeObjects["armCover2R"].geometry.vertices.length; i++)
+        {
+            this.activeObjects["armCover2R"].initialGeometry[i] = new THREE.Vector3();
+            this.activeObjects["armCover2R"].initialGeometry[i].copy(this.activeObjects["armCover2R"].geometry.vertices[i]);
+        }
 
-            this.activeObjects["armCover4R"].geometry = new THREE.Geometry().fromBufferGeometry(this.activeObjects["armCover4R"].geometry);
-            this.activeObjects["armCover4R"].initialGeometry = [];
-            for (var i = 0; i < this.activeObjects["armCover4R"].geometry.vertices.length; i++)
-            {
-                this.activeObjects["armCover4R"].initialGeometry[i] = new THREE.Vector3();
-                this.activeObjects["armCover4R"].initialGeometry[i].copy(this.activeObjects["armCover4R"].geometry.vertices[i]);
-            }
+        this.activeObjects["armCover4R"].geometry = new THREE.Geometry().fromBufferGeometry(this.activeObjects["armCover4R"].geometry);
+        this.activeObjects["armCover4R"].initialGeometry = [];
+        for (var i = 0; i < this.activeObjects["armCover4R"].geometry.vertices.length; i++)
+        {
+            this.activeObjects["armCover4R"].initialGeometry[i] = new THREE.Vector3();
+            this.activeObjects["armCover4R"].initialGeometry[i].copy(this.activeObjects["armCover4R"].geometry.vertices[i]);
+        }
 
-            this.activeObjects["armCover2L"].geometry = new THREE.Geometry().fromBufferGeometry(this.activeObjects["armCover2L"].geometry);
-            this.activeObjects["armCover2L"].initialGeometry = [];
-            for (var i = 0; i < this.activeObjects["armCover2L"].geometry.vertices.length; i++)
-            {
-                this.activeObjects["armCover2L"].initialGeometry[i] = new THREE.Vector3();
-                this.activeObjects["armCover2L"].initialGeometry[i].copy(this.activeObjects["armCover2L"].geometry.vertices[i]);
-            }
+        this.activeObjects["armCover2L"].geometry = new THREE.Geometry().fromBufferGeometry(this.activeObjects["armCover2L"].geometry);
+        this.activeObjects["armCover2L"].initialGeometry = [];
+        for (var i = 0; i < this.activeObjects["armCover2L"].geometry.vertices.length; i++)
+        {
+            this.activeObjects["armCover2L"].initialGeometry[i] = new THREE.Vector3();
+            this.activeObjects["armCover2L"].initialGeometry[i].copy(this.activeObjects["armCover2L"].geometry.vertices[i]);
+        }
 
-            this.activeObjects["armCover4L"].geometry = new THREE.Geometry().fromBufferGeometry(this.activeObjects["armCover4L"].geometry);
-            this.activeObjects["armCover4L"].initialGeometry = [];
-            for (var i = 0; i < this.activeObjects["armCover4L"].geometry.vertices.length; i++)
-            {
-                this.activeObjects["armCover4L"].initialGeometry[i] = new THREE.Vector3();
-                this.activeObjects["armCover4L"].initialGeometry[i].copy(this.activeObjects["armCover4L"].geometry.vertices[i]);
-            }
+        this.activeObjects["armCover4L"].geometry = new THREE.Geometry().fromBufferGeometry(this.activeObjects["armCover4L"].geometry);
+        this.activeObjects["armCover4L"].initialGeometry = [];
+        for (var i = 0; i < this.activeObjects["armCover4L"].geometry.vertices.length; i++)
+        {
+            this.activeObjects["armCover4L"].initialGeometry[i] = new THREE.Vector3();
+            this.activeObjects["armCover4L"].initialGeometry[i].copy(this.activeObjects["armCover4L"].geometry.vertices[i]);
+        }
 
-            var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1RightFixture1"].matrixWorld);
-            var dir1 = this.activeObjects["armActuatorP1RightFixture1"].getWorldDirection();
-            var rotationMatrix = new THREE.Matrix4();
-            rotationMatrix.makeRotationAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
-            dir1.applyMatrix4(rotationMatrix);
-            dir1.normalize();
-            var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1RightFixture"].matrixWorld);
-            var dirPos1Pos2 = pos1.clone().sub(pos2);
-            dirPos1Pos2.normalize().negate();
-            this.initialValuesArray["armActuatorP1RightAngle"] = dirPos1Pos2.angleTo(dir1);
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1RightFixture1"].matrixWorld);
+        var dir1 = this.activeObjects["armActuatorP1RightFixture1"].getWorldDirection();
+        var rotationMatrix = new THREE.Matrix4();
+        rotationMatrix.makeRotationAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+        dir1.applyMatrix4(rotationMatrix);
+        dir1.normalize();
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1RightFixture"].matrixWorld);
+        var dirPos1Pos2 = pos1.clone().sub(pos2);
+        dirPos1Pos2.normalize().negate();
+        this.initialValuesArray["armActuatorP1RightAngle"] = dirPos1Pos2.angleTo(dir1);
 
-            var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1LeftFixture1"].matrixWorld);
-            var dir1 = this.activeObjects["armActuatorP1LeftFixture1"].getWorldDirection();
-            var rotationMatrix = new THREE.Matrix4();
-            rotationMatrix.makeRotationAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
-            dir1.applyMatrix4(rotationMatrix);
-            dir1.normalize();
-            var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1LeftFixture"].matrixWorld);
-            var dirPos1Pos2 = pos1.clone().sub(pos2);
-            dirPos1Pos2.normalize().negate();
-            this.initialValuesArray["armActuatorP1LeftAngle"] = dirPos1Pos2.angleTo(dir1);
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1LeftFixture1"].matrixWorld);
+        var dir1 = this.activeObjects["armActuatorP1LeftFixture1"].getWorldDirection();
+        var rotationMatrix = new THREE.Matrix4();
+        rotationMatrix.makeRotationAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+        dir1.applyMatrix4(rotationMatrix);
+        dir1.normalize();
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1LeftFixture"].matrixWorld);
+        var dirPos1Pos2 = pos1.clone().sub(pos2);
+        dirPos1Pos2.normalize().negate();
+        this.initialValuesArray["armActuatorP1LeftAngle"] = dirPos1Pos2.angleTo(dir1);
 
-            var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["forearmActuatorRFixture1"].matrixWorld);
-            var dir1 = this.activeObjects["forearmActuatorRFixture1"].getWorldDirection();
-            var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["forearmActuatorRFixture"].matrixWorld);
-            var dir2 = pos1.clone().sub(pos2);
-            dir2.normalize();
-            this.initialValuesArray["forearmActuatorRAngle"] = dir1.angleTo(dir2);
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["forearmActuatorRFixture1"].matrixWorld);
+        var dir1 = this.activeObjects["forearmActuatorRFixture1"].getWorldDirection();
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["forearmActuatorRFixture"].matrixWorld);
+        var dir2 = pos1.clone().sub(pos2);
+        dir2.normalize();
+        this.initialValuesArray["forearmActuatorRAngle"] = dir1.angleTo(dir2);
 
-            //initial values
-            this.initialValuesArray["rightArm_rot_y"] = this.activeObjects["rightArm"].rotation.y;
-            this.initialValuesArray["leftArm_rot_y"] = this.activeObjects["leftArm"].rotation.y;
-            this.initialValuesArray["armActuatorP1Right_rot_x"] = this.activeObjects["armActuatorP1Right"].rotation.x;
-            this.initialValuesArray["armActuatorP1Left_rot_x"] = this.activeObjects["armActuatorP1Left"].rotation.x;
-            this.initialValuesArray["forearmActuatorR_rot_x"] = this.activeObjects["forearmActuatorR"].rotation.x;
-            this.initialValuesArray["rightForearmTilt"] = this.activeObjects["rightForearmTilt"].rotation.y;
-            this.initialValuesArray["forearmActuatorRStock_rot_y"] = this.activeObjects["forearmActuatorRStock"].rotation.y;
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["forearmActuatorLFixture1"].matrixWorld);
+        var dir1 = this.activeObjects["forearmActuatorLFixture1"].getWorldDirection();
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["forearmActuatorLFixture"].matrixWorld);
+        var dir2 = pos1.clone().sub(pos2);
+        dir2.normalize();
+        this.initialValuesArray["forearmActuatorLAngle"] = dir1.angleTo(dir2);
 
-            this.joints.rightArm = this.initialValuesArray["rightArm_rot_y"];
-            this.joints.leftArm = this.initialValuesArray["leftArm_rot_y"];
-            this.joints.rightShoudler = this.activeObjects["bodyFrameR"].rotation.z;
-            this.joints.leftShoudler = this.activeObjects["bodyFrameL"].rotation.z;
+        //initial values
+        this.initialValuesArray["rightArm_rot_y"] = this.activeObjects["rightArm"].rotation.y;
+        this.initialValuesArray["leftArm_rot_y"] = this.activeObjects["leftArm"].rotation.y;
+        this.initialValuesArray["armActuatorP1Right_rot_x"] = this.activeObjects["armActuatorP1Right"].rotation.x;
+        this.initialValuesArray["armActuatorP1Left_rot_x"] = this.activeObjects["armActuatorP1Left"].rotation.x;
+        this.initialValuesArray["forearmActuatorR_rot_x"] = this.activeObjects["forearmActuatorR"].rotation.x;
+        this.initialValuesArray["rightForearmTilt"] = this.activeObjects["rightForearmTilt"].rotation.y;
+        this.initialValuesArray["forearmActuatorRStock_rot_y"] = this.activeObjects["forearmActuatorRStock"].rotation.y;
+        this.initialValuesArray["forearmActuatorL_rot_x"] = this.activeObjects["forearmActuatorL"].rotation.x;
+        this.initialValuesArray["leftForearmTilt"] = this.activeObjects["leftForearmTilt"].rotation.y;
+        this.initialValuesArray["forearmActuatorLStock_rot_y"] = this.activeObjects["forearmActuatorLStock"].rotation.y;
 
-            this.joints.rightForearm = this.activeObjects["rightForearmTilt"].rotation.y;
-            this.joints.leftForearm = this.activeObjects["leftForearmTilt"].rotation.y;
+        this.joints.rightArm = this.initialValuesArray["rightArm_rot_y"];
+        this.joints.leftArm = this.initialValuesArray["leftArm_rot_y"];
+        this.joints.rightShoudler = this.activeObjects["bodyFrameR"].rotation.z;
+        this.joints.leftShoudler = this.activeObjects["bodyFrameL"].rotation.z;
+        this.joints.rightForearm = this.activeObjects["rightForearmTilt"].rotation.y;
+        this.joints.leftForearm = this.activeObjects["leftForearmTilt"].rotation.y;
+        this.joints.leftPalmYaw = this.activeObjects["rightPalmFixtureP14"].rotation.y;
+        this.joints.rightPalmYaw = this.activeObjects["leftPalmFixtureP14"].rotation.y;
 
-            this.initialized = true;
+        this.initialized = true;
     }
 
     simulationStep(event)
@@ -411,6 +465,11 @@ class Valter
             {
                 this.prevValterBasePosition.copy(this.activeObjects["ValterBase"].position);
             }
+            for (var i = 0; i < this.delayedCalls.length; i++)
+            {
+                this.delayedCalls[i].bind(this).call();
+            }
+            this.delayedCalls = [];
         }
     }
 
@@ -708,8 +767,23 @@ class Valter
 
     rightArmRotate(value)
     {
-        if (this.activeObjects["rightArm"].rotation.y == value) return;
-        this.activeObjects["rightArm"].rotation.y = value;
+        if (value != undefined)
+        {
+            if (this.activeObjects["rightArm"].rotation.y == value) return;
+            this.rightArmRotateDirection = (this.activeObjects["rightArm"].rotation.y > value) ? true : false;
+            this.activeObjects["rightArm"].rotation.y = value;
+            this.delayedCalls.push(this.rightArmRotate);
+            if (this.rightArmRotateDirection)
+            {
+                this.activeObjects["armActuatorP1RightStock"].rotateY(-0.05);
+            }
+            return;
+        }
+        if (this.rightArmRotateDirection)
+        {
+            this.activeObjects["armActuatorP1RightStock"].rotateY(0.05);
+        }
+
         var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1RightFixture1"].matrixWorld);
         var dir1 = this.activeObjects["armActuatorP1RightFixture1"].getWorldDirection();
         dir1.normalize();
@@ -767,9 +841,22 @@ class Valter
 
     leftArmRotate(value)
     {
-        if (this.activeObjects["leftArm"].rotation.y == value) return;
-
-        this.activeObjects["leftArm"].rotation.y = value;
+        if (value != undefined)
+        {
+            if (this.activeObjects["leftArm"].rotation.y == value) return;
+            this.leftArmRotateDirection = (this.activeObjects["leftArm"].rotation.y > value) ? true : false;
+            this.activeObjects["leftArm"].rotation.y = value;
+            this.delayedCalls.push(this.leftArmRotate);
+            if (this.leftArmRotateDirection)
+            {
+                this.activeObjects["armActuatorP1LeftStock"].rotateY(-0.05);
+            }
+            return;
+        }
+        if (this.leftArmRotateDirection)
+        {
+            this.activeObjects["armActuatorP1LeftStock"].rotateY(0.05);
+        }
 
         var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["armActuatorP1LeftFixture1"].matrixWorld);
         var dir1 = this.activeObjects["armActuatorP1LeftFixture1"].getWorldDirection();
@@ -837,7 +924,6 @@ class Valter
     rightForearmRotate(value)
     {
         if (this.activeObjects["rightForearmTilt"].rotation.y == value) return;
-
         this.activeObjects["rightForearmTilt"].rotation.y = value;
 
         var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["forearmActuatorRFixture1"].matrixWorld);
@@ -850,7 +936,7 @@ class Valter
         this.activeObjects["forearmActuatorR"].rotation.x = angle;
 
         var rot_dy = this.initialValuesArray["rightForearmTilt"] - this.activeObjects["rightForearmTilt"].rotation.y;
-        this.activeObjects["forearmActuatorRStock"].rotation.y = this.initialValuesArray["forearmActuatorRStock_rot_y"] - rot_dy * 0.85;
+        this.activeObjects["forearmActuatorRStock"].rotation.y = this.initialValuesArray["forearmActuatorRStock_rot_y"] - rot_dy * 0.82;
 
         // if (this.activeObjects["arrowHelper1"] == undefined)
         // {
@@ -874,6 +960,32 @@ class Valter
         if (this.activeObjects["leftForearmTilt"].rotation.y == value) return;
 
         this.activeObjects["leftForearmTilt"].rotation.y = value;
+
+        var pos1 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["forearmActuatorLFixture1"].matrixWorld);
+        var dir1 = this.activeObjects["forearmActuatorLFixture1"].getWorldDirection();
+        var pos2 = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["forearmActuatorLFixture"].matrixWorld);
+        var dir2 = pos1.clone().sub(pos2);
+        dir2.normalize();
+        var newAngle = dir1.angleTo(dir2);
+        var angle = this.initialValuesArray["forearmActuatorL_rot_x"] - (this.initialValuesArray["forearmActuatorLAngle"] - newAngle);
+        this.activeObjects["forearmActuatorL"].rotation.x = angle;
+
+        var rot_dy = this.initialValuesArray["leftForearmTilt"] - this.activeObjects["leftForearmTilt"].rotation.y;
+        this.activeObjects["forearmActuatorLStock"].rotation.y = this.initialValuesArray["forearmActuatorLStock_rot_y"] - rot_dy * 0.82;
+    }
+
+    rightPalmYaw(value)
+    {
+        if (this.activeObjects["rightPalmFixtureP14"].rotation.z == value) return;
+
+        this.activeObjects["rightPalmFixtureP14"].rotation.z = value;
+    }
+
+    leftPalmYaw(value)
+    {
+        if (this.activeObjects["leftPalmFixtureP14"].rotation.z == value) return;
+
+        this.activeObjects["leftPalmFixtureP14"].rotation.z = value;
     }
 
     rightHandGrasping(value)
@@ -922,5 +1034,32 @@ class Valter
         this.activeObjects["leftHand"].f5_0.obj.rotation.x = this.activeObjects["leftHand"].f5_0.angle - value * 0.75;
         this.activeObjects["leftHand"].f5_1.obj.rotation.z = this.activeObjects["leftHand"].f5_1.angle + value * 0.5;
         this.activeObjects["leftHand"].f5_2.obj.rotation.z = this.activeObjects["leftHand"].f5_2.angle + value * 0.75;
+    }
+
+    say(text)
+    {
+        this.sayAudio = new Audio("https://tts.voicetech.yandex.net/generate?text=" + text +"&format=mp3&lang=ru-RU&speaker=ermil&emotion=good&key=069b6659-984b-4c5f-880e-aaedcfd84102");
+        this.sayAudio.play();
+
+        this.mouthAnimationTimer = setInterval(this.mouthPanelAnimation.bind(this), 100);
+    }
+
+    mouthPanelAnimation()
+    {
+        if (!this.sayAudio.ended)
+        {
+            if (this.sayAudio.currentTime > 0)
+            {
+                var min = Math.ceil(1);
+                var max = Math.floor(4);
+
+                this.activeObjects["mouthPanel"].material.map = this.mouthPanelFrames[Math.floor(Math.random() * (max - min)) + min];
+            }
+        }
+        else
+        {
+            clearInterval(this.mouthAnimationTimer);
+            this.activeObjects["mouthPanel"].material.map = this.mouthPanelFrames[0];
+        }
     }
 }
