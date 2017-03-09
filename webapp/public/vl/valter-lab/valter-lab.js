@@ -78,6 +78,10 @@ function ValterLab(webGLContainer)
 
         initialDefaultCameraPosVectorLength = self.getDefaultCameraPosition().length();
 
+        self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("frontWall"));
+        self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("leftWall"));
+        self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("rightWall"));
+
         // actually start VLab
         self.setPhysijsScenePause(false);
         self.setSceneRenderPause(false);

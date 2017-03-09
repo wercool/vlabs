@@ -59,6 +59,8 @@ function VLab(vlabNature)
 
     var processNodes = {};
 
+    var collidableMeshList = [];
+
     self.interactionHelpers = {};
 
     self.trace = function(error)
@@ -869,7 +871,9 @@ function VLab(vlabNature)
         }
 
         self.getDefaultCamera().controls.getObject().position.copy(self.initialCameraPos);
+        self.getDefaultCamera().controls.getObstacleAvoidanceObject().position.copy(self.initialCameraPos);
         self.getVlabScene().add(self.getDefaultCamera().controls.getObject());
+        self.getVlabScene().add(self.getDefaultCamera().controls.getObstacleAvoidanceObject());
 
         self.getDefaultCamera().controls.getYawObject().position.x = curCameraPos.x;
         self.getDefaultCamera().controls.getYawObject().position.z = curCameraPos.z;
@@ -902,6 +906,7 @@ function VLab(vlabNature)
             self.getDefaultCamera().controls.dispose();
             self.getDefaultCamera().controls = null;
             self.getDefaultCamera().parent = null;
+            self.getVlabScene().remove(self.getVlabScene().getObjectByName("obstacleAvoidanceGizmo"));
             self.getVlabScene().remove(self.getVlabScene().getObjectByName("pointerControlPitchObject"));
             self.getVlabScene().remove(self.getVlabScene().getObjectByName("pointerControlYawObject"));
         }
@@ -1035,4 +1040,12 @@ function VLab(vlabNature)
             self.interactionHelpers[interactionHelperName].visible = visibility;
         }
     };
+    self.addMeshToCollidableMeshList = function(collidableMesh)
+    {
+        collidableMeshList.push(collidableMesh);
+    }
+    self.getMeshToCollidableMeshList = function()
+    {
+        return collidableMeshList;
+    }
 };
