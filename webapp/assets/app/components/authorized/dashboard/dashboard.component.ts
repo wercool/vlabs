@@ -13,7 +13,7 @@ export class DashboardComponent implements OnInit {
     users: User[] = [];
 
     constructor(private userService: UserService, private elementRef: ElementRef) {
-        this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        this.currentUser = new User(JSON.parse(localStorage.getItem('currentUser')));
     }
 
     ngOnInit() {

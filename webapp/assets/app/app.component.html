@@ -43,7 +43,7 @@
 
 <!-- credits -->
 <div class="text-center">
-    <p>
-        VLabs
-    </p>
+    <a [routerLink]="['/login']">
+        {{authenticationService.isAuthenticated() ? "Log Out" : "Log In"}}
+    </a>
 </div>

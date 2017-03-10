@@ -1,0 +1,5 @@
+DROP DATABASE IF EXISTS vlabs;
+CREATE DATABASE vlabs;
+CREATE USER 'vlabs'@'localhost' IDENTIFIED BY 'vlabs';
+GRANT ALL PRIVILEGES ON vlabs.* TO 'vlabs'@'localhost';
+FLUSH PRIVILEGES;

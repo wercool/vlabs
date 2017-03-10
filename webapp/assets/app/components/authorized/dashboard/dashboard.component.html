@@ -1,10 +1,4 @@
-<div class="col-md-6 col-md-offset-3">
-    <h1>Hi {{currentUser.firstname}}!</h1>
-    <p>You're logged into VLabs</p>
-    <ul>
-        <li><a href="/vlabs/ph-mpd-fcm" target="_blank">Friction coefficient measurement</a></li>
-        <li><a href="/vlabs/valter-lab" target="_blank">Valter Lab</a></li>
-    </ul>
+<div *ngIf="this.currentUser.hasRole('Administrator')">
     <h3>All registered users:</h3>
     <ul>
         <li *ngFor="let user of users">
@@ -12,5 +6,13 @@
             - <a (click)="deleteUser(user.id)">Delete</a>
         </li>
     </ul>
-    <p><a [routerLink]="['/login']">Logout</a></p>
+</div>
+
+<div *ngIf="this.currentUser.hasRole('Student')">
+    <h3>Hi {{currentUser.firstname}}!</h3>
+    <p>You're logged into VLabs</p>
+    <ul>
+        <li><a href="/vlabs/ph-mpd-fcm" target="_blank">Friction coefficient measurement</a></li>
+        <li><a href="/vlabs/valter-lab" target="_blank">Valter Lab</a></li>
+    </ul>
 </div>

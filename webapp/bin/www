@@ -38,6 +38,12 @@ models.sequelize.sync({force: config.sequelizeSyncForce})
                 user.addRole(administratorRole.id);
             })
         });
+        models.Role.create({ title: 'Student' }).then(function(role){
+            studentRole = role;
+            models.User.create({ email: 'maska@3si2.com', password: '123', firstname: 'Alexey', lastname: 'Maistrenko' }).then(function(user){
+                user.addRole(studentRole.id);
+            })
+        });
     }
 })
 .then(function(){
