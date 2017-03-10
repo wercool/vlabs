@@ -23,15 +23,15 @@ THREE.PointerLockControls = function (vlab, camera)
     var moveRight = false;
 
     var velocity = new THREE.Vector3();
-    var prevTime = performance.now();
-
-    var prevCameraPos = undefined;
+    // var prevTime = performance.now();
 
     scope.activated = false;
+    scope.userKeyboardActivity = false;
 
-    var sphereGeometry = new THREE.SphereGeometry(2, 4, 4);
-    var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
-    var obstacleAvoidanceGizmo = new THREE.Mesh(sphereGeometry, wireMaterial);
+    var sphereGeometry = new THREE.CubeGeometry(1, 1, 1, 2, 2, 2);
+    // var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
+    // var obstacleAvoidanceGizmo = new THREE.Mesh(sphereGeometry, wireMaterial);
+    var obstacleAvoidanceGizmo = new THREE.Mesh(sphereGeometry);
     obstacleAvoidanceGizmo.name = "obstacleAvoidanceGizmo";
 
     var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
@@ -82,8 +82,6 @@ THREE.PointerLockControls = function (vlab, camera)
         pitchObject.rotation.x -= movementY * 0.002;
 
         pitchObject.rotation.x = Math.max(-PI_2, Math.min( PI_2, pitchObject.rotation.x));
-
-        scope.getObstacleAvoidanceObject().rotation.y = yawObject.rotation.y;
     };
 
     var onKeyDown = function (event)
@@ -107,6 +105,7 @@ THREE.PointerLockControls = function (vlab, camera)
                 moveRight = true;
                 break;
         }
+        scope.userKeyboardActivity = true;
     };
 
     var onKeyUp = function (event)
@@ -130,6 +129,7 @@ THREE.PointerLockControls = function (vlab, camera)
                 moveRight = false;
                 break;
         }
+        scope.userKeyboardActivity = false;
     };
 
     document.addEventListener('mousemove', onMouseMove, false);
@@ -188,14 +188,13 @@ THREE.PointerLockControls = function (vlab, camera)
 
     this.update = function()
     {
-        if (scope.activated === true)
+        if (scope.activated === true && scope.userKeyboardActivity === true)
         {
             scope.vlab.cameraControlsEvent();
 
-            prevCameraPos = this.getObject().position.clone();
-
-            var time = performance.now();
-            var delta = (time - prevTime) / 1000;
+            // var time = performance.now();
+            // var delta = (time - prevTime) / 1000;
+            var delta = 0.035;
 
             velocity.x -= velocity.x * 10 * delta;
             velocity.z -= velocity.z * 10 * delta;
@@ -205,9 +204,10 @@ THREE.PointerLockControls = function (vlab, camera)
             if ( moveLeft )     velocity.x -= 4 * delta;
             if ( moveRight )    velocity.x += 4 * delta;
 
-            var nextCameraPosition = this.getObject().position.clone();
-            nextCameraPosition.x += velocity.x;
-            nextCameraPosition.z += velocity.z;
+            var curStepPosition = this.getObstacleAvoidanceObject().position.clone();
+            this.getObstacleAvoidanceObject().translateX(velocity.x);
+            this.getObstacleAvoidanceObject().translateZ(velocity.z * 2);
+            this.getObstacleAvoidanceObject().updateMatrixWorld();
 
             //prevent mesh intersection
             for (var vertexIndex = 0; vertexIndex < this.getObstacleAvoidanceObject().geometry.vertices.length; vertexIndex++)
@@ -216,7 +216,7 @@ THREE.PointerLockControls = function (vlab, camera)
                 var globalVertex = localVertex.applyMatrix4(this.getObstacleAvoidanceObject().matrix);
                 var directionVector = globalVertex.sub(this.getObstacleAvoidanceObject().position);
 
-                var ray = new THREE.Raycaster(nextCameraPosition, directionVector.clone().normalize());
+                var ray = new THREE.Raycaster(this.getObstacleAvoidanceObject().position, directionVector.clone().normalize());
                 var collisionResults = ray.intersectObjects(this.vlab.getMeshToCollidableMeshList());
 
                 if (collisionResults.length > 0)
@@ -225,21 +225,20 @@ THREE.PointerLockControls = function (vlab, camera)
                     {
                         if (collisionResults[i].distance < directionVector.length())
                         {
-                            this.getObject().position.copy(prevCameraPos);
-                            this.getObstacleAvoidanceObject().position.copy(this.getObject().position.clone());
-                            velocity.x = 0;
-                            velocity.z = 0;
-                            break;
+                            this.getObstacleAvoidanceObject().position.copy(curStepPosition);
+                            return;
                         }
                     }
                 }
             }
 
+            this.getObstacleAvoidanceObject().position.copy(curStepPosition);
+
             this.getObject().translateX(velocity.x);
             this.getObject().translateZ(velocity.z);
             this.getObstacleAvoidanceObject().position.copy(this.getObject().position.clone());
 
-            prevTime = time;
+            // prevTime = time;
         }
     };
 };
