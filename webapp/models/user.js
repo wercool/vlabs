@@ -10,7 +10,8 @@ module.exports = function(sequelize)
             email:      Sequelize.STRING,
             password:   Sequelize.STRING,
             firstname:  Sequelize.STRING,
-            lastname:   Sequelize.STRING
+            lastname:   Sequelize.STRING,
+            activated:  Sequelize.BOOLEAN
         },
         {
             timestamps: false,

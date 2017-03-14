@@ -7,14 +7,16 @@ export class User {
     firstname: string;
     lastname: string;
     roles: Role[];
+    activated: boolean;
 
     constructor(userInfo:any)
     {
-      this.id = userInfo.id;
-      this.email = userInfo.email;
-      this.firstname = userInfo.firstname;
-      this.lastname = userInfo.lastname;
-      this.roles = userInfo.roles;
+        this.id = userInfo.id;
+        this.email = userInfo.email;
+        this.firstname = userInfo.firstname;
+        this.lastname = userInfo.lastname;
+        this.roles = userInfo.roles;
+        this.activated = userInfo.activated;
     }
 
     hasRole(roleTitle:string)
@@ -27,5 +29,10 @@ export class User {
             }
         }
         return false;
+    }
+
+    isActive()
+    {
+        return this.activated;
     }
 }
