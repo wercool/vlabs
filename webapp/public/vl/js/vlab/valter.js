@@ -65,11 +65,22 @@ class Valter
                 {
                     self.say(textToSay);
                 }
+            },
+            talk:function(){
+                var inputMessage = prompt("Talk to Valter", "Hello!");
+
+                if (inputMessage != null)
+                {
+                    self.talk(inputMessage);
+                }
             }
         };
 
         this.sayAudio = undefined;
         this.mouthAnimationTimer = undefined;
+
+        // initialize with argument 'true': no random choices
+        this.eliza = new ElizaBot(true);
 
         addEventListener("simulationStep", this.simulationStep.bind(this), false);
     }
@@ -339,6 +350,7 @@ class Valter
             GUIcontrols1.add(this.handGrasping, 'left', 0.0, 1.0).name("Left Hand Grapsing").step(0.01).onChange(this.leftHandGrasping.bind(this));
             GUIcontrols1.add(this.settings, 'coveringsVisibility').name("Coverings Visibility").onChange(this.setCoveringsVisibility.bind(this));
             GUIcontrols1.add(this.guiControls, 'say').name("Valter says");
+            GUIcontrols1.add(this.guiControls, 'talk').name("Valter talks");
         }
 
         var self = this;
@@ -458,6 +470,8 @@ class Valter
         this.joints.leftForearm = this.activeObjects["leftForearmTilt"].rotation.y;
         this.joints.leftPalmYaw = this.activeObjects["rightPalmFixtureP14"].rotation.y;
         this.joints.rightPalmYaw = this.activeObjects["leftPalmFixtureP14"].rotation.y;
+
+        this.eliza.reset();
 
         this.initialized = true;
     }
@@ -1043,10 +1057,25 @@ class Valter
 
     say(text)
     {
-        this.sayAudio = new Audio("https://tts.voicetech.yandex.net/generate?text=" + text +"&format=mp3&lang=ru-RU&speaker=ermil&emotion=good&key=069b6659-984b-4c5f-880e-aaedcfd84102");
+        this.sayAudio = new Audio("https://tts.voicetech.yandex.net/generate?text=" + text +"&format=mp3&lang=ru-RU&speaker=ermil&emotion=good&speed=0.5&key=069b6659-984b-4c5f-880e-aaedcfd84102");
+        this.sayAudio.addEventListener("ended", this.sayAudioCompleted.bind(this), false);
         this.sayAudio.play();
 
         this.mouthAnimationTimer = setInterval(this.mouthPanelAnimation.bind(this), 100);
+    }
+
+    sayEng(text)
+    {
+        this.sayAudio = new Audio("https://tts.voicetech.yandex.net/generate?text=" + text +"&format=mp3&lang=en-US&speaker=ermil&emotion=good&speed=0.5&key=069b6659-984b-4c5f-880e-aaedcfd84102");
+        this.sayAudio.addEventListener("ended", this.sayAudioCompleted.bind(this), false);
+        this.sayAudio.play();
+
+        this.mouthAnimationTimer = setInterval(this.mouthPanelAnimation.bind(this), 100);
+    }
+
+    sayAudioCompleted()
+    {
+        this.activeObjects["mouthPanel"].material.map = this.mouthPanelFrames[0];
     }
 
     mouthPanelAnimation()
@@ -1066,5 +1095,12 @@ class Valter
             clearInterval(this.mouthAnimationTimer);
             this.activeObjects["mouthPanel"].material.map = this.mouthPanelFrames[0];
         }
+    }
+
+    talk(inputMessage)
+    {
+        var resultMessage = this.eliza.transform(inputMessage);
+        console.log("Valter talks: " + resultMessage);
+        this.sayEng(resultMessage);
     }
 }
