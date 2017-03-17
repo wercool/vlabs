@@ -1,0 +1,8 @@
+<div *ngIf="this.currentUser.hasRole('Student')">
+    <h3>Hi {{currentUser.firstname}}!</h3>
+    <p>You're logged into VLabs</p>
+    <ul>
+        <li><a href="/vlabs/ph-mpd-fcm" target="_blank">Friction coefficient measurement</a></li>
+        <li><a href="/vlabs/valter-lab" target="_blank">Valter Lab</a></li>
+    </ul>
+</div>

@@ -22,7 +22,8 @@ export class LoginComponent implements OnInit {
         private authenticationService: AuthenticationService,
         private alertService: AlertService) { }
 
-    ngOnInit() {
+    ngOnInit()
+    {
         // reset login status
         this.authenticationService.logout();
 
@@ -41,7 +42,23 @@ export class LoginComponent implements OnInit {
                     }
                     else
                     {
-                        this.router.navigate([this.returnUrl]);
+                        if (this.authenticationService.getCurrentUser().isActive())
+                        {
+                            if (!this.authenticationService.getCurrentUser().isBlocked())
+                            {
+                                this.router.navigate(['/dashboard']);
+                            }
+                            else
+                            {
+                                this.authenticationService.logout();
+                                this.alertService.error("Authentication failed. You account has not been blocked.");
+                            }
+                        }
+                        else
+                        {
+                            this.authenticationService.logout();
+                            this.alertService.error("Authentication failed. You account has not been activated yet.");
+                        }
                     }
                     this.loading = false;
                 },

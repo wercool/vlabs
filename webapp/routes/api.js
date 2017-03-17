@@ -28,6 +28,8 @@ router.post('/authenticate', function(req, res, next) {
                 firstname:  user.firstname,
                 lastname:   user.lastname,
                 roles:      user.Roles,
+                activated:  user.activated,
+                blocked:    user.blocked,
                 token:      jwtToken
             };
             res.json(authenticatedUser);

@@ -8,6 +8,7 @@ export class User {
     lastname: string;
     roles: Role[];
     activated: boolean;
+    blocked: boolean;
 
     constructor(userInfo:any)
     {
@@ -17,6 +18,7 @@ export class User {
         this.lastname = userInfo.lastname;
         this.roles = userInfo.roles;
         this.activated = userInfo.activated;
+        this.blocked = userInfo.blocked;
     }
 
     hasRole(roleTitle:string)
@@ -34,5 +36,10 @@ export class User {
     isActive()
     {
         return this.activated;
+    }
+
+    isBlocked()
+    {
+        return this.blocked;
     }
 }

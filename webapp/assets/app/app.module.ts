@@ -24,7 +24,13 @@ import { LoginComponent }            from './components/frontface/login/index';
 import { RegisterComponent }         from './components/frontface/register/index';
 
 // authorized components
-import { DashboardComponent }        from './components/authorized/dashboard/index';
+import { DashboardComponent }               from './components/authorized/dashboard/index';
+// admin
+import { AdminDashboardComponent }          from './components/authorized/admin/dashboard/index';
+//import { AdminUsersViewComponent }          from './components/authorized/admin/users/index';
+
+// student
+import { StudentDashboardComponent }        from './components/authorized/student/dashboard/index';
 
 @NgModule({
     imports: [
@@ -41,7 +47,12 @@ import { DashboardComponent }        from './components/authorized/dashboard/ind
         ContactComponent,
         LoginComponent,
         RegisterComponent,
-        DashboardComponent
+        DashboardComponent,
+        // admin
+        AdminDashboardComponent,
+//        AdminUsersViewComponent,
+        // student
+        StudentDashboardComponent,
     ],
     providers: [
         AuthGuard,

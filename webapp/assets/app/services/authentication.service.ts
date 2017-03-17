@@ -31,14 +31,21 @@ export class AuthenticationService {
             });
     }
 
-    logout() {
+    logout()
+    {
         // remove user from local storage to log user out
         localStorage.removeItem('currentUser');
         this.authenticated = false;
     }
 
-    public isAuthenticated() {
+    public isAuthenticated()
+    {
         return this.authenticated;
+    }
+
+    public getCurrentUser()
+    {
+        return new User(JSON.parse(localStorage.getItem('currentUser')));
     }
 
     public jwt() {

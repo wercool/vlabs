@@ -11,7 +11,8 @@ module.exports = function(sequelize)
             password:   Sequelize.STRING,
             firstname:  Sequelize.STRING,
             lastname:   Sequelize.STRING,
-            activated:  Sequelize.BOOLEAN
+            activated:  Sequelize.BOOLEAN,
+            blocked:    Sequelize.BOOLEAN,
         },
         {
             timestamps: false,

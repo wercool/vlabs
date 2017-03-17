@@ -8,9 +8,13 @@ import { LoginComponent }           from './components/frontface/login/index';
 import { RegisterComponent }        from './components/frontface/register/index';
 
 // authorized components
-import { DashboardComponent }       from './components/authorized/dashboard/index';
+import { DashboardComponent }               from './components/authorized/dashboard/index';
+// admin
+import { AdminDashboardComponent }          from './components/authorized/admin/dashboard/index';
+// student
+import { StudentDashboardComponent }        from './components/authorized/student/dashboard/index';
 
-import { AuthGuard }                from './guards/index';
+import { AuthGuard }                        from './guards/index';
 
 const appRoutes: Routes = [
     // front face components
@@ -21,7 +25,11 @@ const appRoutes: Routes = [
     { path: 'register',     component: RegisterComponent },
 
     // authorized components
-    { path: 'dashboard',    component: DashboardComponent, canActivate: [AuthGuard] },
+    { path: 'dashboard',            component: DashboardComponent,          canActivate: [AuthGuard] },
+    // admin
+    { path: 'admin-dashboard',      component: AdminDashboardComponent,     canActivate: [AuthGuard] },
+    // student
+    { path: 'student-dashboard',    component: StudentDashboardComponent,   canActivate: [AuthGuard] },
 
     // otherwise redirect to home
     { path: '**', redirectTo: '' }

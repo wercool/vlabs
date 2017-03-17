@@ -1,4 +1,5 @@
 ﻿import { Component, OnInit, ElementRef }    from '@angular/core';
+import { Router, ActivatedRoute }           from '@angular/router';
 
 import { User }                 from '../../../models/index';
 import { UserService }          from '../../../services/index';
@@ -8,24 +9,26 @@ import { UserService }          from '../../../services/index';
     templateUrl: 'dashboard.component.html'
 })
 
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit
+{
     currentUser: User;
-    users: User[] = [];
 
-    constructor(private userService: UserService, private elementRef: ElementRef) {
+    constructor(private router: Router, private userService: UserService, private elementRef: ElementRef)
+    {
         this.currentUser = new User(JSON.parse(localStorage.getItem('currentUser')));
+        if (this.currentUser.hasRole('Administrator'))
+        {
+            this.router.navigate(['/admin-dashboard']);
+        }
+        if (this.currentUser.hasRole('Student'))
+        {
+            this.router.navigate(['/student-dashboard']);
+        }
     }
 
-    ngOnInit() {
-        this.loadAllUsers();
-    }
+    ngOnInit()
+    {
 
-    deleteUser(id: number) {
-        this.userService.delete(id).subscribe(() => { this.loadAllUsers() });
-    }
-
-    private loadAllUsers() {
-        this.userService.getAll().subscribe(users => { this.users = users; });
     }
 
 }

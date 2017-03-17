@@ -22,6 +22,7 @@ export class RegisterComponent {
         this.roleService.getByTitle('Student').subscribe(role => {
              this.model.roles.push(role);
              this.model.activated = false;
+             this.model.blocked = false;
          });
     }
 
