@@ -6,7 +6,7 @@ export class User {
     password: string;
     firstname: string;
     lastname: string;
-    roles: Role[];
+    Roles: Role[];
     activated: boolean;
     blocked: boolean;
 
@@ -16,14 +16,14 @@ export class User {
         this.email = userInfo.email;
         this.firstname = userInfo.firstname;
         this.lastname = userInfo.lastname;
-        this.roles = userInfo.roles;
+        this.Roles = userInfo.Roles;
         this.activated = userInfo.activated;
         this.blocked = userInfo.blocked;
     }
 
     hasRole(roleTitle:string)
     {
-        for (let role of this.roles)
+        for (let role of this.Roles)
         {
             if (role.title == roleTitle)
             {

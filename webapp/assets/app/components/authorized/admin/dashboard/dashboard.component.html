@@ -1,36 +1,28 @@
 <div *ngIf="this.currentUser.hasRole('Administrator')">
     <div class="row content">
+
         <div class="col-sm-3 sidenav">
             <div class="well">
                 <ul class="nav nav-list">
                     <li class="nav-header">Administrator Menu</li>
-                    <li><a href="#"><i class="glyphicon glyphicon-envelope"></i> Messages </a></li>
                     <li>
-                        <a href="#"><i class="glyphicon glyphicon-bell">
-                            </i> Activation requests
+                        <a href="javascript:void(0);" (click)="this.selectedView = 'admin-usersview'"><i class="glyphicon glyphicon-user">
+                        </i> Users
                             <span *ngIf="this.notActivatedYetUsersNumber > 0" class="badge badge-info">
                                 {{this.notActivatedYetUsersNumber}}
                             </span>
                         </a>
                     </li>
-                    <li><a href="#"><i class="glyphicon glyphicon-user"></i> Members</a></li>
+                    <li><a href="javascript:void(0);" (click)="this.selectedView = 'admin-messages'"><i class="glyphicon glyphicon-envelope"></i> Messages </a></li>
                     <li class="nav-divider"></li>
                     <li><a href="#"><i class="glyphicon glyphicon-scale"></i> VLabs</a></li>
                 </ul>
             </div>
         </div>
 
-        <div class="col-sm-6">
-            View's Content
-<!--
-            <h3>All registered users:</h3>
-            <ul>
-                <li *ngFor="let user of users">
-                    {{user.email}} ({{user.firstname}} {{user.lastname}})
-                    - <a (click)="deleteUser(user.id)">Delete</a>
-                </li>
-            </ul>
--->
+        <div id="viewContainer" class="col-md-9 panel panel-default">
+            <admin-usersview *ngIf="this.selectedView == 'admin-usersview'"></admin-usersview>
+            <admin-messages *ngIf="this.selectedView == 'admin-messages'"></admin-messages>
         </div>
 
     </div>

@@ -27,7 +27,8 @@ import { RegisterComponent }         from './components/frontface/register/index
 import { DashboardComponent }               from './components/authorized/dashboard/index';
 // admin
 import { AdminDashboardComponent }          from './components/authorized/admin/dashboard/index';
-//import { AdminUsersViewComponent }          from './components/authorized/admin/users/index';
+import { AdminUsersViewComponent }          from './components/authorized/admin/users/index';
+import { AdminMessagesComponent }          from './components/authorized/admin/messages/index';
 
 // student
 import { StudentDashboardComponent }        from './components/authorized/student/dashboard/index';
@@ -50,7 +51,8 @@ import { StudentDashboardComponent }        from './components/authorized/studen
         DashboardComponent,
         // admin
         AdminDashboardComponent,
-//        AdminUsersViewComponent,
+        AdminUsersViewComponent,
+        AdminMessagesComponent,
         // student
         StudentDashboardComponent,
     ],

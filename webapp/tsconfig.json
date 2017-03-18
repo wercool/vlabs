@@ -27,6 +27,8 @@
     "./assets/app/app.routing.ts",
     "./assets/app/components/authorized/admin/dashboard/dashboard.component.ts",
     "./assets/app/components/authorized/admin/dashboard/index.ts",
+    "./assets/app/components/authorized/admin/messages/admin.messages.component.ts",
+    "./assets/app/components/authorized/admin/messages/index.ts",
     "./assets/app/components/authorized/admin/users/admin.usersview.component.ts",
     "./assets/app/components/authorized/admin/users/index.ts",
     "./assets/app/components/authorized/dashboard/dashboard.component.ts",
@@ -59,7 +61,6 @@
     "./typings.d.ts",
     "./typings/browser.d.ts",
     "./typings/browser/ambient/es6-shim/index.d.ts",
-    "./typings/index.d.ts",
     "./typings/main.d.ts",
     "./typings/main/ambient/es6-shim/index.d.ts"
   ]

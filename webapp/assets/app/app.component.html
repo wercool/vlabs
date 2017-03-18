@@ -24,7 +24,7 @@
                 </template>
 
                 <template [ngIf]="authenticationService.getCurrentUser().hasRole('Student')">
-                    <li [routerLinkActive]="['active']"><a [routerLink]="['/student-dashboard']">Dashboard</a></li>
+                    <li [routerLinkActive]="['active']"><a [routerLink]="['/student-dashboard']">Dashboard<template [ngIf]="authenticationService.getCurrentUser().hasRole('Administrator')"> (Student)</template></a></li>
                 </template>
 
             </template>

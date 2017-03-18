@@ -11,7 +11,7 @@ import { User, Role }                             from '../../../models/index';
 })
 
 export class RegisterComponent {
-    model: User = new User({roles:[]});
+    model: User = new User({Roles:[]});
     loading = false;
 
     constructor(private router: Router,
@@ -20,7 +20,7 @@ export class RegisterComponent {
                 private roleService: RoleService)
     {
         this.roleService.getByTitle('Student').subscribe(role => {
-             this.model.roles.push(role);
+             this.model.Roles.push(role);
              this.model.activated = false;
              this.model.blocked = false;
          });

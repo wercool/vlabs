@@ -16,11 +16,12 @@ export class DashboardComponent implements OnInit
     constructor(private router: Router, private userService: UserService, private elementRef: ElementRef)
     {
         this.currentUser = new User(JSON.parse(localStorage.getItem('currentUser')));
+
         if (this.currentUser.hasRole('Administrator'))
         {
             this.router.navigate(['/admin-dashboard']);
         }
-        if (this.currentUser.hasRole('Student'))
+        else if (this.currentUser.hasRole('Student'))
         {
             this.router.navigate(['/student-dashboard']);
         }

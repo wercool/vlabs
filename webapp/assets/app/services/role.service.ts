@@ -6,14 +6,20 @@ import {
        }                                                from './index';
 
 @Injectable()
-export class RoleService {
-    constructor(private http: Http, private authenticationService: AuthenticationService) { }
+export class RoleService
+{
+    constructor(private http: Http, private authenticationService: AuthenticationService)
+    {
 
-    getAll() {
+    }
+
+    getAll()
+    {
         return this.http.get('/api/role', this.authenticationService.jwt()).map((response: Response) => response.json());
     }
 
-    getByTitle(title: string) {
+    getByTitle(title: string)
+    {
         return this.http.get('/api/role/' + title).map((response: Response) => response.json());
     }
 

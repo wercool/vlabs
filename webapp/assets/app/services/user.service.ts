@@ -8,26 +8,35 @@ import {
        }                                                from './index';
 
 @Injectable()
-export class UserService {
-    constructor(private http: Http, private authenticationService: AuthenticationService) { }
+export class UserService
+{
+    constructor(private http: Http, private authenticationService: AuthenticationService)
+    {
 
-    getAll() {
+    }
+
+    getAll()
+    {
         return this.http.get('/api/user', this.authenticationService.jwt()).map((response: Response) => response.json());
     }
 
-    getById(id: number) {
+    getById(id: number)
+    {
         return this.http.get('/api/user/' + id, this.authenticationService.jwt()).map((response: Response) => response.json());
     }
 
-    create(user: User) {
+    create(user: User)
+    {
         return this.http.post('/api/user/register', user, this.authenticationService.jwt()).map((response: Response) => response.json());
     }
 
-    update(user: User) {
+    update(user: User)
+    {
         return this.http.put('/api/user/' + user.id, user, this.authenticationService.jwt()).map((response: Response) => response.json());
     }
 
-    delete(id: number) {
+    delete(id: number)
+    {
         return this.http.delete('/api/user/' + id, this.authenticationService.jwt()).map((response: Response) => response.json());
     }
 

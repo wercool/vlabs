@@ -4,11 +4,13 @@ import { Observable }                   from 'rxjs';
 import { Subject }                      from 'rxjs/Subject';
 
 @Injectable()
-export class AlertService {
+export class AlertService
+{
     private subject = new Subject<any>();
     private keepAfterNavigationChange = false;
 
-    constructor(private router: Router) {
+    constructor(private router: Router)
+    {
         // clear alert message on route change
         router.events.subscribe(event => {
             if (event instanceof NavigationStart) {
@@ -23,17 +25,20 @@ export class AlertService {
         });
     }
 
-    success(message: string, keepAfterNavigationChange = false) {
+    success(message: string, keepAfterNavigationChange = false)
+    {
         this.keepAfterNavigationChange = keepAfterNavigationChange;
         this.subject.next({ type: 'success', text: message });
     }
 
-    error(message: string, keepAfterNavigationChange = false) {
+    error(message: string, keepAfterNavigationChange = false)
+    {
         this.keepAfterNavigationChange = keepAfterNavigationChange;
         this.subject.next({ type: 'error', text: message });
     }
 
-    getMessage(): Observable<any> {
+    getMessage(): Observable<any>
+    {
         return this.subject.asObservable();
     }
 }

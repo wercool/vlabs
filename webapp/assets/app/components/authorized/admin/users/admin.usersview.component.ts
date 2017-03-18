@@ -5,16 +5,18 @@ import { UserService }          from '../../../../services/index';
 
 @Component({
     moduleId: module.id,
-    templateUrl: 'admin.usersview.component.html'
+    templateUrl: 'admin.usersview.component.html',
+    selector: 'admin-usersview'
 })
 
 export class AdminUsersViewComponent implements OnInit
 {
+    currentUser: User;
     users: User[] = [];
 
     constructor(private userService: UserService, private elementRef: ElementRef)
     {
-
+        this.currentUser = new User(JSON.parse(localStorage.getItem('currentUser')));
     }
 
     ngOnInit()
@@ -34,4 +36,13 @@ export class AdminUsersViewComponent implements OnInit
         });
     }
 
+    public blockUser(id)
+    {
+        console.log('block user ', id);
+    }
+
+    public activateUser(id)
+    {
+        console.log('activate user', id);
+    }
 }

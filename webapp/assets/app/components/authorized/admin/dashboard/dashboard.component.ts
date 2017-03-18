@@ -14,6 +14,7 @@ export class AdminDashboardComponent implements OnInit
     currentUser: User;
     users: User[] = [];
     notActivatedYetUsersNumber: number = 0;
+    selectedView: string = "";
 
     constructor(private userService: UserService, private elementRef: ElementRef)
     {

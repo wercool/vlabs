@@ -21,13 +21,12 @@ router.post('/authenticate', function(req, res, next) {
             var jwtToken = jwt.sign({id: user.id, email: user.email, password: user.password}, req.app.get('jwtSecret'), {
               expiresIn: 60*60*24 // expires in 24 hours
             });
-            // console.log(user);
             var authenticatedUser = {
                 id:         user.id,
                 email:      user.email,
                 firstname:  user.firstname,
                 lastname:   user.lastname,
-                roles:      user.Roles,
+                Roles:      user.Roles,
                 activated:  user.activated,
                 blocked:    user.blocked,
                 token:      jwtToken
@@ -76,6 +75,9 @@ router.post('/user/register', function(req, res, next) {
         if (user === null)
         {
             models.User.create(req.body).then(function(user){
+                req.body.Roles.forEach(function(role){
+                    user.addRole(role.id);
+                });
                 return res.send({
                   success: true
                 });
@@ -92,7 +94,7 @@ router.post('/user/register', function(req, res, next) {
 });
 
 router.get('/user', function(req, res, next) {
-    models.User.findAll().then(function(users){
+    models.User.findAll({include:[{model:models.Role}]}).then(function(users){
         res.json(users);
     });
 });

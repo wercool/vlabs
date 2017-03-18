@@ -10,13 +10,18 @@ import 'rxjs/add/operator/map'
 import { User }                 from '../models/index';
 
 @Injectable()
-export class AuthenticationService {
+export class AuthenticationService
+{
 
     private authenticated: boolean = false;
 
-    constructor(private http: Http) { }
+    constructor(private http: Http)
+    {
 
-    login(email: string, password: string) {
+    }
+
+    login(email: string, password: string)
+    {
         return this.http.post('/api/authenticate', { email: email, password: password })
             .map((response: Response) => {
                 // login successful if there's a jwt token in the response
@@ -48,10 +53,12 @@ export class AuthenticationService {
         return new User(JSON.parse(localStorage.getItem('currentUser')));
     }
 
-    public jwt() {
+    public jwt()
+    {
         // create authorization header with jwt token
         let currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        if (currentUser && currentUser.token) {
+        if (currentUser && currentUser.token)
+        {
             let headers = new Headers({ 'x-access-token': currentUser.token });
             return new RequestOptions({ headers: headers });
         }

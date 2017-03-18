@@ -37,8 +37,7 @@ db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
 // Models relations
-
 sequelize.define('UserRole', {}, { timestamps: false });
-db.User.belongsToMany(db.Role, {through: 'UserRole'});
+db.UserRole = db.User.belongsToMany(db.Role, {through: 'UserRole'});
 
 module.exports = db;
