@@ -14,6 +14,7 @@ export class User {
     {
         this.id = userInfo.id;
         this.email = userInfo.email;
+        this.password = userInfo.password;
         this.firstname = userInfo.firstname;
         this.lastname = userInfo.lastname;
         this.Roles = userInfo.Roles;

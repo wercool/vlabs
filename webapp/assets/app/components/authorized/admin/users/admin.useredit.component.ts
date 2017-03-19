@@ -3,26 +3,32 @@
          ElementRef,
          Input }                        from '@angular/core';
 
-import { User }                         from '../../../../models/index';
+import { User,
+         Role }                         from '../../../../models/index';
 import { UserService,
+         RoleService,
          AlertService,
          GlobalEventsManager }          from '../../../../services/index';
 
 @Component({
     moduleId: module.id,
     templateUrl: 'admin.useredit.component.html',
-    selector: 'admin-useredit'
+    selector: 'admin-useredit',
+    providers: [RoleService]
 })
 
 export class AdminUserEditComponent implements OnInit
 {
-    currentUser: User;
     @Input() selectedUserId: number;
+
+    currentUser: User;
     model: User = new User({Roles:[]});
+    roles:Role[];
     loading = false;
 
     constructor(private globalEventsManager: GlobalEventsManager,
                 private userService: UserService,
+                private roleService: RoleService,
                 private elementRef: ElementRef,
                 private alertService: AlertService)
     {
@@ -38,8 +44,11 @@ export class AdminUserEditComponent implements OnInit
     {
         this.loading = true;
         this.userService.getById(id).subscribe(user => {
-            this.model = user;
-            this.loading = false;
+            this.model = new User(user);
+            this.roleService.getAll().subscribe(roles => {
+                this.roles = roles;
+                this.loading = false;
+            });
         });
     }
 
@@ -56,4 +65,5 @@ export class AdminUserEditComponent implements OnInit
     {
         this.globalEventsManager.showComponent.emit({componentName: 'admin-usersview'});
     }
+
 }

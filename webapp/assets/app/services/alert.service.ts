@@ -29,7 +29,10 @@ export class AlertService
     {
         this.keepAfterNavigationChange = keepAfterNavigationChange;
         this.subject.next({ type: 'success', text: message });
-        setTimeout(() => this.subject.next(), 1000);
+        if (autoHide)
+        {
+            setTimeout(() => this.subject.next(), 1000);
+        }
     }
 
     error(message: string, keepAfterNavigationChange = false)
