@@ -10,7 +10,8 @@ import { AuthGuard }                 from './guards/index';
 import {
          AlertService,
          AuthenticationService,
-         UserService
+         UserService,
+         GlobalEventsManager
        }                             from './services/index';
 
 // shared components
@@ -27,7 +28,9 @@ import { RegisterComponent }         from './components/frontface/register/index
 import { DashboardComponent }               from './components/authorized/dashboard/index';
 // admin
 import { AdminDashboardComponent }          from './components/authorized/admin/dashboard/index';
-import { AdminUsersViewComponent }          from './components/authorized/admin/users/index';
+import {
+        AdminUsersViewComponent,
+        AdminUserEditComponent }           from './components/authorized/admin/users/index';
 import { AdminMessagesComponent }          from './components/authorized/admin/messages/index';
 
 // student
@@ -53,12 +56,14 @@ import { StudentDashboardComponent }        from './components/authorized/studen
         AdminDashboardComponent,
         AdminUsersViewComponent,
         AdminMessagesComponent,
+        AdminUserEditComponent,
         // student
         StudentDashboardComponent,
     ],
     providers: [
         AuthGuard,
         AlertService,
+        GlobalEventsManager,
         AuthenticationService,
         UserService
     ],

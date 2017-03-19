@@ -14,7 +14,7 @@
         </thead>
         <tbody>
             <tr *ngFor="let user of users">
-                <td><a href="/user-edit">{{user.id}}</a></td>
+                <td><a href="javascript:void(0)" (click)="editUser(user.id)">{{user.id}}</a></td>
                 <td>{{user.email}}</td>
                 <td class="hidden-xs">{{user.password}}</td>
                 <td class="hidden-xs">{{user.firstname}}</td>

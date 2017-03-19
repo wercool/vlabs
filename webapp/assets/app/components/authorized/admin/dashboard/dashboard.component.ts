@@ -1,8 +1,9 @@
 ﻿import { Component, OnInit, ElementRef }    from '@angular/core';
 
-import { User }                       from '../../../../models/index';
-import { UserService }                from '../../../../services/index';
-import { AdminUsersViewComponent }    from '../users/index';
+import { User }                             from '../../../../models/index';
+import { UserService,
+         GlobalEventsManager}               from '../../../../services/index';
+import { AdminUsersViewComponent }          from '../users/index';
 
 @Component({
     moduleId: module.id,
@@ -15,10 +16,17 @@ export class AdminDashboardComponent implements OnInit
     users: User[] = [];
     notActivatedYetUsersNumber: number = 0;
     selectedView: string = "";
+    selectedUserId:number = 0;
 
-    constructor(private userService: UserService, private elementRef: ElementRef)
+    constructor(private globalEventsManager: GlobalEventsManager,
+                private userService: UserService,
+                private elementRef: ElementRef)
     {
         this.currentUser = new User(JSON.parse(localStorage.getItem('currentUser')));
+        this.globalEventsManager.showComponent.subscribe(data => {
+            this.setViewContainerComponent(data.componentName);
+            this.selectedUserId = data.selectedUserId;
+        });
     }
 
     ngOnInit()
@@ -46,4 +54,8 @@ export class AdminDashboardComponent implements OnInit
         });
     }
 
+    public setViewContainerComponent(componentSelector: string )
+    {
+        this.selectedView = componentSelector;
+    }
 }

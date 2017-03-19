@@ -100,7 +100,14 @@ router.get('/user', function(req, res, next) {
 });
 
 router.get('/user/:id', function(req, res, next) {
-    models.User.findOne({ where: {id: req.params.id} }).then(function(user){
+    models.User.findOne({ where: {id: req.params.id},
+                          include:[{model:models.Role}] }).then(function(user){
+        res.json(user === null ? {} : user);
+    });
+});
+
+router.put('/user/:id', function(req, res, next) {
+    models.User.update(req.body, { where: {id: req.params.id} }).then(function(user){
         res.json(user === null ? {} : user);
     });
 });

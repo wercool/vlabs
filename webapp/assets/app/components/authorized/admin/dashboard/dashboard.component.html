@@ -6,23 +6,24 @@
                 <ul class="nav nav-list">
                     <li class="nav-header">Administrator Menu</li>
                     <li>
-                        <a href="javascript:void(0);" (click)="this.selectedView = 'admin-usersview'"><i class="glyphicon glyphicon-user">
+                        <a href="javascript:void(0);" (click)="setViewContainerComponent('admin-usersview')"><i class="glyphicon glyphicon-user">
                         </i> Users
                             <span *ngIf="this.notActivatedYetUsersNumber > 0" class="badge badge-info">
                                 {{this.notActivatedYetUsersNumber}}
                             </span>
                         </a>
                     </li>
-                    <li><a href="javascript:void(0);" (click)="this.selectedView = 'admin-messages'"><i class="glyphicon glyphicon-envelope"></i> Messages </a></li>
+                    <li><a href="javascript:void(0);" (click)="setViewContainerComponent('admin-messages')"><i class="glyphicon glyphicon-envelope"></i> Messages </a></li>
                     <li class="nav-divider"></li>
                     <li><a href="#"><i class="glyphicon glyphicon-scale"></i> VLabs</a></li>
                 </ul>
             </div>
         </div>
 
-        <div id="viewContainer" class="col-md-9 panel panel-default">
+        <div id="viewContainer" class="col-md-9 well">
             <admin-usersview *ngIf="this.selectedView == 'admin-usersview'"></admin-usersview>
             <admin-messages *ngIf="this.selectedView == 'admin-messages'"></admin-messages>
+            <admin-useredit *ngIf="this.selectedView == 'admin-useredit'" [selectedUserId]="selectedUserId"></admin-useredit>
         </div>
 
     </div>
