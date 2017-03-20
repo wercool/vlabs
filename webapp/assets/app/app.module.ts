@@ -11,6 +11,7 @@ import {
          AlertService,
          AuthenticationService,
          UserService,
+         GroupService,
          GlobalEventsManager
        }                             from './services/index';
 
@@ -28,10 +29,12 @@ import { RegisterComponent }         from './components/frontface/register/index
 import { DashboardComponent }               from './components/authorized/dashboard/index';
 // admin
 import { AdminDashboardComponent }          from './components/authorized/admin/dashboard/index';
-import {
-        AdminUsersViewComponent,
-        AdminUserEditComponent }           from './components/authorized/admin/users/index';
-import { AdminMessagesComponent }          from './components/authorized/admin/messages/index';
+import { AdminUsersViewComponent,
+        AdminUserEditComponent }            from './components/authorized/admin/users/index';
+import { AdminMessagesComponent }           from './components/authorized/admin/messages/index';
+import { AdminGroupsViewComponent,
+         AdminGroupEditComponent }          from './components/authorized/admin/groups/index';
+import { AdminVLabsComponent }              from './components/authorized/admin/vlabs/index';
 
 // student
 import { StudentDashboardComponent }        from './components/authorized/student/dashboard/index';
@@ -55,8 +58,11 @@ import { StudentDashboardComponent }        from './components/authorized/studen
         // admin
         AdminDashboardComponent,
         AdminUsersViewComponent,
+        AdminGroupsViewComponent,
+        AdminGroupEditComponent,
         AdminMessagesComponent,
         AdminUserEditComponent,
+        AdminVLabsComponent,
         // student
         StudentDashboardComponent,
     ],

@@ -44,6 +44,7 @@ models.sequelize.sync({force: config.sequelizeSyncForce})
                 user.addRole(studentRole.id);
             })
         });
+        models.Group.create({ name: 'General' });
     }
 })
 .then(function(){

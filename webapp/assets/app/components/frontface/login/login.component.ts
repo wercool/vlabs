@@ -51,7 +51,7 @@ export class LoginComponent implements OnInit {
                             else
                             {
                                 this.authenticationService.logout();
-                                this.alertService.error("Authentication failed. You account has not been blocked.");
+                                this.alertService.error("Authentication failed. You account has been blocked.");
                             }
                         }
                         else

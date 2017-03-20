@@ -31,7 +31,7 @@ export class AlertService
         this.subject.next({ type: 'success', text: message });
         if (autoHide)
         {
-            setTimeout(() => this.subject.next(), 1000);
+            setTimeout(() => this.subject.next(), 2000);
         }
     }
 

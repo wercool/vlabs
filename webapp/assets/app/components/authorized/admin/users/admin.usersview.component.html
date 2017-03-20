@@ -22,14 +22,14 @@
                 <td class="hidden-xs">
                     <div *ngFor="let role of user.Roles" style="font-size:10px;">{{role.title}}</div>
                 </td>
-                <th class="hidden-xs">
+                <th>
                     <i *ngIf="user.activated" class="glyphicon glyphicon-ok green"></i>
-                    <a *ngIf="!user.activated" href="javascript:void(0)" (click)="activateUser(user.id)">
+                    <a *ngIf="!user.activated" href="javascript:void(0)" (click)="activateUser(user)">
                         <i class="glyphicon glyphicon-ok yellow"></i>
                     </a>
                 </th>
-                <th class="hidden-xs">
-                    <a href="javascript:void(0)" (click)="blockUser(user.id)">
+                <th>
+                    <a href="javascript:void(0)" (click)="blockUser(user)">
                         <i *ngIf="user.blocked" class="glyphicon glyphicon-lock red"></i>
                         <i *ngIf="!user.blocked" class="glyphicon glyphicon-lock green"></i>
                     </a>

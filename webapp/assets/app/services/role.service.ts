@@ -23,4 +23,13 @@ export class RoleService
         return this.http.get('/api/role/' + title).map((response: Response) => response.json());
     }
 
+    addRoleToUser(roleId: number, userId: number)
+    {
+        return this.http.put('/api/role/add', {roleId: roleId, userId: userId}, this.authenticationService.jwt()).map((response: Response) => response.json());
+    }
+
+    removeRoleFromUser(roleId: number, userId: number)
+    {
+        return this.http.delete('/api/role/remove/' + roleId + '/' + userId, this.authenticationService.jwt()).map((response: Response) => response.json());
+    }
 }

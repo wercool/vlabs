@@ -39,9 +39,10 @@ router.post('/user/register', function(req, res, next) {
         if (user === null)
         {
             models.User.create(req.body).then(function(user){
-                req.body.Roles.forEach(function(role){
+                req.body.Roles.forEach(role => {
                     user.addRole(role.id);
                 });
+            }).then(() => {
                 return res.send({
                   success: true
                 });
@@ -114,6 +115,57 @@ router.put('/user/:id', function(req, res, next) {
 router.get('/role', function(req, res, next) {
     models.Role.findAll().then(function(roles){
         res.json(roles);
+    });
+});
+
+router.put('/role/add', function(req, res, next) {
+    models.User.findById(req.body.userId).then(function(user){
+        user.addRole(req.body.roleId).then(() => {
+            return res.status(200).send({
+              success: true,
+              message: 'ok'
+            });
+        });
+    });
+});
+
+router.delete('/role/remove/:roleId/:userId', function(req, res, next) {
+    models.User.findById(req.params.userId).then(function(user){
+        user.removeRole(req.params.roleId).then(() => {
+            return res.status(200).send({
+              success: true,
+              message: 'ok'
+            });
+        });
+    });
+});
+
+router.get('/group', function(req, res, next) {
+    models.Group.findAll().then(groups => {
+        res.json(groups);
+    });
+});
+
+router.get('/group/:id', function(req, res, next) {
+    models.Group.findById(req.params.id).then(group => {
+        res.json(group);
+    });
+});
+
+router.post('/group', function(req, res, next) {
+    models.Group.create(req.body).then(group => {
+        return res.send({
+          success: true
+        });
+    });
+});
+
+router.put('/group/:id', function(req, res, next) {
+    models.Group.update(req.body, { where: {id: req.params.id} }).then(group => {
+        return res.status(200).send({
+          success: true,
+          message: 'ok'
+        });
     });
 });
 

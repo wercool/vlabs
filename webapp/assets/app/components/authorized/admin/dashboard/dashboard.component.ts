@@ -17,6 +17,7 @@ export class AdminDashboardComponent implements OnInit
     notActivatedYetUsersNumber: number = 0;
     selectedView: string = "";
     selectedUserId:number = 0;
+    selectedGroupId:number = 0;
 
     constructor(private globalEventsManager: GlobalEventsManager,
                 private userService: UserService,
@@ -26,6 +27,7 @@ export class AdminDashboardComponent implements OnInit
         this.globalEventsManager.showComponent.subscribe(data => {
             this.setViewContainerComponent(data.componentName);
             this.selectedUserId = data.selectedUserId;
+            this.selectedGroupId = data.selectedGroupId;
         });
     }
 

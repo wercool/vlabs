@@ -20,7 +20,7 @@
         <label for="rolesContainer">Roles</label>
         <div name="rolesContainer">
             <div class="btn-group well" data-toggle="buttons">
-              <button *ngFor="let role of roles" [ngClass]="this.model.hasRole(role.title) ? 'btn btn-success' : 'btn btn-secondary'">{{role.title}}</button>
+              <button *ngFor="let role of roles" (click)="model.hasRole(role.title) ? removeRole(role) : addRole(role)" [ngClass]="model.hasRole(role.title) ? 'btn btn-success' : 'btn btn-secondary'">{{role.title}}</button>
             </div>
         </div>
 

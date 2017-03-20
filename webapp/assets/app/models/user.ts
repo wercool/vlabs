@@ -1,6 +1,7 @@
 import { Role }                 from './index';
 
-export class User {
+export class User
+{
     id: number;
     email: string;
     password: string;
@@ -43,4 +44,5 @@ export class User {
     {
         return this.blocked;
     }
+
 }

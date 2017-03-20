@@ -56,8 +56,28 @@ export class AdminUserEditComponent implements OnInit
     {
         this.loading = true;
         this.userService.update(this.model).subscribe(user => {
-            this.alertService.success("Successfully Updated.", false, true);
+            this.alertService.success("Successfully updated.", false, true);
             this.loading = false;
+        });
+    }
+
+    addRole(role: Role)
+    {
+        this.loading = true;
+        this.roleService.addRoleToUser(role.id, this.model.id).subscribe(user => {
+            this.alertService.success("User role [" + role.title + "] has been successfully added.", false, true);
+            this.loading = false;
+            this.loadUser(this.model.id);
+        });
+    }
+
+    removeRole(role: Role)
+    {
+        this.loading = true;
+        this.roleService.removeRoleFromUser(role.id, this.model.id).subscribe(user => {
+            this.alertService.success("User role [" + role.title + "] has been successfully removed", false, true);
+            this.loading = false;
+            this.loadUser(this.model.id);
         });
     }
 
