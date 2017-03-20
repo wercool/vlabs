@@ -53,8 +53,6 @@
 <!-- footer -->
 <footer class="footer hidden-xs">
     <div class="container vcenter">
-        <a [routerLink]="['/login']">
-            {{authenticationService.isAuthenticated() ? "Log Out" : "Log In"}}
-        </a>
+        <span *ngIf="authenticationService.isAuthenticated()" style="font-size:10px;">Logged in as {{authenticationService.getCurrentUser().email}}</span>
     </div>
 </footer>

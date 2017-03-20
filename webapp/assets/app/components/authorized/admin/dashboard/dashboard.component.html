@@ -1,4 +1,4 @@
-<div *ngIf="currentUser.hasRole('Administrator')">
+<div *ngIf="authenticationService.getCurrentUser().hasRole('Administrator')">
     <div class="row content">
 
         <div class="col-sm-3 sidenav">

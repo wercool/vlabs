@@ -1,4 +1,4 @@
-<div *ngIf="currentUser.hasRole('Administrator')">
+<div *ngIf="authenticationService.getCurrentUser().hasRole('Administrator')">
     <form name="form" (ngSubmit)="f.form.valid && updateUser()" #f="ngForm" data-toggle="validator">
         <div class="form-group">
             <label for="email">Email</label>
@@ -17,17 +17,19 @@
             <input type="text" class="form-control" name="lastName" [(ngModel)]="model.lastname" #lastName="ngModel" required />
         </div>
 
-        <label for="rolesContainer">Roles</label>
-        <div name="rolesContainer">
-            <div class="btn-group well" data-toggle="buttons">
-              <button *ngFor="let role of roles" (click)="model.hasRole(role.title) ? removeRole(role) : addRole(role)" [ngClass]="model.hasRole(role.title) ? 'btn btn-success' : 'btn btn-secondary'">{{role.title}}</button>
-            </div>
-        </div>
-
         <div class="form-group">
             <button [disabled]="loading" type="submit" class="btn btn-primary">Save</button>
             <img *ngIf="loading" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
             <a href="javascript:void(0)" (click)="cancel()" class="btn btn-link">Cancel</a>
         </div>
     </form>
+
+    <hr/>
+
+    <label for="rolesContainer">Roles</label>
+    <div name="rolesContainer">
+        <div class="btn-group well" data-toggle="buttons">
+          <button *ngFor="let role of roles" (click)="model.hasRole(role.title) ? removeRole(role) : addRole(role)" [ngClass]="model.hasRole(role.title) ? 'btn btn-success' : 'btn btn-secondary'">{{role.title}}</button>
+        </div>
+    </div>
 </div>

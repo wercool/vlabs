@@ -15,10 +15,9 @@ import { User, Role }                             from './models/index';
 
 export class AppComponent
 {
-    constructor(
-        private authenticationService: AuthenticationService,
-        private alertService: AlertService)
-        {
+    constructor( private authenticationService: AuthenticationService,
+                 private alertService: AlertService)
+    {
 
-        }
+    }
 }

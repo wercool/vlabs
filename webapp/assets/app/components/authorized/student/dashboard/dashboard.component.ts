@@ -1,7 +1,19 @@
-﻿import { Component, OnInit, ElementRef }    from '@angular/core';
+﻿import
+{
+    Component,
+    OnInit,
+    ElementRef
+}
+from '@angular/core';
 
-import { User }                 from '../../../../models/index';
-import { UserService }          from '../../../../services/index';
+import
+{
+    AuthenticationService,
+    UserService
+}
+from '../../../../services/index';
+
+///////////////////////////////////////////////////////////////////////////////
 
 @Component({
     moduleId: module.id,
@@ -10,11 +22,9 @@ import { UserService }          from '../../../../services/index';
 
 export class StudentDashboardComponent implements OnInit
 {
-    currentUser: User;
-
-    constructor(private elementRef: ElementRef)
+    constructor(private authenticationService: AuthenticationService,
+                private elementRef: ElementRef)
     {
-        this.currentUser = new User(JSON.parse(localStorage.getItem('currentUser')));
     }
 
     ngOnInit()

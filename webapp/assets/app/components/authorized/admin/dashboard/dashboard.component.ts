@@ -1,9 +1,32 @@
-﻿import { Component, OnInit, ElementRef }    from '@angular/core';
+﻿import
+{
+    Component,
+    OnInit,
+    ElementRef
+}
+from '@angular/core';
 
-import { User }                             from '../../../../models/index';
-import { UserService,
-         GlobalEventsManager}               from '../../../../services/index';
-import { AdminUsersViewComponent }          from '../users/index';
+import
+{
+    User
+}
+from '../../../../models/index';
+
+import
+{
+    AuthenticationService,
+    UserService,
+    GlobalEventsManager
+}
+from '../../../../services/index';
+
+import
+{
+    AdminUsersViewComponent
+}
+from '../users/index';
+
+///////////////////////////////////////////////////////////////////////////////
 
 @Component({
     moduleId: module.id,
@@ -12,18 +35,19 @@ import { AdminUsersViewComponent }          from '../users/index';
 
 export class AdminDashboardComponent implements OnInit
 {
-    currentUser: User;
     users: User[] = [];
     notActivatedYetUsersNumber: number = 0;
     selectedView: string = "";
     selectedUserId:number = 0;
     selectedGroupId:number = 0;
 
-    constructor(private globalEventsManager: GlobalEventsManager,
+    constructor(private authenticationService: AuthenticationService,
+                private globalEventsManager: GlobalEventsManager,
                 private userService: UserService,
                 private elementRef: ElementRef)
     {
-        this.currentUser = new User(JSON.parse(localStorage.getItem('currentUser')));
+        this.setViewContainerComponent('admin-messages');
+
         this.globalEventsManager.showComponent.subscribe(data => {
             this.setViewContainerComponent(data.componentName);
             this.selectedUserId = data.selectedUserId;

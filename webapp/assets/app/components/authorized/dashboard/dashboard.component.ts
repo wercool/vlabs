@@ -1,8 +1,26 @@
-﻿import { Component, OnInit, ElementRef }    from '@angular/core';
-import { Router, ActivatedRoute }           from '@angular/router';
+﻿import
+{
+    Component,
+    OnInit,
+    ElementRef
+}
+from '@angular/core';
 
-import { User }                 from '../../../models/index';
-import { UserService }          from '../../../services/index';
+import
+{
+    Router,
+    ActivatedRoute
+}
+from '@angular/router';
+
+///////////////////////////////////////////////////////////////////////////////
+
+import
+{
+    AuthenticationService,
+    UserService
+}
+from '../../../services/index';
 
 @Component({
     moduleId: module.id,
@@ -11,17 +29,16 @@ import { UserService }          from '../../../services/index';
 
 export class DashboardComponent implements OnInit
 {
-    currentUser: User;
-
-    constructor(private router: Router, private userService: UserService, private elementRef: ElementRef)
+    constructor(private router: Router,
+                private authenticationService: AuthenticationService,
+                private userService: UserService,
+                private elementRef: ElementRef)
     {
-        this.currentUser = new User(JSON.parse(localStorage.getItem('currentUser')));
-
-        if (this.currentUser.hasRole('Administrator'))
+        if (this.authenticationService.getCurrentUser().hasRole('Administrator'))
         {
             this.router.navigate(['/admin-dashboard']);
         }
-        else if (this.currentUser.hasRole('Student'))
+        else if (this.authenticationService.getCurrentUser().hasRole('Student'))
         {
             this.router.navigate(['/student-dashboard']);
         }

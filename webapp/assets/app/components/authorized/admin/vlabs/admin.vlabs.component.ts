@@ -1,7 +1,19 @@
-﻿import { Component, OnInit, ElementRef }    from '@angular/core';
+﻿import
+{
+    Component,
+    OnInit,
+    ElementRef
+}
+from '@angular/core';
 
-import { User }                 from '../../../../models/index';
-import { UserService }          from '../../../../services/index';
+import
+{
+    AuthenticationService,
+    UserService
+}
+from '../../../../services/index';
+
+///////////////////////////////////////////////////////////////////////////////
 
 @Component({
     moduleId: module.id,
@@ -11,11 +23,10 @@ import { UserService }          from '../../../../services/index';
 
 export class AdminVLabsComponent implements OnInit
 {
-    currentUser: User;
-
-    constructor(private userService: UserService, private elementRef: ElementRef)
+    constructor(private authenticationService: AuthenticationService,
+                private userService: UserService,
+                private elementRef: ElementRef)
     {
-        this.currentUser = new User(JSON.parse(localStorage.getItem('currentUser')));
     }
 
     ngOnInit()

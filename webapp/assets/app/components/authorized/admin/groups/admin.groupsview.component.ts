@@ -1,9 +1,26 @@
-﻿import { Component, OnInit, ElementRef }    from '@angular/core';
+﻿import
+{
+    Component,
+    OnInit,
+    ElementRef
+}
+from '@angular/core';
 
-import { User,
-         Group }                        from '../../../../models/index';
-import { GroupService,
-         GlobalEventsManager }          from '../../../../services/index';
+import
+{
+    Group
+}
+from '../../../../models/index';
+
+import
+{
+    AuthenticationService,
+    GroupService,
+    GlobalEventsManager
+}
+from '../../../../services/index';
+
+///////////////////////////////////////////////////////////////////////////////
 
 @Component({
     moduleId: module.id,
@@ -14,14 +31,13 @@ import { GroupService,
 
 export class AdminGroupsViewComponent implements OnInit
 {
-    currentUser: User;
     groups: Group[] = [];
 
-    constructor(private globalEventsManager: GlobalEventsManager,
+    constructor(private authenticationService: AuthenticationService,
+                private globalEventsManager: GlobalEventsManager,
                 private groupService: GroupService,
                 private elementRef: ElementRef)
     {
-        this.currentUser = new User(JSON.parse(localStorage.getItem('currentUser')));
     }
 
     ngOnInit()

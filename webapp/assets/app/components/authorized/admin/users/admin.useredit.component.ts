@@ -1,14 +1,29 @@
-﻿import { Component,
-         OnInit,
-         ElementRef,
-         Input }                        from '@angular/core';
+﻿import
+{
+    Component,
+    OnInit,
+    ElementRef,
+    Input
+}
+from '@angular/core';
 
-import { User,
-         Role }                         from '../../../../models/index';
-import { UserService,
-         RoleService,
-         AlertService,
-         GlobalEventsManager }          from '../../../../services/index';
+import {
+    User,
+    Role
+}
+from '../../../../models/index';
+
+import
+{
+    AuthenticationService,
+    UserService,
+    RoleService,
+    AlertService,
+    GlobalEventsManager
+}
+from '../../../../services/index';
+
+///////////////////////////////////////////////////////////////////////////////
 
 @Component({
     moduleId: module.id,
@@ -21,18 +36,17 @@ export class AdminUserEditComponent implements OnInit
 {
     @Input() selectedUserId: number;
 
-    currentUser: User;
     model: User = new User({Roles:[]});
     roles:Role[];
     loading = false;
 
-    constructor(private globalEventsManager: GlobalEventsManager,
+    constructor(private authenticationService: AuthenticationService,
+                private globalEventsManager: GlobalEventsManager,
                 private userService: UserService,
                 private roleService: RoleService,
                 private elementRef: ElementRef,
                 private alertService: AlertService)
     {
-        this.currentUser = new User(JSON.parse(localStorage.getItem('currentUser')));
     }
 
     ngOnInit()

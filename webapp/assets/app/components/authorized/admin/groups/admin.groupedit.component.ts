@@ -1,10 +1,24 @@
-﻿import { Component, OnInit, ElementRef, Input }    from '@angular/core';
+﻿import
+{
+    Component,
+    OnInit,
+    ElementRef,
+    Input
+} from '@angular/core';
 
-import { User,
-         Group }                        from '../../../../models/index';
-import { GroupService,
-         GlobalEventsManager,
-         AlertService}                  from '../../../../services/index';
+import
+{
+    Group
+} from '../../../../models/index';
+
+import
+{
+    AuthenticationService,
+    GroupService,
+    GlobalEventsManager,
+    AlertService
+}
+from '../../../../services/index';
 
 @Component({
     moduleId: module.id,
@@ -13,20 +27,21 @@ import { GroupService,
     providers: [GroupService]
 })
 
+///////////////////////////////////////////////////////////////////////////////
+
 export class AdminGroupEditComponent implements OnInit
 {
     @Input() selectedGroupId: number;
 
-    currentUser: User;
     model: Group = new Group({});
     loading = false;
 
-    constructor(private globalEventsManager: GlobalEventsManager,
+    constructor(private authenticationService: AuthenticationService,
+                private globalEventsManager: GlobalEventsManager,
                 private groupService: GroupService,
                 private elementRef: ElementRef,
                 private alertService: AlertService)
     {
-        this.currentUser = new User(JSON.parse(localStorage.getItem('currentUser')));
     }
 
     ngOnInit()
@@ -58,7 +73,8 @@ export class AdminGroupEditComponent implements OnInit
         else
         {
             this.groupService.create(this.model).subscribe(group => {
-                this.model = group;
+                this.alertService.success("Group [" + this.model.name + "] successfully created.", false, true);
+                this.globalEventsManager.showComponent.emit({componentName: 'admin-groupsview'});
                 this.loading = false;
             });
         }
