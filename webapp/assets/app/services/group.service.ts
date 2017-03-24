@@ -35,6 +35,17 @@ export class GroupService
         return this.http.get('/api/group/' + id, this.authenticationService.jwt()).map((response: Response) => response.json());
     }
 
+    getMemebers(id: number)
+    {
+        return this.http.get('/api/group/' + id + '/members', this.authenticationService.jwt()).map((response: Response) => response.json());
+    }
+
+    excludeMemeberFromGroup(userId: number, groupId: number)
+    {
+        return this.http.delete('/api/group/exclude/' + groupId + '/' + userId, this.authenticationService.jwt()).map((response: Response) => response.json());
+    }
+
+    //no token required
     getByTitle(title: string)
     {
         return this.http.get('/api/group/' + title).map((response: Response) => response.json());

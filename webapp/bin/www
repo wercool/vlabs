@@ -27,6 +27,7 @@ var server = http.createServer(app);
 if (config.sequelizeSyncForce)
 {
     var administratorRole;
+    var defaultStudent;
 }
 models.sequelize.sync({force: config.sequelizeSyncForce})
 .then(function(){
@@ -41,10 +42,13 @@ models.sequelize.sync({force: config.sequelizeSyncForce})
         models.Role.create({ title: 'Student' }).then(function(role){
             studentRole = role;
             models.User.create({ email: 'maska@3si2.com', password: '123', firstname: 'Alexey', lastname: 'Maistrenko', activated: true, blocked: false }).then(function(user){
+                defaultStudent = user;
                 user.addRole(studentRole.id);
+                models.Group.create({ name: 'General' }).then(function(group){
+                    defaultStudent.addGroup(group.id);
+                });
             })
         });
-        models.Group.create({ name: 'General' });
     }
 })
 .then(function(){

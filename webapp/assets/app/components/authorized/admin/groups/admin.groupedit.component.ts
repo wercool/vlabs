@@ -8,7 +8,8 @@
 
 import
 {
-    Group
+    Group,
+    User
 } from '../../../../models/index';
 
 import
@@ -34,6 +35,7 @@ export class AdminGroupEditComponent implements OnInit
     @Input() selectedGroupId: number;
 
     model: Group = new Group({});
+    groupMembers: User[];
     loading = false;
 
     constructor(private authenticationService: AuthenticationService,
@@ -47,6 +49,7 @@ export class AdminGroupEditComponent implements OnInit
     ngOnInit()
     {
         this.loadGroup(this.selectedGroupId);
+        this.loadGroupMemebers(this.selectedGroupId);
     }
 
     loadGroup(groupId: number)
@@ -55,6 +58,16 @@ export class AdminGroupEditComponent implements OnInit
         {
             this.groupService.getById(groupId).subscribe(group => {
                 this.model = new Group(group);
+            });
+        }
+    }
+
+    loadGroupMemebers(groupId: number)
+    {
+        if (groupId != undefined)
+        {
+            this.groupService.getMemebers(groupId).subscribe(groupAndUsers => {
+                this.groupMembers = groupAndUsers.Users;
             });
         }
     }
@@ -78,6 +91,27 @@ export class AdminGroupEditComponent implements OnInit
                 this.loading = false;
             });
         }
+    }
+
+    addMember()
+    {
+        console.log('addMember(), groupId = ', this.selectedGroupId);
+    }
+
+    excludeMember(user: User)
+    {
+        var scope = this;
+        bootbox.confirm("Are you sure you want to exclude <b>"
+                        + user.email + "</b> (" + user.firstname + " " + user.lastname + ")"
+                        + " user from the group <b>" + scope.model.name + "</b>?" , function(ok){
+            if (ok)
+            {
+                scope.groupService.excludeMemeberFromGroup(user.id, scope.model.id).subscribe(() => {
+                    scope.alertService.success("User [" + user.email + "] successfully excluded.", false, true);
+                    scope.ngOnInit();
+                });
+            }
+        });
     }
 
     cancel()

@@ -88,7 +88,7 @@ export class AdminUserEditComponent implements OnInit
     removeRole(role: Role)
     {
         this.loading = true;
-        this.roleService.removeRoleFromUser(role.id, this.model.id).subscribe(user => {
+        this.roleService.removeRoleFromUser(role.id, this.model.id).subscribe(() => {
             this.alertService.success("User role [" + role.title + "] has been successfully removed", false, true);
             this.loading = false;
             this.loadUser(this.model.id);

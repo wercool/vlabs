@@ -169,4 +169,23 @@ router.put('/group/:id', function(req, res, next) {
     });
 });
 
+router.get('/group/:id/members', function(req, res, next) {
+    models.Group.findOne({ where: {id: req.params.id},
+                           include:[{model:models.User}] }).then(groupMembers => {
+        res.json(groupMembers);
+    });
+    console.log(models.UserGroup);
+});
+
+router.delete('/group/exclude/:groupId/:userId', function(req, res, next) {
+    models.User.findById(req.params.userId).then(function(user){
+        user.removeGroup(req.params.groupId).then(() => {
+            return res.status(200).send({
+              success: true,
+              message: 'ok'
+            });
+        });
+    });
+});
+
 module.exports = router;
