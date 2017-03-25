@@ -1,11 +1,16 @@
 ﻿import { Injectable }                                   from '@angular/core';
 import { Http, Headers, RequestOptions, Response }      from '@angular/http';
 
-import { Group }                                        from '../models/index';
+import
+{
+    Group,
+    User
+} from '../models/index';
 
-import {
-        AuthenticationService
-       }                                                from './index';
+import
+{
+    AuthenticationService
+} from './index';
 
 @Injectable()
 export class GroupService
@@ -43,6 +48,11 @@ export class GroupService
     excludeMemeberFromGroup(userId: number, groupId: number)
     {
         return this.http.delete('/api/group/exclude/' + groupId + '/' + userId, this.authenticationService.jwt()).map((response: Response) => response.json());
+    }
+
+    addMemeberToGroup(user: User, groupId:number)
+    {
+        return this.http.post('/api/group/addmember/' + groupId, user, this.authenticationService.jwt()).map((response: Response) => response.json());
     }
 
     //no token required

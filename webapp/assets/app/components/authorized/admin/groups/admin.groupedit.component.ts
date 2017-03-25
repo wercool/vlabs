@@ -16,6 +16,7 @@ import
 {
     AuthenticationService,
     GroupService,
+    UserService,
     GlobalEventsManager,
     AlertService
 }
@@ -35,12 +36,14 @@ export class AdminGroupEditComponent implements OnInit
     @Input() selectedGroupId: number;
 
     model: Group = new Group({});
-    groupMembers: User[];
+    groupMembers: User[] = [];
+    potentialGroupMembers: User[] = [];
     loading = false;
 
     constructor(private authenticationService: AuthenticationService,
                 private globalEventsManager: GlobalEventsManager,
                 private groupService: GroupService,
+                private userService: UserService,
                 private elementRef: ElementRef,
                 private alertService: AlertService)
     {
@@ -95,7 +98,24 @@ export class AdminGroupEditComponent implements OnInit
 
     addMember()
     {
-        console.log('addMember(), groupId = ', this.selectedGroupId);
+        var excludeUserIds:number[] = this.groupMembers.length > 0 ? [] : [0];
+        for (var member of this.groupMembers)
+        {
+            excludeUserIds.push(member.id);
+        }
+        var excludeUserIds_stringified = excludeUserIds.join('-');
+        this.userService.getAllExcept(excludeUserIds_stringified).subscribe(users => {
+            this.potentialGroupMembers = users;
+        });
+    }
+
+    addMemberToGroup(user:User)
+    {
+        this.groupService.addMemeberToGroup(user, this.model.id).subscribe(() => {
+            this.potentialGroupMembers.splice(this.potentialGroupMembers.indexOf(user), 1);
+            this.alertService.success("User [" + user.email + "] successfully added to the group " + this.model.name + ".", false, true);
+            this.ngOnInit();
+        });
     }
 
     excludeMember(user: User)

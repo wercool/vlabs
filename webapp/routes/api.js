@@ -99,6 +99,18 @@ router.get('/user', function(req, res, next) {
     });
 });
 
+router.get('/user/getallexcept/:excludeUserIds', function(req, res, next) {
+    models.User.findAll({
+            where: {
+                        id: {
+                                not: [req.params.excludeUserIds.split('-')]
+                            }
+                    }
+    }).then(function(users){
+        res.json(users);
+    });
+});
+
 router.get('/user/:id', function(req, res, next) {
     models.User.findOne({ where: {id: req.params.id},
                           include:[{model:models.Role}] }).then(function(user){
@@ -174,7 +186,17 @@ router.get('/group/:id/members', function(req, res, next) {
                            include:[{model:models.User}] }).then(groupMembers => {
         res.json(groupMembers);
     });
-    console.log(models.UserGroup);
+});
+
+router.post('/group/addmember/:groupId', function(req, res, next) {
+    models.User.findById(req.body.id).then(function(user){
+        user.addGroup(req.params.groupId).then(() => {
+            return res.status(200).send({
+              success: true,
+              message: 'ok'
+            });
+        });
+    });
 });
 
 router.delete('/group/exclude/:groupId/:userId', function(req, res, next) {

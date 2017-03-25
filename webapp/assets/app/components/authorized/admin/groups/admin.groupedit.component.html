@@ -14,7 +14,7 @@
     <hr/>
     <h4>Group Members</h4>
     <div>
-        <button class="btn btn-default" (click)="addMember()">
+        <button class="btn btn-default" (click)="addMember()" data-toggle="modal" data-target="#addMember">
             <i class="glyphicon glyphicon-plus green"></i> Add Member
         </button>
     </div>
@@ -42,4 +42,47 @@
             </tr>
         </tbody>
     </table>
+</div>
+
+<!-- Modal Add User to group, make it a memeber of a group -->
+<div class="modal fade" id="addMember" tabindex="-1" role="dialog" aria-labelledby="addMemberLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addMemberLabel">Add user to a group <b>{{model.name}}</b></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <table class="table table-striped table-condensed">
+              <thead>
+                  <tr>
+                      <th>ID</th>
+                      <th>Email</th>
+                      <th class="hidden-xs">First Name</th>
+                      <th class="hidden-xs">Last Name</th>
+                      <th class="hidden-xs">Add to Group</th>
+                  </tr>
+              </thead>
+              <tbody *ngIf="potentialGroupMembers.length > 0">
+                  <tr *ngFor="let potentialMember of potentialGroupMembers">
+                      <td>{{potentialMember.id}}</td>
+                      <td>{{potentialMember.email}}</td>
+                      <td>{{potentialMember.firstname}}</td>
+                      <td>{{potentialMember.lastname}}</td>
+                      <td>
+                          <a href="javascript:void(0)" (click)="addMemberToGroup(potentialMember)">
+                              <i class="glyphicon glyphicon-plus green"></i>
+                          </a>
+                      </td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 </div>

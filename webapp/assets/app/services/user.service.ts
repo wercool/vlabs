@@ -20,6 +20,11 @@ export class UserService
         return this.http.get('/api/user', this.authenticationService.jwt()).map((response: Response) => response.json());
     }
 
+    getAllExcept(excludeUserIds:string)
+    {
+        return this.http.get('/api/user/getallexcept/' + excludeUserIds, this.authenticationService.jwt()).map((response: Response) => response.json());
+    }
+
     getById(id: number)
     {
         return this.http.get('/api/user/' + id, this.authenticationService.jwt()).map((response: Response) => response.json());
