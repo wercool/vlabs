@@ -73,6 +73,9 @@ class Valter
                 {
                     self.talk(inputMessage);
                 }
+            },
+            navigate:function(){
+                self.navigate();
             }
         };
 
@@ -369,13 +372,14 @@ class Valter
 
             var manipulationObjectXZProjPos = this.manipulationObject.position.clone();
             manipulationObjectXZProjPos.y = this.model.position.y;
-            var valterToManipulationObjectDirectionVectorLength = this.model.position.clone().sub(manipulationObjectXZProjPos.clone()).length();
-            manipulationObjectXZProjPos.normalize();
-            this.activeObjects["valterToManipulationObjectDirectionVector"] = new THREE.ArrowHelper(manipulationObjectXZProjPos, this.model.position, valterToManipulationObjectDirectionVectorLength, 0xffffff, 1.0, 0.3);
+            var valterToManipulationObjectDirectionVector = this.model.position.clone().sub(manipulationObjectXZProjPos.clone());
+            var valterToManipulationObjectDirectionVectorLength = valterToManipulationObjectDirectionVector.clone().length();
+            valterToManipulationObjectDirectionVector.normalize();
+            this.activeObjects["valterToManipulationObjectDirectionVector"] = new THREE.ArrowHelper(valterToManipulationObjectDirectionVector, this.model.position, valterToManipulationObjectDirectionVectorLength, 0xffffff, 1.0, 0.3);
             this.vlab.getVlabScene().add(this.activeObjects["valterToManipulationObjectDirectionVector"]);
 
             var GUIcontrols1 = new dat.GUI();
-            GUIcontrols1.add(this.model.rotation, 'z', -6.28, 0.0).name("Base Yaw").step(0.01);
+            GUIcontrols1.add(this.model.rotation, 'z', -6.28, 0.0).name("Base Yaw").step(0.01).listen().onChange(this.baseRotation.bind(this));;
             GUIcontrols1.add(this.activeObjects["valterBodyP1"].rotation, 'z', -1.57, 1.57).name("Body Yaw").step(0.01).onChange(this.baseToBodyCableSleeveAnimation.bind(this));
             GUIcontrols1.add(this.activeObjects["bodyFrameAxisR"].rotation, 'x', -0.8, 0.0).name("Body Tilt").step(0.01).onChange(this.bodyToTorsoCableSleeveAnimation.bind(this));
             GUIcontrols1.add(this.joints, 'rightShoudler', 0.0, 1.0).name("Right Shoulder").step(0.01).onChange(this.rightShoulderRotate.bind(this));
@@ -403,6 +407,7 @@ class Valter
             GUIcontrols1.add(this.settings, 'coveringsVisibility').name("Coverings Visibility").onChange(this.setCoveringsVisibility.bind(this));
             GUIcontrols1.add(this.guiControls, 'say').name("Valter says");
             GUIcontrols1.add(this.guiControls, 'talk').name("Valter talks");
+            GUIcontrols1.add(this.guiControls, 'navigate').name("Navigate");
         }
 
         var self = this;
@@ -551,14 +556,17 @@ class Valter
                 this.activeObjects["valterForwardDirectionVector"].setDirection(valterForwardDirection);
                 this.activeObjects["valterForwardDirectionVector"].position.copy(this.model.position.clone());
 
-
                 var manipulationObjectXZProjPos = this.manipulationObject.position.clone();
                 manipulationObjectXZProjPos.y = this.model.position.y;
-                var valterToManipulationObjectDirectionVectorLength = this.model.position.clone().sub(manipulationObjectXZProjPos.clone()).length();
-                manipulationObjectXZProjPos.normalize();
-                this.activeObjects["valterToManipulationObjectDirectionVector"].position.copy(this.model.position.clone());
-                this.activeObjects["valterToManipulationObjectDirectionVector"].setDirection(manipulationObjectXZProjPos);
-                this.activeObjects["valterToManipulationObjectDirectionVector"].setLength(valterToManipulationObjectDirectionVectorLength);
+                if (this.model.position.distanceTo(manipulationObjectXZProjPos) > 1.0)
+                {
+                    var valterToManipulationObjectDirectionVector = this.model.position.clone().sub(manipulationObjectXZProjPos.clone());
+                    var valterToManipulationObjectDirectionVectorLength = valterToManipulationObjectDirectionVector.clone().length();
+                    valterToManipulationObjectDirectionVector.normalize().negate();
+                    this.activeObjects["valterToManipulationObjectDirectionVector"].position.copy(this.model.position);
+                    this.activeObjects["valterToManipulationObjectDirectionVector"].setDirection(valterToManipulationObjectDirectionVector);
+                    this.activeObjects["valterToManipulationObjectDirectionVector"].setLength(valterToManipulationObjectDirectionVectorLength, 1.0, 0.3);
+                }
             }
         }
     }
@@ -1173,5 +1181,54 @@ class Valter
         var resultMessage = this.eliza.transform(inputMessage);
         console.log("Valter talks: " + resultMessage);
         this.sayEng(resultMessage);
+    }
+
+    navigate()
+    {
+        var matrix = new THREE.Matrix4();
+        matrix.extractRotation(this.model.matrix);
+        var valterForwardDirection = new THREE.Vector3(0, 1, 0);
+        valterForwardDirection.applyMatrix4(matrix);
+
+        var manipulationObjectXZProjPos = this.manipulationObject.position.clone();
+        manipulationObjectXZProjPos.y = this.model.position.y;
+        var valterToManipulationObjectDirectionVector = this.model.position.clone().sub(manipulationObjectXZProjPos.clone());
+        valterToManipulationObjectDirectionVector.normalize().negate();
+
+        var rotationVal = valterForwardDirection.angleTo(valterToManipulationObjectDirectionVector);
+        var rotationDir = (valterForwardDirection.clone().cross(valterToManipulationObjectDirectionVector).y > 0) ? 1 : -1;
+
+        var valterTargetZRotation = this.model.rotation.z + rotationVal * rotationDir;
+        this.baseRotation(valterTargetZRotation);
+    }
+
+    baseRotation(valterTargetZRotation)
+    {
+        var self = this;
+        var speed = Math.abs(this.model.rotation.z - valterTargetZRotation);
+        var rotationTween = new TWEEN.Tween(this.model.rotation);
+        rotationTween.easing(TWEEN.Easing.Cubic.InOut);
+        rotationTween.to({z: valterTargetZRotation}, 4000 * speed);
+        rotationTween.onComplete(function(){
+            self.baseMovement();
+        });
+        rotationTween.start();
+    }
+
+    baseMovement(valterTargetZRotation)
+    {
+        var self = this;
+        var manipulationObjectXZProjPos = this.manipulationObject.position.clone();
+        manipulationObjectXZProjPos.y = this.model.position.y;
+        var distance = this.model.position.clone().sub(manipulationObjectXZProjPos.clone()).length();
+
+        var movementTween = new TWEEN.Tween(this.model.position);
+        movementTween.easing(TWEEN.Easing.Cubic.InOut);
+        movementTween.to(manipulationObjectXZProjPos, 500 * (distance > 1 ? distance : 1));
+        movementTween.onComplete(function(){
+            //self.say("Цель достигнута");
+            console.log("Goal reached");
+        });
+        movementTween.start();
     }
 }
