@@ -48,6 +48,8 @@ function VLab(vlabNature)
     var mouseDownEvent = null;
     var mouseUpEvent = null;
 
+    self.pressedKey = null;
+
     self.clickResponsiveObjects = [];
     self.hoverResponsiveObjects = [];
 
@@ -150,6 +152,8 @@ function VLab(vlabNature)
         webglContainerDOM.addEventListener("mouseup", mouseUp, false);
 
         $(window).on("resize", webglContainerResized);
+        $(window).keydown(onKeyDown);
+        $(window).keyup(onKeyUp);
 
         self.webglContainerWidth  = webglContainer.width() - webglContainer.offset().left;
         self.webglContainerHeight = webglContainer.height() - webglContainer.offset().top;
@@ -741,6 +745,16 @@ function VLab(vlabNature)
                         1 -((event.clientY - webglContainer.offset().top) / webglContainer.height()) * 2);
         mouseUpEvent = event;
         self.getDefaultCamera().controls.enabled = true;
+    };
+
+    var onKeyDown = function(event)
+    {
+        self.pressedKey = event.keyCode;
+    };
+
+    var onKeyUp = function(event)
+    {
+        self.pressedKey = null;
     };
 
     var processMouseDown = function()
