@@ -270,6 +270,19 @@ class Valter
 
         this.activeObjects["mouthPanel"] = this.vlab.getVlabScene().getObjectByName("mouthPanel");
 
+        this.activeObjects["rightWheelDisk"] = this.vlab.getVlabScene().getObjectByName("rightWheelDisk");
+        this.activeObjects["leftWheelDisk"] = this.vlab.getVlabScene().getObjectByName("leftWheelDisk");
+
+        this.activeObjects["smallWheelArmatureRF"] = this.vlab.getVlabScene().getObjectByName("smallWheelArmatureRF");
+        this.activeObjects["smallWheelArmatureLF"] = this.vlab.getVlabScene().getObjectByName("smallWheelArmatureLF");
+        this.activeObjects["smallWheelArmatureRR"] = this.vlab.getVlabScene().getObjectByName("smallWheelArmatureRR");
+        this.activeObjects["smallWheelArmatureLR"] = this.vlab.getVlabScene().getObjectByName("smallWheelArmatureLR");
+
+        this.activeObjects["smallWheelRF"] = this.vlab.getVlabScene().getObjectByName("smallWheelRF");
+        this.activeObjects["smallWheelLF"] = this.vlab.getVlabScene().getObjectByName("smallWheelLF");
+        this.activeObjects["smallWheelRR"] = this.vlab.getVlabScene().getObjectByName("smallWheelRR");
+        this.activeObjects["smallWheelLR"] = this.vlab.getVlabScene().getObjectByName("smallWheelLR");
+
         this.activeObjects["rightHand"] = {
             f0_0: {obj: this.vlab.getVlabScene().getObjectByName("r_0_finger_p1"), angle: this.vlab.getVlabScene().getObjectByName("r_0_finger_p1").rotation.x},
             f0_1: {obj: this.vlab.getVlabScene().getObjectByName("r_0_finger_p2"), angle: this.vlab.getVlabScene().getObjectByName("r_0_finger_p2").rotation.z},
@@ -1212,10 +1225,40 @@ class Valter
         rotationTween.onComplete(function(){
             self.baseMovement();
         });
+        var prevBaseRotZ = self.model.rotation.clone().z;
+        rotationTween.onUpdate(function(){
+            var curBaseRotZ = self.model.rotation.z;
+            var rotVelAcc = (prevBaseRotZ - curBaseRotZ) * 3.0;
+            self.activeObjects["rightWheelDisk"].rotateZ(rotVelAcc);
+            self.activeObjects["leftWheelDisk"].rotateZ(rotVelAcc);
+            prevBaseRotZ = self.model.rotation.clone().z;
+            var speed = Math.abs(rotVelAcc / 5);
+            var maxRot = 120 * Math.PI / 180;
+            if (Math.abs(self.activeObjects["smallWheelArmatureRF"].rotation.z) < maxRot * (rotVelAcc > 0 ? 1 : 0.5))
+            {
+                self.activeObjects["smallWheelArmatureRF"].rotation.z += (rotVelAcc > 0 ? -speed : speed);
+            }
+            if (Math.abs(self.activeObjects["smallWheelArmatureLF"].rotation.z) < maxRot * (rotVelAcc > 0 ? 0.5 : 1))
+            {
+                self.activeObjects["smallWheelArmatureLF"].rotation.z += (rotVelAcc > 0 ? -speed : speed);
+            }
+            if (Math.abs(self.activeObjects["smallWheelArmatureRR"].rotation.z) < maxRot * (rotVelAcc > 0 ? 2 : 0.5))
+            {
+                self.activeObjects["smallWheelArmatureRR"].rotation.z += (rotVelAcc > 0 ? speed : -speed);
+            }
+            if (Math.abs(self.activeObjects["smallWheelArmatureLR"].rotation.z) < maxRot * (rotVelAcc > 0 ? 0.5 : 1))
+            {
+                self.activeObjects["smallWheelArmatureLR"].rotation.z += (rotVelAcc > 0 ? speed : -speed);
+            }
+            self.activeObjects["smallWheelRF"].rotateZ(rotVelAcc / 6);
+            self.activeObjects["smallWheelLF"].rotateZ(rotVelAcc / 6);
+            self.activeObjects["smallWheelRR"].rotateZ(rotVelAcc / 6);
+            self.activeObjects["smallWheelLR"].rotateZ(rotVelAcc / 6);
+        });
         rotationTween.start();
     }
 
-    baseMovement(valterTargetZRotation)
+    baseMovement()
     {
         var self = this;
         var manipulationObjectXZProjPos = this.manipulationObject.position.clone();
@@ -1228,6 +1271,36 @@ class Valter
         movementTween.onComplete(function(){
             //self.say("Цель достигнута");
             console.log("Goal reached");
+        });
+        var prevBasePosXZ = Math.sqrt(self.model.position.clone().x * self.model.position.clone().x + self.model.position.clone().z * self.model.position.clone().z);
+        movementTween.onUpdate(function(){
+            var curBasePosXZ = Math.sqrt(self.model.position.x * self.model.position.x + self.model.position.z * self.model.position.z);
+            var movVelAcc = Math.abs(curBasePosXZ - prevBasePosXZ) * 0.85;
+            prevBasePosXZ = Math.sqrt(self.model.position.clone().x * self.model.position.clone().x + self.model.position.clone().z * self.model.position.clone().z);
+            self.activeObjects["rightWheelDisk"].rotateZ(-movVelAcc);
+            self.activeObjects["leftWheelDisk"].rotateZ(movVelAcc);
+
+            var speed = Math.abs(movVelAcc / 2);
+            if (Math.abs(self.activeObjects["smallWheelArmatureRF"].rotation.z) > 0)
+            {
+                self.activeObjects["smallWheelArmatureRF"].rotation.z += (self.activeObjects["smallWheelArmatureRF"].rotation.z > 0 ? -speed : speed)
+            }
+            if (Math.abs(self.activeObjects["smallWheelArmatureLF"].rotation.z) > 0)
+            {
+                self.activeObjects["smallWheelArmatureLF"].rotation.z += (self.activeObjects["smallWheelArmatureLF"].rotation.z > 0 ? -speed : speed)
+            }
+            if (Math.abs(self.activeObjects["smallWheelArmatureRR"].rotation.z) > 0)
+            {
+                self.activeObjects["smallWheelArmatureRR"].rotation.z += (self.activeObjects["smallWheelArmatureRR"].rotation.z > 0 ? -speed : speed)
+            }
+            if (Math.abs(self.activeObjects["smallWheelArmatureLR"].rotation.z) > 0)
+            {
+                self.activeObjects["smallWheelArmatureLR"].rotation.z += (self.activeObjects["smallWheelArmatureLR"].rotation.z > 0 ? -speed : speed)
+            }
+            self.activeObjects["smallWheelLR"].rotateZ(movVelAcc / 6);
+            self.activeObjects["smallWheelRR"].rotateZ(movVelAcc / 6);
+            self.activeObjects["smallWheelLF"].rotateZ(movVelAcc / 6);
+            self.activeObjects["smallWheelRF"].rotateZ(movVelAcc / 6);
         });
         movementTween.start();
     }
