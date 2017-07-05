@@ -37,6 +37,7 @@ THREE.PointerLockControls = function (vlab, camera)
     // var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
     // var obstacleAvoidanceGizmo = new THREE.Mesh(sphereGeometry, wireMaterial);
     var obstacleAvoidanceGizmo = new THREE.Mesh(sphereGeometry);
+    obstacleAvoidanceGizmo.visible = false;
     obstacleAvoidanceGizmo.name = "obstacleAvoidanceGizmo";
 
     var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
