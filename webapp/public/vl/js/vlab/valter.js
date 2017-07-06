@@ -76,6 +76,9 @@ class Valter
             },
             navigate:function(){
                 self.navigate();
+            },
+            executeScript:function(){
+                self.executeScript();
             }
         };
 
@@ -421,6 +424,10 @@ class Valter
             GUIcontrols1.add(this.guiControls, 'say').name("Valter says");
             GUIcontrols1.add(this.guiControls, 'talk').name("Valter talks");
             GUIcontrols1.add(this.guiControls, 'navigate').name("Navigate");
+            if (typeof executeScriptDialog !== 'undefined')
+            {
+                GUIcontrols1.add(this.guiControls, 'executeScript').name("Execute Script");
+            }
         }
 
         var self = this;
@@ -1213,6 +1220,14 @@ class Valter
 
         var valterTargetZRotation = this.model.rotation.z + rotationVal * rotationDir;
         this.baseRotation(valterTargetZRotation);
+    }
+
+    executeScript()
+    {
+        if (typeof executeScriptDialog !== 'undefined')
+        {
+            executeScriptDialog.dialog("open");
+        }
     }
 
     baseRotation(valterTargetZRotation)

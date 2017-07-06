@@ -19,7 +19,8 @@ function ValterLab(webGLContainer)
     // this VLab constants
     var origin = new THREE.Vector3(0, 20, 10);
     var initialDefaultCameraPosVectorLength;
-    var valter = null;
+
+    self.Valter = null;
 
     var scenePostBuilt = function()
     {
@@ -112,7 +113,7 @@ function ValterLab(webGLContainer)
         self.getVlabScene().add(lensFlare);
 
         // Valter
-        valter = new Valter(self, new THREE.Vector3(0, 2.57, 5), true);
+        self.Valter = new Valter(self, new THREE.Vector3(0, 2.57, 5), true);
 
         // this VLab constants
 
@@ -146,4 +147,6 @@ function ValterLab(webGLContainer)
         VLab.apply(self, [jsonObj]);
         self.initialize(webGLContainer);
     });
+
+    return this;
 }

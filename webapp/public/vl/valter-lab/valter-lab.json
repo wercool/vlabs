@@ -15,11 +15,11 @@
     "advanceLighting1src":  true,
     "castShadows":
     [
-        "Lamp1"
+        "Lamp1", "doorCloserLever1", "doorCloserLever2"
     ],
     "receiveShadows":
     [
-        "floor", "frontWall", "rightWall", "leftWall"
+        "floor", "frontWall", "rearWall", "rightWall", "leftWall", "rearWallDoorBigPart"
     ],
     "castShadowsExecptions":
     [

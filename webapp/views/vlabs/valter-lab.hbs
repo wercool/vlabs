@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <title>Valter Lab</title>
     <link rel="stylesheet" type="text/css" href="/vl/css/important.css">
+    <link rel="stylesheet" href="/vl/js/jquery-ui/jquery-ui.css">
     <!-- Include this VLab specific styles -->
     <link rel="stylesheet" type="text/css" href="/vl/ph-mpd-fcm/css/ph-mpd-fcm.css">
 </head
 <body>
     <!-- Include jQuery -->
     <script src="/vl/js/jquery-1.8.2.min.js"></script>
+    <!-- Include jQuery UI-->
+    <script src="/vl/js/jquery-ui/jquery-ui.min.js"></script>
     <!-- Include jQuery Popup Overlay -->
     <script src="/vl/js/jquery.popupoverlay.js"></script>
     <!-- Tween.js -->
@@ -44,13 +47,33 @@
     <div id="canvases" style="display:hidden;"></canvas>
 
     <script>
+        var executeScriptDialog;
+        var ValterLabRef;
+
         $(document).ready(function() {
             $("#notificationPopup").popup({
                 opacity: 0.2
             });
 
-            new ValterLab("webGLContainer");
+            ValterLabRef = new ValterLab("webGLContainer");
+
+            executeScriptDialog = $("#execute-script-dialog").dialog({
+                autoOpen: false,
+                height: 400,
+                width: 350,
+                modal: true,
+                buttons: {
+                    "Execute": function(){
+                        console.log(ValterLabRef.Valter);
+                    },
+                    "Cancel": function() {
+                      executeScriptDialog.dialog("close");
+                    }
+                }
+            });
         });
+
     </script>
 </body>
+    <div id="execute-script-dialog" title="Execute Script">dialog</div>
 </html>
