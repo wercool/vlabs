@@ -24,7 +24,7 @@ function ValterLab(webGLContainer)
 
     var scenePostBuilt = function()
     {
-        self.initialCameraPos = new THREE.Vector3(0.0, 20.0, 15.0);
+        self.initialCameraPos = new THREE.Vector3(0.0, 22.0, 15.0);
 
         // PointerLockControls
         // self.pointerLockControlsEnable(self.initialCameraPos);
