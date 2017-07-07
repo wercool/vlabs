@@ -74,6 +74,8 @@ class Valter
             leftForearm: null,
             rightForearmRoll: null,
             leftForearmRoll: null,
+            rightHandGrasp: null,
+            leftHandGrasp: null,
         };
 
         this.navigating = false;
@@ -1496,8 +1498,7 @@ class Valter
                 valterRef.jointsTweens.rightForearm = new TWEEN.Tween(valterRef.joints);
                 valterRef.jointsTweens.rightForearm.to({rightForearm: valueRad}, 2000);
                 valterRef.jointsTweens.rightForearm.onUpdate(function(){
-                    valterRef.activeObjects["rightForearmTilt"].rotation.y = valterRef.joints.rightForearm;
-                    valterRef.rightForearmRotate();
+                    valterRef.rightForearmRotate(valterRef.joints.rightForearm);
                 });
                 valterRef.jointsTweens.rightForearm.start();
                 valterRef.scriptExecution();
@@ -1514,10 +1515,43 @@ class Valter
                 valterRef.jointsTweens.leftForearm = new TWEEN.Tween(valterRef.joints);
                 valterRef.jointsTweens.leftForearm.to({leftForearm: valueRad}, 2000);
                 valterRef.jointsTweens.leftForearm.onUpdate(function(){
-                    console.log(valterRef.joints.leftForearm);
-                    valterRef.leftForearmRotate().bind(valterRef);
+                    valterRef.leftForearmRotate(valterRef.joints.leftForearm);
                 });
                 valterRef.jointsTweens.leftForearm.start();
+                valterRef.scriptExecution();
+            break;
+            case "RightHandGrasp": // 0.0 ~ 1.0
+                if (valterRef.jointsTweens.rightHandGrasp != null)
+                {
+                    if (valterRef.jointsTweens.rightHandGrasp._isPlaying)
+                    {
+                        valterRef.jointsTweens.rightHandGrasp.stop();
+                    }
+                }
+                var value = scriptLineParts[1];
+                valterRef.jointsTweens.rightHandGrasp = new TWEEN.Tween(valterRef.handGrasping);
+                valterRef.jointsTweens.rightHandGrasp.to({right: value}, 350);
+                valterRef.jointsTweens.rightHandGrasp.onUpdate(function(){
+                    valterRef.rightHandGrasping(valterRef.handGrasping.right);
+                });
+                valterRef.jointsTweens.rightHandGrasp.start();
+                valterRef.scriptExecution();
+            break;
+            case "LefttHandGrasp": // 0.0 ~ 1.0
+                if (valterRef.jointsTweens.leftHandGrasp != null)
+                {
+                    if (valterRef.jointsTweens.leftHandGrasp._isPlaying)
+                    {
+                        valterRef.jointsTweens.leftHandGrasp.stop();
+                    }
+                }
+                var value = scriptLineParts[1];
+                valterRef.jointsTweens.leftHandGrasp = new TWEEN.Tween(valterRef.handGrasping);
+                valterRef.jointsTweens.leftHandGrasp.to({left: value}, 350);
+                valterRef.jointsTweens.leftHandGrasp.onUpdate(function(){
+                    valterRef.leftHandGrasping(valterRef.handGrasping.left);
+                });
+                valterRef.jointsTweens.leftHandGrasp.start();
                 valterRef.scriptExecution();
             break;
         }
