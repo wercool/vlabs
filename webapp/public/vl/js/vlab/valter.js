@@ -40,16 +40,43 @@ class Valter
             coveringsVisibility: true
         };
 
+        this.scriptLines = [];
+
         this.joints = {
+            baseYaw: 0.0,
+            bodyYaw: 0.0,
+            bodyTilt: 0.0,
+            headYaw: 0.0,
+            headTilt: 0.0,
             rightArm: 0.0,
             leftArm: 0.0,
+            rightLimb: 0.0,
+            leftLimb: 0.0,
             rightShoudler: 0.0,
             leftShoudler: 0.0,
             rightForearm: 0.0,
             leftForearm: 0.0,
             leftPalmYaw: 0.0,
-            rightPalmYaw: 0.0
+            rightPalmYaw: 0.0,
+            rightForearmRoll: 0.0,
+            leftForearmRoll: 0.0,
         };
+
+        this.jointsTweens = {
+            baseYaw: null,
+            bodyYaw: null,
+            bodyTilt: null,
+            headYaw: null,
+            headTilt: null,
+            rightLimb: null,
+            leftLimb: null,
+            rightForearm: null,
+            leftForearm: null,
+            rightForearmRoll: null,
+            leftForearmRoll: null,
+        };
+
+        this.navigating = false;
 
         this.delayedCalls = [];
 
@@ -539,14 +566,23 @@ class Valter
         this.initialValuesArray["leftForearmTilt"] = this.activeObjects["leftForearmTilt"].rotation.y;
         this.initialValuesArray["forearmActuatorLStock_rot_y"] = this.activeObjects["forearmActuatorLStock"].rotation.y;
 
-        this.joints.rightArm = this.initialValuesArray["rightArm_rot_y"];
+        this.joints.baseYaw = this.model.rotation.z;
+        this.joints.bodyYaw = this.activeObjects["valterBodyP1"].rotation.z;
+        this.joints.bodyTilt = this.activeObjects["bodyFrameAxisR"].rotation.x;
+        this.joints.headYaw = this.activeObjects["headYawFrame"].rotation.z;
+        this.joints.headTilt = this.activeObjects["headTiltFrame"].rotation.x;
         this.joints.leftArm = this.initialValuesArray["leftArm_rot_y"];
+        this.joints.rightArm = this.initialValuesArray["rightArm_rot_y"];
+        this.joints.rightLimb = this.activeObjects["armRightShoulderAxis"].rotation.x;
+        this.joints.leftLimb = this.activeObjects["armLeftShoulderAxis"].rotation.x;
         this.joints.rightShoudler = this.activeObjects["bodyFrameR"].rotation.z;
         this.joints.leftShoudler = this.activeObjects["bodyFrameL"].rotation.z;
         this.joints.rightForearm = this.activeObjects["rightForearmTilt"].rotation.y;
         this.joints.leftForearm = this.activeObjects["leftForearmTilt"].rotation.y;
         this.joints.leftPalmYaw = this.activeObjects["rightPalmFixtureP14"].rotation.y;
         this.joints.rightPalmYaw = this.activeObjects["leftPalmFixtureP14"].rotation.y;
+        this.joints.rightForearmRoll = this.activeObjects["forearmFrameRight"].rotation.y;
+        this.joints.leftForearmRoll = this.activeObjects["forearmFrameLeft"].rotation.y;
 
         this.eliza.reset();
 
@@ -1203,14 +1239,22 @@ class Valter
         this.sayEng(resultMessage);
     }
 
-    navigate()
+    navigate(position)
     {
+        if (typeof position !== "undefined")
+        {
+            this.manipulationObject.position.x = position.x;
+            this.manipulationObject.position.z = position.z;
+        }
+
+        this.navigating = true;
         var matrix = new THREE.Matrix4();
         matrix.extractRotation(this.model.matrix);
         var valterForwardDirection = new THREE.Vector3(0, 1, 0);
         valterForwardDirection.applyMatrix4(matrix);
 
         var manipulationObjectXZProjPos = this.manipulationObject.position.clone();
+        console.log("Navigate to: ", manipulationObjectXZProjPos.x, manipulationObjectXZProjPos.z);
         manipulationObjectXZProjPos.y = this.model.position.y;
         var valterToManipulationObjectDirectionVector = this.model.position.clone().sub(manipulationObjectXZProjPos.clone());
         valterToManipulationObjectDirectionVector.normalize().negate();
@@ -1222,11 +1266,260 @@ class Valter
         this.baseRotation(valterTargetZRotation);
     }
 
-    executeScript()
+    executeScript(scriptText)
     {
         if (typeof executeScriptDialog !== 'undefined')
         {
             executeScriptDialog.dialog("open");
+            if (typeof scriptText !== 'undefined')
+            {
+                if(scriptText != '')
+                {
+                    this.scriptLines = scriptText.split("\n");
+                    this.scriptExecution();
+                }
+            }
+        }
+    }
+
+    scriptExecution()
+    {
+        var valterRef = this;
+
+        if (valterRef.scriptLines.length == 0)
+        {
+            return;
+        }
+
+        console.log(valterRef.navigating);
+
+        if (valterRef.navigating)
+        {
+            setTimeout(valterRef.scriptExecution.bind(valterRef), 250);
+            return;
+        }
+
+        var scriptLine = valterRef.scriptLines.shift();
+
+        var scriptLineParts = scriptLine.split("_");
+
+        switch(scriptLineParts[0])
+        {
+            case "Delay":
+                var delay = scriptLineParts[1];
+                setTimeout(valterRef.scriptExecution.bind(valterRef), delay);
+                return;
+            break;
+            case "Navigate":
+                if (typeof scriptLineParts[1] !== undefined && typeof scriptLineParts[2] !== undefined)
+                {
+                    var navPosition = new THREE.Vector3(parseFloat(scriptLineParts[1]), 0, parseFloat(scriptLineParts[2]));
+                    valterRef.navigate(navPosition);
+                }
+                else
+                {
+                    valterRef.navigate();
+                }
+                setTimeout(valterRef.scriptExecution.bind(valterRef), 250);
+                return;
+            break;
+            case "BaseYaw": // -180 ~ 180 deg
+                if (valterRef.jointsTweens.baseYaw != null)
+                {
+                    if (valterRef.jointsTweens.baseYaw._isPlaying)
+                    {
+                        valterRef.jointsTweens.baseYaw.stop();
+                    }
+                }
+                var valueRad = scriptLineParts[1] * Math.PI / 180 - Math.PI;
+                valterRef.jointsTweens.baseYaw = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.baseYaw.easing(TWEEN.Easing.Cubic.InOut);
+                valterRef.jointsTweens.baseYaw.to({baseYaw: valueRad}, 8000 * 1 - Math.abs(180 - scriptLineParts[1]));
+                valterRef.jointsTweens.baseYaw.onUpdate(function(){
+                    valterRef.model.rotation.z = valterRef.joints.baseYaw;
+                    valterRef.baseRotation();
+                });
+                valterRef.jointsTweens.baseYaw.start();
+                valterRef.scriptExecution();
+            break;
+            case "BodyYaw": // -75 ~ 75 deg
+                if (valterRef.jointsTweens.bodyYaw != null)
+                {
+                    if (valterRef.jointsTweens.bodyYaw._isPlaying)
+                    {
+                        valterRef.jointsTweens.bodyYaw.stop();
+                    }
+                }
+                var valueRad = -1 * scriptLineParts[1] * Math.PI / 180;
+                valterRef.jointsTweens.bodyYaw = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.bodyYaw.easing(TWEEN.Easing.Cubic.InOut);
+                valterRef.jointsTweens.bodyYaw.to({bodyYaw: valueRad}, 8000 * (1 - Math.abs(valueRad)));
+                valterRef.jointsTweens.bodyYaw.onUpdate(function(){
+                    valterRef.activeObjects["valterBodyP1"].rotation.z = valterRef.joints.bodyYaw;
+                    valterRef.bodyToTorsoCableSleeveAnimation();
+                });
+                valterRef.jointsTweens.bodyYaw.start();
+                valterRef.scriptExecution();
+            break;
+            case "BodyTilt": // 0 ~ 30 deg
+                if (valterRef.jointsTweens.bodyTilt != null)
+                {
+                    if (valterRef.jointsTweens.bodyTilt._isPlaying)
+                    {
+                        valterRef.jointsTweens.bodyTilt.stop();
+                    }
+                }
+                var valueRad = -1 * scriptLineParts[1] * Math.PI / 180;
+                valterRef.jointsTweens.bodyTilt = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.bodyTilt.easing(TWEEN.Easing.Cubic.InOut);
+                valterRef.jointsTweens.bodyTilt.to({bodyTilt: valueRad}, 8000 * (1 - Math.abs(valueRad)));
+                valterRef.jointsTweens.bodyTilt.onUpdate(function(){
+                    valterRef.activeObjects["bodyFrameAxisR"].rotation.x = valterRef.joints.bodyTilt;
+                    valterRef.baseToBodyCableSleeveAnimation();
+                });
+                valterRef.jointsTweens.bodyTilt.start();
+                valterRef.scriptExecution();
+            break;
+            case "HeadYaw": // -85 ~ 85 deg
+                if (valterRef.jointsTweens.headYaw != null)
+                {
+                    if (valterRef.jointsTweens.headYaw._isPlaying)
+                    {
+                        valterRef.jointsTweens.headYaw.stop();
+                    }
+                }
+                var valueRad = scriptLineParts[1] * Math.PI / 180 - Math.PI;
+                valterRef.jointsTweens.headYaw = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.headYaw.to({headYaw: valueRad}, 2000);
+                valterRef.jointsTweens.headYaw.onUpdate(function(){
+                    valterRef.activeObjects["headYawFrame"].rotation.z = valterRef.joints.headYaw;
+                    valterRef.headToBodyCableSleeveAnimation();
+                });
+                valterRef.jointsTweens.headYaw.start();
+                valterRef.scriptExecution();
+            break;
+            case "HeadTilt": // 0 ~ 30 deg
+                if (valterRef.jointsTweens.headTilt != null)
+                {
+                    if (valterRef.jointsTweens.headTilt._isPlaying)
+                    {
+                        valterRef.jointsTweens.headTilt.stop();
+                    }
+                }
+                var valueRad = scriptLineParts[1] * Math.PI / 180 - 2.85;
+                valterRef.jointsTweens.headTilt = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.headTilt.to({headTilt: valueRad}, 2000);
+                valterRef.jointsTweens.headTilt.onUpdate(function(){
+                    valterRef.activeObjects["headTiltFrame"].rotation.x = valterRef.joints.headTilt;
+                    valterRef.headToBodyCableSleeveAnimation();
+                });
+                valterRef.jointsTweens.headTilt.start();
+                valterRef.scriptExecution();
+            break;
+            case "RightForearmRoll": // 0 ~ 180 deg
+                if (valterRef.jointsTweens.rightForearmRoll != null)
+                {
+                    if (valterRef.jointsTweens.rightForearmRoll._isPlaying)
+                    {
+                        valterRef.jointsTweens.rightForearmRoll.stop();
+                    }
+                }
+                var valueRad = -1 * scriptLineParts[1] * Math.PI / 180;
+                valterRef.jointsTweens.rightForearmRoll = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.rightForearmRoll.to({rightForearmRoll: valueRad}, 2000);
+                valterRef.jointsTweens.rightForearmRoll.onUpdate(function(){
+                    valterRef.activeObjects["forearmFrameRight"].rotation.y = valterRef.joints.rightForearmRoll;
+                });
+                valterRef.jointsTweens.rightForearmRoll.start();
+                valterRef.scriptExecution();
+            break;
+            case "LeftForearmRoll": // 0 ~ 180 deg
+                if (valterRef.jointsTweens.leftForearmRoll != null)
+                {
+                    if (valterRef.jointsTweens.leftForearmRoll._isPlaying)
+                    {
+                        valterRef.jointsTweens.leftForearmRoll.stop();
+                    }
+                }
+                var valueRad = -1 * scriptLineParts[1] * Math.PI / 180;
+                valterRef.jointsTweens.leftForearmRoll = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.leftForearmRoll.to({leftForearmRoll: valueRad}, 2000);
+                valterRef.jointsTweens.leftForearmRoll.onUpdate(function(){
+                    valterRef.activeObjects["forearmFrameLeft"].rotation.y = valterRef.joints.leftForearmRoll;
+                });
+                valterRef.jointsTweens.leftForearmRoll.start();
+                valterRef.scriptExecution();
+            break;
+            case "RightLimb": // -48 ~ 80 deg
+                if (valterRef.jointsTweens.rightLimb != null)
+                {
+                    if (valterRef.jointsTweens.rightLimb._isPlaying)
+                    {
+                        valterRef.jointsTweens.rightLimb.stop();
+                    }
+                }
+                var valueRad = scriptLineParts[1] * Math.PI / 180;
+                valterRef.jointsTweens.rightLimb = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.rightLimb.to({rightLimb: valueRad}, 2000);
+                valterRef.jointsTweens.rightLimb.onUpdate(function(){
+                    valterRef.activeObjects["armRightShoulderAxis"].rotation.x = valterRef.joints.rightLimb;
+                });
+                valterRef.jointsTweens.rightLimb.start();
+                valterRef.scriptExecution();
+            break;
+            case "LeftLimb": // -48 ~ 80 deg
+                if (valterRef.jointsTweens.leftLimb != null)
+                {
+                    if (valterRef.jointsTweens.leftLimb._isPlaying)
+                    {
+                        valterRef.jointsTweens.leftLimb.stop();
+                    }
+                }
+                var valueRad = scriptLineParts[1] * Math.PI / 180;
+                valterRef.jointsTweens.leftLimb = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.leftLimb.to({leftLimb: valueRad}, 2000);
+                valterRef.jointsTweens.leftLimb.onUpdate(function(){
+                    valterRef.activeObjects["armLeftShoulderAxis"].rotation.x = valterRef.joints.leftLimb;
+                });
+                valterRef.jointsTweens.leftLimb.start();
+                valterRef.scriptExecution();
+            break;
+            case "RightForearm": // -28 ~ 57 deg
+                if (valterRef.jointsTweens.rightForearm != null)
+                {
+                    if (valterRef.jointsTweens.rightForearm._isPlaying)
+                    {
+                        valterRef.jointsTweens.rightForearm.stop();
+                    }
+                }
+                var valueRad = scriptLineParts[1] * Math.PI / 180;
+                valterRef.jointsTweens.rightForearm = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.rightForearm.to({rightForearm: valueRad}, 2000);
+                valterRef.jointsTweens.rightForearm.onUpdate(function(){
+                    valterRef.activeObjects["rightForearmTilt"].rotation.y = valterRef.joints.rightForearm;
+                    valterRef.rightForearmRotate();
+                });
+                valterRef.jointsTweens.rightForearm.start();
+                valterRef.scriptExecution();
+            break;
+            case "LeftForearm": // -28 ~ 57 deg
+                if (valterRef.jointsTweens.leftForearm != null)
+                {
+                    if (valterRef.jointsTweens.leftForearm._isPlaying)
+                    {
+                        valterRef.jointsTweens.leftForearm.stop();
+                    }
+                }
+                var valueRad = scriptLineParts[1] * Math.PI / 180;
+                valterRef.jointsTweens.leftForearm = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.leftForearm.to({leftForearm: valueRad}, 2000);
+                valterRef.jointsTweens.leftForearm.onUpdate(function(){
+                    console.log(valterRef.joints.leftForearm);
+                    valterRef.leftForearmRotate().bind(valterRef);
+                });
+                valterRef.jointsTweens.leftForearm.start();
+                valterRef.scriptExecution();
+            break;
         }
     }
 
@@ -1286,6 +1579,7 @@ class Valter
         movementTween.onComplete(function(){
             //self.say("Цель достигнута");
             console.log("Goal reached");
+            self.navigating = false;
         });
         var prevBasePosXZ = Math.sqrt(self.model.position.clone().x * self.model.position.clone().x + self.model.position.clone().z * self.model.position.clone().z);
         movementTween.onUpdate(function(){

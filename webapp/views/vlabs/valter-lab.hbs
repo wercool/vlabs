@@ -61,10 +61,10 @@
                 autoOpen: false,
                 height: 400,
                 width: 350,
-                modal: true,
+                modal: false,
                 buttons: {
                     "Execute": function(){
-                        console.log(ValterLabRef.Valter);
+                        ValterLabRef.Valter.executeScript($("#scriptText").val());
                     },
                     "Cancel": function() {
                       executeScriptDialog.dialog("close");
@@ -75,5 +75,5 @@
 
     </script>
 </body>
-    <div id="execute-script-dialog" title="Execute Script">dialog</div>
+    <div id="execute-script-dialog" title="Execute Script"><textarea id="scriptText" style="width:95%; height:95%"></textarea></div>
 </html>

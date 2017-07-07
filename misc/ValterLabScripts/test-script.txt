@@ -1,0 +1,9 @@
+Navigate_-17.5_4.0
+Navigate_-17.5_-12.0
+Navigate_-13.0_-12.0
+HeadTilt_30
+HeadYaw_10
+BodyYaw_28
+LeftForearmRoll_90
+LeftLimb_36.1
+LeftForearm_29.2
