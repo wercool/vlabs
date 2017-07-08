@@ -15,12 +15,16 @@
     "advanceLighting1src":  true,
     "castShadows":
     [
-        "Lamp1", "doorCloserLever1", "doorCloserLever2", "tableTop", "tableLeg", "tableLeg.001", "tableLeg.002", "foamContainer"
+        "Lamp1", "doorCloserLever1", "doorCloserLever2", "tableTop", "tableLeg", "tableLeg_001", "tableLeg_002", "foamContainer",
+        "tableTop_001", "tableLeg_004", "tableLeg_003", "tableLeg_005", "tableLeg_006", "tableLeg_008", "tableLeg_007",
+        "dryWallSheet"
     ],
     "receiveShadows":
     [
         "floor", "frontWall", "rearWall", "rightWall", "leftWall", "rearWallDoorBigPart", "tableTop",
-        "tableStandDoor", "tableStand", "tableLeg", "tableLeg.001", "tableLeg.002"
+        "tableStandDoor", "tableStand", "tableLeg", "tableLeg_001", "tableLeg_002",
+        "tableTop_001", "tableLeg_004", "tableLeg_003", "tableLeg_005", "tableLeg_006", "tableLeg_008", "tableLeg_007",
+        "dryWallSheet"
     ],
     "castShadowsExecptions":
     [

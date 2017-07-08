@@ -898,8 +898,17 @@ function VLab(vlabNature)
         pointerLockControls = true;
     };
 
-    self.orbitControlsEnable = function(cameraPos, targetPos, initiOnly, test)
+    self.orbitControlsEnable = function(cameraPos, targetPos, initOnly, test, keepPoiterLockLastPosition)
     {
+        if(self.orbitControlsEnable.testMode == undefined)
+        {
+            self.orbitControlsEnable.testMode = test;
+        }
+        if(self.orbitControlsEnable.keepPoiterLockLastPosition == undefined)
+        {
+            self.orbitControlsEnable.keepPoiterLockLastPosition = keepPoiterLockLastPosition;
+        }
+
         if (initialOrbitControlTarget == undefined && targetPos != undefined)
         {
             initialOrbitControlTarget = targetPos;
@@ -909,47 +918,92 @@ function VLab(vlabNature)
         {
             initialOrbitControlCameraPos = cameraPos;
         }
-        if (initiOnly === true)
+        if (initOnly === true)
         {
             return;
         }
 
+        var lastCameraPositionInPointerLockMode = undefined;
         if (pointerLockControls === true)
         {
             pointerLockControls = false;
             self.getDefaultCamera().controls.dispose();
             self.getDefaultCamera().controls = null;
             self.getDefaultCamera().parent = null;
+            lastCameraPositionInPointerLockMode = self.getVlabScene().getObjectByName("pointerControlYawObject").position.clone();
             self.getVlabScene().remove(self.getVlabScene().getObjectByName("obstacleAvoidanceGizmo"));
             self.getVlabScene().remove(self.getVlabScene().getObjectByName("pointerControlPitchObject"));
             self.getVlabScene().remove(self.getVlabScene().getObjectByName("pointerControlYawObject"));
         }
 
-        self.setDefaultCameraPosition(initialOrbitControlCameraPos);
+        if (self.orbitControlsEnable.keepPoiterLockLastPosition === true)
+        {
+            if (typeof lastCameraPositionInPointerLockMode !== "undefined")
+            {
+                self.setDefaultCameraPosition(lastCameraPositionInPointerLockMode);
+            }
+            else
+            {
+                self.setDefaultCameraPosition(initialOrbitControlCameraPos);
+            }
+        }
+        else
+        {
+            self.setDefaultCameraPosition(initialOrbitControlCameraPos);
+        }
 
         self.getDefaultCamera().controls = new THREE.OrbitControls(self.getDefaultCamera(), self.getWebglContainerDOM(), self);
         if (initialOrbitControlTarget != undefined)
         {
-            self.getDefaultCamera().controls.setTarget(initialOrbitControlTarget);
+            if (self.orbitControlsEnable.keepPoiterLockLastPosition === true)
+            {
+                if (typeof lastCameraPositionInPointerLockMode !== "undefined")
+                {
+                    self.getDefaultCamera().controls.setTarget(lastCameraPositionInPointerLockMode);
+                }
+                else
+                {
+                    self.getDefaultCamera().controls.setTarget(initialOrbitControlTarget);
+                }
+            }
+            else
+            {
+                self.getDefaultCamera().controls.setTarget(initialOrbitControlTarget);
+            }
         }
 
         self.getDefaultCamera().controls.addEventListener("change", self.cameraControlsEvent);
         self.getDefaultCamera().controls.autoRotate = false;
         self.getDefaultCamera().controls.enableKeys = false;
         // test mode
-        if (test === true)
+        if (self.orbitControlsEnable.testMode === true)
         {
+            console.log("Camera Orbit Controls is in test mode");
             self.getDefaultCamera().controls.testMode = true;
         }
         // user mode
-        self.getDefaultCamera().controls.minDistance = 5;
-        self.getDefaultCamera().controls.maxDistance = 15;
-        self.getDefaultCamera().controls.maxPolarAngle = Math.PI/2 - 0.2;
-        self.getDefaultCamera().controls.minPolarAngle = 0.75;
-        self.getDefaultCamera().controls.maxXPan    = initialOrbitControlTarget.x + 3;
-        self.getDefaultCamera().controls.minXPan    = initialOrbitControlTarget.x - 3;
-        self.getDefaultCamera().controls.maxYPan    = initialOrbitControlTarget.y + 2;
-        self.getDefaultCamera().controls.minYPan    = initialOrbitControlTarget.y;
+        if (self.orbitControlsEnable.testMode === true)
+        {
+            self.getDefaultCamera().controls.minDistance = 0.5;
+            self.getDefaultCamera().controls.maxDistance = 50;
+            self.getDefaultCamera().controls.maxPolarAngle = Math.PI * 2;
+            self.getDefaultCamera().controls.minPolarAngle = 0.0;
+            self.getDefaultCamera().controls.maxXPan    = 50;
+            self.getDefaultCamera().controls.minXPan    = 0.5;
+            self.getDefaultCamera().controls.maxYPan    = 50;
+            self.getDefaultCamera().controls.minYPan    = 0.5;
+        }
+        else
+        {
+            self.getDefaultCamera().controls.minDistance = 5;
+            self.getDefaultCamera().controls.maxDistance = 15;
+            self.getDefaultCamera().controls.maxPolarAngle = Math.PI / 2 - 0.2;
+            self.getDefaultCamera().controls.minPolarAngle = 0.75;
+            self.getDefaultCamera().controls.maxXPan    = initialOrbitControlTarget.x + 3;
+            self.getDefaultCamera().controls.minXPan    = initialOrbitControlTarget.x - 3;
+            self.getDefaultCamera().controls.maxYPan    = initialOrbitControlTarget.y + 2;
+            self.getDefaultCamera().controls.minYPan    = initialOrbitControlTarget.y;
+        }
         self.getDefaultCamera().controls.update();
 
         orbitControls = true;

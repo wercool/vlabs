@@ -1329,6 +1329,10 @@ class Valter
                 THREE.SceneUtils.attach(valterRef.vlab.getVlabScene().getObjectByName(scriptLineParts[1]), valterRef.vlab.getVlabScene(), valterRef.vlab.getVlabScene().getObjectByName(scriptLineParts[2]));
                 valterRef.scriptExecution();
             break;
+            case "Detach":
+                THREE.SceneUtils.detach(valterRef.vlab.getVlabScene().getObjectByName(scriptLineParts[1]), valterRef.vlab.getVlabScene().getObjectByName(scriptLineParts[2]), valterRef.vlab.getVlabScene());
+                valterRef.scriptExecution();
+            break;
             case "BaseYaw": // -180 ~ 180 deg
                 if (valterRef.jointsTweens.baseYaw != null)
                 {

@@ -29,7 +29,7 @@ function ValterLab(webGLContainer)
         // PointerLockControls
         // self.pointerLockControlsEnable(self.initialCameraPos);
         // OrbitControls
-        self.orbitControlsEnable(self.initialCameraPos, origin, false, false);
+        self.orbitControlsEnable(self.initialCameraPos, origin, false, true, true);
 
         activeObjects["floor"] = self.getVlabScene().getObjectByName("floor");
         activeObjects["lampGlass"] = self.getVlabScene().getObjectByName("lampGlass");
