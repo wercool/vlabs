@@ -15,6 +15,7 @@ HeadYaw_25
 HeadTilt_35
 Delay_2750
 LefttHandGrasp_0.7
+Attach_foamContainer_rPalmPad.001
 Delay_1000
 LeftForearm_0
 HeadYaw_0
