@@ -52,8 +52,8 @@ class Valter
             leftArm: 0.0,
             rightLimb: 0.0,
             leftLimb: 0.0,
-            rightShoudler: 0.0,
-            leftShoudler: 0.0,
+            rightShoulder: 0.0,
+            leftShoulder: 0.0,
             rightForearm: 0.0,
             leftForearm: 0.0,
             leftPalmYaw: 0.0,
@@ -76,6 +76,10 @@ class Valter
             leftForearmRoll: null,
             rightHandGrasp: null,
             leftHandGrasp: null,
+            rightShoulder: null,
+            leftShoulder: null,
+            leftArm: null,
+            rightArm: null,
         };
 
         this.navigating = false;
@@ -428,8 +432,8 @@ class Valter
             GUIcontrols1.add(this.model.rotation, 'z', -6.28, 0.0).name("Base Yaw").step(0.01).listen().onChange(this.baseRotation.bind(this));;
             GUIcontrols1.add(this.activeObjects["valterBodyP1"].rotation, 'z', -1.57, 1.57).name("Body Yaw").step(0.01).onChange(this.baseToBodyCableSleeveAnimation.bind(this));
             GUIcontrols1.add(this.activeObjects["bodyFrameAxisR"].rotation, 'x', -0.8, 0.0).name("Body Tilt").step(0.01).onChange(this.bodyToTorsoCableSleeveAnimation.bind(this));
-            GUIcontrols1.add(this.joints, 'rightShoudler', 0.0, 1.0).name("Right Shoulder").step(0.01).onChange(this.rightShoulderRotate.bind(this));
-            GUIcontrols1.add(this.joints, 'leftShoudler', -1.0, 0.0).name("Left Shoulder").step(0.01).onChange(this.leftShoulderRotate.bind(this));;
+            GUIcontrols1.add(this.joints, 'rightShoulder', 0.0, 1.0).name("Right Shoulder").step(0.01).onChange(this.rightShoulderRotate.bind(this));
+            GUIcontrols1.add(this.joints, 'leftShoulder', -1.0, 0.0).name("Left Shoulder").step(0.01).onChange(this.leftShoulderRotate.bind(this));;
             GUIcontrols1.add(this.activeObjects["armRightShoulderAxis"].rotation, 'x', -0.85, 1.4).name("Right Limb").step(0.01);
             GUIcontrols1.add(this.activeObjects["armLeftShoulderAxis"].rotation, 'x', -0.85, 1.4).name("Left Limb").step(0.01);
             GUIcontrols1.add(this.joints, 'rightArm', -2.57, -1.22).name("Right Arm").step(0.01).onChange(this.rightArmRotate.bind(this));
@@ -578,8 +582,8 @@ class Valter
         this.joints.rightArm = this.initialValuesArray["rightArm_rot_y"];
         this.joints.rightLimb = this.activeObjects["armRightShoulderAxis"].rotation.x;
         this.joints.leftLimb = this.activeObjects["armLeftShoulderAxis"].rotation.x;
-        this.joints.rightShoudler = this.activeObjects["bodyFrameR"].rotation.z;
-        this.joints.leftShoudler = this.activeObjects["bodyFrameL"].rotation.z;
+        this.joints.rightShoulder = this.activeObjects["bodyFrameR"].rotation.z;
+        this.joints.leftShoulder = this.activeObjects["bodyFrameL"].rotation.z;
         this.joints.rightForearm = this.activeObjects["rightForearmTilt"].rotation.y;
         this.joints.leftForearm = this.activeObjects["leftForearmTilt"].rotation.y;
         this.joints.leftPalmYaw = this.activeObjects["rightPalmFixtureP14"].rotation.y;
@@ -1294,7 +1298,7 @@ class Valter
             return;
         }
 
-        console.log(valterRef.navigating);
+        console.log("navigating = ", valterRef.navigating);
 
         if (valterRef.navigating)
         {
@@ -1561,6 +1565,74 @@ class Valter
                     valterRef.leftHandGrasping(valterRef.handGrasping.left);
                 });
                 valterRef.jointsTweens.leftHandGrasp.start();
+                valterRef.scriptExecution();
+            break;
+            case "RightShoulder":
+                if (valterRef.jointsTweens.rightShoulder != null)
+                {
+                    if (valterRef.jointsTweens.rightShoulder._isPlaying)
+                    {
+                        valterRef.jointsTweens.rightShoulder.stop();
+                    }
+                }
+                var valueRad = scriptLineParts[1] * Math.PI / 180;
+                valterRef.jointsTweens.rightShoulder = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.rightShoulder.to({rightShoulder: valueRad}, 2000);
+                valterRef.jointsTweens.rightShoulder.onUpdate(function(){
+                    valterRef.rightShoulderRotate(valterRef.joints.rightShoulder);
+                });
+                valterRef.jointsTweens.rightShoulder.start();
+                valterRef.scriptExecution();
+            break;
+            case "LeftShoulder":
+                if (valterRef.jointsTweens.leftShoulder != null)
+                {
+                    if (valterRef.jointsTweens.leftShoulder._isPlaying)
+                    {
+                        valterRef.jointsTweens.leftShoulder.stop();
+                    }
+                }
+                var valueRad = -1 * scriptLineParts[1] * Math.PI / 180;
+                valterRef.jointsTweens.leftShoulder = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.leftShoulder.to({leftShoulder: valueRad}, 2000);
+                valterRef.jointsTweens.leftShoulder.onUpdate(function(){
+                    valterRef.leftShoulderRotate(valterRef.joints.leftShoulder);
+                });
+                valterRef.jointsTweens.leftShoulder.start();
+                valterRef.scriptExecution();
+            break;
+            case "RightArm":
+                if (valterRef.jointsTweens.rightArm != null)
+                {
+                    if (valterRef.jointsTweens.rightArm._isPlaying)
+                    {
+                        valterRef.jointsTweens.rightArm.stop();
+                    }
+                }
+                var valueRad = -1.22 - scriptLineParts[1] * Math.PI / 180;
+                valterRef.jointsTweens.rightArm = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.rightArm.to({rightArm: valueRad}, 2000);
+                valterRef.jointsTweens.rightArm.onUpdate(function(){
+                    valterRef.rightArmRotate(valterRef.joints.rightArm);
+                });
+                valterRef.jointsTweens.rightArm.start();
+                valterRef.scriptExecution();
+            break;
+            case "LeftArm":
+                if (valterRef.jointsTweens.leftArm != null)
+                {
+                    if (valterRef.jointsTweens.leftArm._isPlaying)
+                    {
+                        valterRef.jointsTweens.leftArm.stop();
+                    }
+                }
+                var valueRad = -1.22 - scriptLineParts[1] * Math.PI / 180;
+                valterRef.jointsTweens.leftArm = new TWEEN.Tween(valterRef.joints);
+                valterRef.jointsTweens.leftArm.to({leftArm: valueRad}, 2000);
+                valterRef.jointsTweens.leftArm.onUpdate(function(){
+                    valterRef.leftArmRotate(valterRef.joints.leftArm);
+                });
+                valterRef.jointsTweens.leftArm.start();
                 valterRef.scriptExecution();
             break;
         }
