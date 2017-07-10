@@ -48,4 +48,13 @@ Navigate_0.0_8.0
 RightForearm_0.0
 LeftLimb_0
 RightForearmRoll_90
-Navigate_0.0_12.0
+
+== Take screwdriver with left hand ==
+Navigate_0.32_2.345
+BodyTilt_8.59
+----------------LeftShoulder_52.71
+LeftLimb_40.68
+----------------LeftArm_6.25
+LeftForearm_40.1
+LeftForearmRoll_76.77
+LefttHandGrasp_0.7

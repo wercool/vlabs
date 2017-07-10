@@ -381,6 +381,7 @@ class Valter
                                                 control.setMode("translate");
                                             }
                                         }
+                                        console.log("Position: ", this.model.position);
                                     }.bind(this));
             control.attach(this.model);
             control.setSize(1.0);

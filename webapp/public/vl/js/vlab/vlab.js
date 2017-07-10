@@ -449,6 +449,14 @@ function VLab(vlabNature)
                         }
                     }
                 }
+                //manage double side
+                if (typeof self.vlabNature.doubleSide !== "undefined")
+                {
+                    if (self.vlabNature.doubleSide.indexOf(object.name) > -1)
+                    {
+                        object.material.side = THREE.DoubleSide;
+                    }
+                }
                 // add interactors to objects
                 if (self.vlabNature.interactors != undefined)
                 {
