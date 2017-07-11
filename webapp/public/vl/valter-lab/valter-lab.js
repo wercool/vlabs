@@ -113,7 +113,7 @@ function ValterLab(webGLContainer)
         self.getVlabScene().add(lensFlare);
 
         // Valter
-        self.Valter = new Valter(self, new THREE.Vector3(0, 2.57, 5), true);
+        self.Valter = new Valter(self, new THREE.Vector3(0, 2.27, 5), true);
 
         // this VLab constants
 
@@ -125,6 +125,7 @@ function ValterLab(webGLContainer)
         self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("rearWall"));
         self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("rearWallDoorBigPart"));
         self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("rearWallDoorSmallPart"));
+        self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("standPanel"));
 
         // actually start VLab
         self.setPhysijsScenePause(false);

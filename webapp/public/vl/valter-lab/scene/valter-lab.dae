@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.78.0 commit date:2016-10-24, commit time:12:20, hash:e8299c8</authoring_tool>
     </contributor>
-    <created>2017-07-11T00:09:44</created>
-    <modified>2017-07-11T00:09:44</modified>
+    <created>2017-07-11T16:49:40</created>
+    <modified>2017-07-11T16:49:40</modified>
     <unit name="decimeter" meter="0.1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -4085,9 +4085,9 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="metalProfile_001" name="metalProfile_001" type="NODE">
+      <node id="metalProfile1" name="metalProfile1" type="NODE">
         <matrix sid="transform">-0.9988506 1.9319e-6 -0.04793188 -26.66166 -1.92898e-6 -1 -1.07278e-7 14.63941 -0.04793188 -1.46956e-8 0.9988506 0 0 0 0 1</matrix>
-        <instance_geometry url="#Plane_018-mesh" name="metalProfile_001">
+        <instance_geometry url="#Plane_018-mesh" name="metalProfile1">
           <bind_material>
             <technique_common>
               <instance_material symbol="metalProfileMaterial_bumpScale_0_01-material" target="#metalProfileMaterial_bumpScale_0_01-material">
@@ -4097,9 +4097,9 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="metalProfile_002" name="metalProfile_002" type="NODE">
+      <node id="metalProfile2" name="metalProfile2" type="NODE">
         <matrix sid="transform">-0.99655 1.9302e-6 -0.08299417 -25.66411 -1.92454e-6 -1 -1.48241e-7 15.89277 -0.08299417 1.19953e-8 0.99655 0 0 0 0 1</matrix>
-        <instance_geometry url="#Plane_019-mesh" name="metalProfile_002">
+        <instance_geometry url="#Plane_019-mesh" name="metalProfile2">
           <bind_material>
             <technique_common>
               <instance_material symbol="metalProfileMaterial_bumpScale_0_01-material" target="#metalProfileMaterial_bumpScale_0_01-material">
@@ -4217,9 +4217,9 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="woodenBar_001" name="woodenBar_001" type="NODE">
+      <node id="woodenBar_h_001" name="woodenBar_h_001" type="NODE">
         <matrix sid="transform">7.54979e-8 4.88762e-7 1 21.04056 -1 4.37114e-8 7.54979e-8 -7.694804 -4.37114e-8 -1 4.88762e-7 23.59604 0 0 0 1</matrix>
-        <instance_geometry url="#Cube_004-mesh" name="woodenBar_001">
+        <instance_geometry url="#Cube_004-mesh" name="woodenBar_h_001">
           <bind_material>
             <technique_common>
               <instance_material symbol="woodenBarMaterial-material" target="#woodenBarMaterial-material">
@@ -4229,9 +4229,9 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="woodenBar_002" name="woodenBar_002" type="NODE">
+      <node id="woodenBar_h_002" name="woodenBar_h_002" type="NODE">
         <matrix sid="transform">7.54979e-8 4.88762e-7 1 21.04056 -1 4.37114e-8 7.54979e-8 -7.694804 -4.37114e-8 -1 4.88762e-7 17.13181 0 0 0 1</matrix>
-        <instance_geometry url="#Cube_015-mesh" name="woodenBar_002">
+        <instance_geometry url="#Cube_015-mesh" name="woodenBar_h_002">
           <bind_material>
             <technique_common>
               <instance_material symbol="woodenBarMaterial-material" target="#woodenBarMaterial-material">
@@ -4241,9 +4241,9 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="woodenBar_003" name="woodenBar_003" type="NODE">
+      <node id="woodenBar_h_003" name="woodenBar_h_003" type="NODE">
         <matrix sid="transform">7.54979e-8 4.88762e-7 1 21.04056 -1 4.37114e-8 7.54979e-8 -7.694804 -4.37114e-8 -1 4.88762e-7 10.73563 0 0 0 1</matrix>
-        <instance_geometry url="#Cube_016-mesh" name="woodenBar_003">
+        <instance_geometry url="#Cube_016-mesh" name="woodenBar_h_003">
           <bind_material>
             <technique_common>
               <instance_material symbol="woodenBarMaterial-material" target="#woodenBarMaterial-material">
@@ -4253,9 +4253,9 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="woodenBar_004" name="woodenBar_004" type="NODE">
+      <node id="woodenBar_h_004" name="woodenBar_h_004" type="NODE">
         <matrix sid="transform">7.54979e-8 4.88762e-7 1 21.04056 -1 4.37114e-8 7.54979e-8 -7.694804 -4.37114e-8 -1 4.88762e-7 4.271401 0 0 0 1</matrix>
-        <instance_geometry url="#Cube_017-mesh" name="woodenBar_004">
+        <instance_geometry url="#Cube_017-mesh" name="woodenBar_h_004">
           <bind_material>
             <technique_common>
               <instance_material symbol="woodenBarMaterial-material" target="#woodenBarMaterial-material">

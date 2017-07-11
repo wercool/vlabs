@@ -1273,6 +1273,97 @@ class Valter
         this.baseRotation(valterTargetZRotation);
     }
 
+    baseRotation(valterTargetZRotation)
+    {
+        var self = this;
+        var speed = Math.abs(this.model.rotation.z - valterTargetZRotation);
+        var rotationTween = new TWEEN.Tween(this.model.rotation);
+        rotationTween.easing(TWEEN.Easing.Cubic.InOut);
+        rotationTween.to({z: valterTargetZRotation}, 4000 * speed);
+        rotationTween.onComplete(function(){
+            self.baseMovement();
+        });
+        var prevBaseRotZ = self.model.rotation.clone().z;
+        rotationTween.onUpdate(function(){
+            var curBaseRotZ = self.model.rotation.z;
+            var rotVelAcc = (prevBaseRotZ - curBaseRotZ) * 3.0;
+            self.activeObjects["rightWheelDisk"].rotateZ(rotVelAcc);
+            self.activeObjects["leftWheelDisk"].rotateZ(rotVelAcc);
+            prevBaseRotZ = self.model.rotation.clone().z;
+            var speed = Math.abs(rotVelAcc / 5);
+            var maxRot = 120 * Math.PI / 180;
+            if (Math.abs(self.activeObjects["smallWheelArmatureRF"].rotation.z) < maxRot * (rotVelAcc > 0 ? 1 : 0.5))
+            {
+                self.activeObjects["smallWheelArmatureRF"].rotation.z += (rotVelAcc > 0 ? -speed : speed);
+            }
+            if (Math.abs(self.activeObjects["smallWheelArmatureLF"].rotation.z) < maxRot * (rotVelAcc > 0 ? 0.5 : 1))
+            {
+                self.activeObjects["smallWheelArmatureLF"].rotation.z += (rotVelAcc > 0 ? -speed : speed);
+            }
+            if (Math.abs(self.activeObjects["smallWheelArmatureRR"].rotation.z) < maxRot * (rotVelAcc > 0 ? 2 : 0.5))
+            {
+                self.activeObjects["smallWheelArmatureRR"].rotation.z += (rotVelAcc > 0 ? speed : -speed) * 1.5;
+            }
+            if (Math.abs(self.activeObjects["smallWheelArmatureLR"].rotation.z) < maxRot * (rotVelAcc > 0 ? 0.5 : 1))
+            {
+                self.activeObjects["smallWheelArmatureLR"].rotation.z += (rotVelAcc > 0 ? speed : -speed) * 1.5;
+            }
+            self.activeObjects["smallWheelRF"].rotateZ(rotVelAcc / 6);
+            self.activeObjects["smallWheelLF"].rotateZ(rotVelAcc / 6);
+            self.activeObjects["smallWheelRR"].rotateZ(rotVelAcc / 6);
+            self.activeObjects["smallWheelLR"].rotateZ(rotVelAcc / 6);
+        });
+        rotationTween.start();
+    }
+
+    baseMovement()
+    {
+        var self = this;
+        var manipulationObjectXZProjPos = this.manipulationObject.position.clone();
+        manipulationObjectXZProjPos.y = this.model.position.y;
+        var distance = this.model.position.clone().sub(manipulationObjectXZProjPos.clone()).length();
+
+        var movementTween = new TWEEN.Tween(this.model.position);
+        movementTween.easing(TWEEN.Easing.Cubic.InOut);
+        movementTween.to(manipulationObjectXZProjPos, 500 * (distance > 1 ? distance : 1));
+        movementTween.onComplete(function(){
+            //self.say("Цель достигнута");
+            console.log("Goal reached");
+            self.navigating = false;
+        });
+        var prevBasePosXZ = Math.sqrt(self.model.position.clone().x * self.model.position.clone().x + self.model.position.clone().z * self.model.position.clone().z);
+        movementTween.onUpdate(function(){
+            var curBasePosXZ = Math.sqrt(self.model.position.x * self.model.position.x + self.model.position.z * self.model.position.z);
+            var movVelAcc = Math.abs(curBasePosXZ - prevBasePosXZ) * 0.85;
+            prevBasePosXZ = Math.sqrt(self.model.position.clone().x * self.model.position.clone().x + self.model.position.clone().z * self.model.position.clone().z);
+            self.activeObjects["rightWheelDisk"].rotateZ(-movVelAcc);
+            self.activeObjects["leftWheelDisk"].rotateZ(movVelAcc);
+
+            var speed = Math.abs(movVelAcc / 2);
+            if (Math.abs(self.activeObjects["smallWheelArmatureRF"].rotation.z) > 0)
+            {
+                self.activeObjects["smallWheelArmatureRF"].rotation.z += (self.activeObjects["smallWheelArmatureRF"].rotation.z > 0 ? -speed : speed)
+            }
+            if (Math.abs(self.activeObjects["smallWheelArmatureLF"].rotation.z) > 0)
+            {
+                self.activeObjects["smallWheelArmatureLF"].rotation.z += (self.activeObjects["smallWheelArmatureLF"].rotation.z > 0 ? -speed : speed)
+            }
+            if (Math.abs(self.activeObjects["smallWheelArmatureRR"].rotation.z) > 0)
+            {
+                self.activeObjects["smallWheelArmatureRR"].rotation.z += (self.activeObjects["smallWheelArmatureRR"].rotation.z > 0 ? -speed : speed)
+            }
+            if (Math.abs(self.activeObjects["smallWheelArmatureLR"].rotation.z) > 0)
+            {
+                self.activeObjects["smallWheelArmatureLR"].rotation.z += (self.activeObjects["smallWheelArmatureLR"].rotation.z > 0 ? -speed : speed)
+            }
+            self.activeObjects["smallWheelLR"].rotateZ(movVelAcc / 6);
+            self.activeObjects["smallWheelRR"].rotateZ(movVelAcc / 6);
+            self.activeObjects["smallWheelLF"].rotateZ(movVelAcc / 6);
+            self.activeObjects["smallWheelRF"].rotateZ(movVelAcc / 6);
+        });
+        movementTween.start();
+    }
+
     executeScript(scriptText)
     {
         if (typeof executeScriptDialog !== 'undefined')
@@ -1310,6 +1401,12 @@ class Valter
 
         var scriptLineParts = scriptLine.split("_");
 
+        if (scriptLineParts[0][0] == '#')
+        {
+            valterRef.scriptExecution();
+            return;
+        }
+
         switch(scriptLineParts[0])
         {
             case "Delay":
@@ -1326,6 +1423,18 @@ class Valter
                 else
                 {
                     valterRef.navigate();
+                }
+                setTimeout(valterRef.scriptExecution.bind(valterRef), 250);
+                return;
+            break;
+            case "BaseTranslate":
+                if (typeof scriptLineParts[1] !== undefined && typeof scriptLineParts[2] !== undefined)
+                {
+                    var navPosition = new THREE.Vector3(parseFloat(scriptLineParts[1]), 0, parseFloat(scriptLineParts[2]));
+                    this.manipulationObject.position.x = navPosition.x;
+                    this.manipulationObject.position.z = navPosition.z;
+                    valterRef.navigating = true;
+                    valterRef.baseMovement();
                 }
                 setTimeout(valterRef.scriptExecution.bind(valterRef), 250);
                 return;
@@ -1371,7 +1480,7 @@ class Valter
                 valterRef.jointsTweens.bodyYaw.to({bodyYaw: valueRad}, 8000 * (1 - Math.abs(valueRad)));
                 valterRef.jointsTweens.bodyYaw.onUpdate(function(){
                     valterRef.activeObjects["valterBodyP1"].rotation.z = valterRef.joints.bodyYaw;
-                    valterRef.bodyToTorsoCableSleeveAnimation();
+                    valterRef.baseToBodyCableSleeveAnimation();
                 });
                 valterRef.jointsTweens.bodyYaw.start();
                 valterRef.scriptExecution();
@@ -1390,7 +1499,8 @@ class Valter
                 valterRef.jointsTweens.bodyTilt.to({bodyTilt: valueRad}, 8000 * (1 - Math.abs(valueRad)));
                 valterRef.jointsTweens.bodyTilt.onUpdate(function(){
                     valterRef.activeObjects["bodyFrameAxisR"].rotation.x = valterRef.joints.bodyTilt;
-                    valterRef.baseToBodyCableSleeveAnimation();
+                    valterRef.bodyToTorsoCableSleeveAnimation();
+                    // console.log("Body Tilt", valterRef.activeObjects["bodyFrameAxisR"].rotation.x);
                 });
                 valterRef.jointsTweens.bodyTilt.start();
                 valterRef.scriptExecution();
@@ -1636,96 +1746,5 @@ class Valter
                 valterRef.scriptExecution();
             break;
         }
-    }
-
-    baseRotation(valterTargetZRotation)
-    {
-        var self = this;
-        var speed = Math.abs(this.model.rotation.z - valterTargetZRotation);
-        var rotationTween = new TWEEN.Tween(this.model.rotation);
-        rotationTween.easing(TWEEN.Easing.Cubic.InOut);
-        rotationTween.to({z: valterTargetZRotation}, 4000 * speed);
-        rotationTween.onComplete(function(){
-            self.baseMovement();
-        });
-        var prevBaseRotZ = self.model.rotation.clone().z;
-        rotationTween.onUpdate(function(){
-            var curBaseRotZ = self.model.rotation.z;
-            var rotVelAcc = (prevBaseRotZ - curBaseRotZ) * 3.0;
-            self.activeObjects["rightWheelDisk"].rotateZ(rotVelAcc);
-            self.activeObjects["leftWheelDisk"].rotateZ(rotVelAcc);
-            prevBaseRotZ = self.model.rotation.clone().z;
-            var speed = Math.abs(rotVelAcc / 5);
-            var maxRot = 120 * Math.PI / 180;
-            if (Math.abs(self.activeObjects["smallWheelArmatureRF"].rotation.z) < maxRot * (rotVelAcc > 0 ? 1 : 0.5))
-            {
-                self.activeObjects["smallWheelArmatureRF"].rotation.z += (rotVelAcc > 0 ? -speed : speed);
-            }
-            if (Math.abs(self.activeObjects["smallWheelArmatureLF"].rotation.z) < maxRot * (rotVelAcc > 0 ? 0.5 : 1))
-            {
-                self.activeObjects["smallWheelArmatureLF"].rotation.z += (rotVelAcc > 0 ? -speed : speed);
-            }
-            if (Math.abs(self.activeObjects["smallWheelArmatureRR"].rotation.z) < maxRot * (rotVelAcc > 0 ? 2 : 0.5))
-            {
-                self.activeObjects["smallWheelArmatureRR"].rotation.z += (rotVelAcc > 0 ? speed : -speed) * 1.5;
-            }
-            if (Math.abs(self.activeObjects["smallWheelArmatureLR"].rotation.z) < maxRot * (rotVelAcc > 0 ? 0.5 : 1))
-            {
-                self.activeObjects["smallWheelArmatureLR"].rotation.z += (rotVelAcc > 0 ? speed : -speed) * 1.5;
-            }
-            self.activeObjects["smallWheelRF"].rotateZ(rotVelAcc / 6);
-            self.activeObjects["smallWheelLF"].rotateZ(rotVelAcc / 6);
-            self.activeObjects["smallWheelRR"].rotateZ(rotVelAcc / 6);
-            self.activeObjects["smallWheelLR"].rotateZ(rotVelAcc / 6);
-        });
-        rotationTween.start();
-    }
-
-    baseMovement()
-    {
-        var self = this;
-        var manipulationObjectXZProjPos = this.manipulationObject.position.clone();
-        manipulationObjectXZProjPos.y = this.model.position.y;
-        var distance = this.model.position.clone().sub(manipulationObjectXZProjPos.clone()).length();
-
-        var movementTween = new TWEEN.Tween(this.model.position);
-        movementTween.easing(TWEEN.Easing.Cubic.InOut);
-        movementTween.to(manipulationObjectXZProjPos, 500 * (distance > 1 ? distance : 1));
-        movementTween.onComplete(function(){
-            //self.say("Цель достигнута");
-            console.log("Goal reached");
-            self.navigating = false;
-        });
-        var prevBasePosXZ = Math.sqrt(self.model.position.clone().x * self.model.position.clone().x + self.model.position.clone().z * self.model.position.clone().z);
-        movementTween.onUpdate(function(){
-            var curBasePosXZ = Math.sqrt(self.model.position.x * self.model.position.x + self.model.position.z * self.model.position.z);
-            var movVelAcc = Math.abs(curBasePosXZ - prevBasePosXZ) * 0.85;
-            prevBasePosXZ = Math.sqrt(self.model.position.clone().x * self.model.position.clone().x + self.model.position.clone().z * self.model.position.clone().z);
-            self.activeObjects["rightWheelDisk"].rotateZ(-movVelAcc);
-            self.activeObjects["leftWheelDisk"].rotateZ(movVelAcc);
-
-            var speed = Math.abs(movVelAcc / 2);
-            if (Math.abs(self.activeObjects["smallWheelArmatureRF"].rotation.z) > 0)
-            {
-                self.activeObjects["smallWheelArmatureRF"].rotation.z += (self.activeObjects["smallWheelArmatureRF"].rotation.z > 0 ? -speed : speed)
-            }
-            if (Math.abs(self.activeObjects["smallWheelArmatureLF"].rotation.z) > 0)
-            {
-                self.activeObjects["smallWheelArmatureLF"].rotation.z += (self.activeObjects["smallWheelArmatureLF"].rotation.z > 0 ? -speed : speed)
-            }
-            if (Math.abs(self.activeObjects["smallWheelArmatureRR"].rotation.z) > 0)
-            {
-                self.activeObjects["smallWheelArmatureRR"].rotation.z += (self.activeObjects["smallWheelArmatureRR"].rotation.z > 0 ? -speed : speed)
-            }
-            if (Math.abs(self.activeObjects["smallWheelArmatureLR"].rotation.z) > 0)
-            {
-                self.activeObjects["smallWheelArmatureLR"].rotation.z += (self.activeObjects["smallWheelArmatureLR"].rotation.z > 0 ? -speed : speed)
-            }
-            self.activeObjects["smallWheelLR"].rotateZ(movVelAcc / 6);
-            self.activeObjects["smallWheelRR"].rotateZ(movVelAcc / 6);
-            self.activeObjects["smallWheelLF"].rotateZ(movVelAcc / 6);
-            self.activeObjects["smallWheelRF"].rotateZ(movVelAcc / 6);
-        });
-        movementTween.start();
     }
 }
