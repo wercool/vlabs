@@ -1428,7 +1428,7 @@ class Valter
                 return;
             break;
             case "BaseTranslate":
-                if (typeof scriptLineParts[1] !== undefined && typeof scriptLineParts[2] !== undefined)
+                if (typeof scriptLineParts[1] !== "undefined" && typeof scriptLineParts[2] !== "undefined")
                 {
                     var navPosition = new THREE.Vector3(parseFloat(scriptLineParts[1]), 0, parseFloat(scriptLineParts[2]));
                     this.manipulationObject.position.x = navPosition.x;
@@ -1436,8 +1436,19 @@ class Valter
                     valterRef.navigating = true;
                     valterRef.baseMovement();
                 }
-                setTimeout(valterRef.scriptExecution.bind(valterRef), 250);
-                return;
+                if (typeof scriptLineParts[3] != "undefined")
+                {
+                    if (scriptLineParts[3] == "C") //continue script
+                    {
+                        valterRef.navigating = false;
+                        valterRef.scriptExecution();
+                    }
+                }
+                else
+                {
+                    setTimeout(valterRef.scriptExecution.bind(valterRef), 250);
+                    return;
+                }
             break;
             case "Attach":
                 THREE.SceneUtils.attach(valterRef.vlab.getVlabScene().getObjectByName(scriptLineParts[1]), valterRef.vlab.getVlabScene(), valterRef.vlab.getVlabScene().getObjectByName(scriptLineParts[2]));
@@ -1743,6 +1754,47 @@ class Valter
                     valterRef.leftArmRotate(valterRef.joints.leftArm);
                 });
                 valterRef.jointsTweens.leftArm.start();
+                valterRef.scriptExecution();
+            break;
+            case "ObjRot":
+                var rotValueRad = parseFloat(scriptLineParts[3]);
+                var objRotation = valterRef.vlab.getVlabScene().getObjectByName(scriptLineParts[1]).rotation;
+                var objectRotTween = new TWEEN.Tween(objRotation);
+                var axis = scriptLineParts[2];
+                switch (axis)
+                {
+                    case "x":
+                        objectRotTween.to({x: rotValueRad}, parseInt(scriptLineParts[4]));
+                    break;
+                    case "y":
+                        objectRotTween.to({y: rotValueRad}, parseInt(scriptLineParts[4]));
+                    break;
+                    case "z":
+                        objectRotTween.to({z: rotValueRad}, parseInt(scriptLineParts[4]));
+                    break;
+                }
+                objectRotTween.start();
+                valterRef.scriptExecution();
+            break;
+            case "ObjTranslate":
+                var translateValue = parseFloat(scriptLineParts[3]);
+                var objPosition = valterRef.vlab.getVlabScene().getObjectByName(scriptLineParts[1]).position;
+                console.log(objPosition);
+                var objPosTween = new TWEEN.Tween(objPosition);
+                var axis = scriptLineParts[2];
+                switch (axis)
+                {
+                    case "x":
+                        objPosTween.to({x: translateValue}, parseInt(scriptLineParts[4]));
+                    break;
+                    case "y":
+                        objPosTween.to({y: translateValue}, parseInt(scriptLineParts[4]));
+                    break;
+                    case "z":
+                        objPosTween.to({z: translateValue}, parseInt(scriptLineParts[4]));
+                    break;
+                }
+                objPosTween.start();
                 valterRef.scriptExecution();
             break;
         }

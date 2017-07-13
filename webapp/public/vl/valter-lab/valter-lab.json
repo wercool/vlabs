@@ -17,14 +17,14 @@
     [
         "Lamp1", "doorCloserLever1", "doorCloserLever2", "tableTop", "tableLeg", "tableLeg_001", "tableLeg_002", "foamContainer",
         "tableTop_001", "tableLeg_004", "tableLeg_003", "tableLeg_005", "tableLeg_006", "tableLeg_008", "tableLeg_007",
-        "dryWallSheet", "metalProfile",  "metalProfile1", "metalProfile2", "standPanel", "screwDriver"
+        "dryWallSheet", "dryWallSheet1", "metalProfile",  "metalProfile1", "metalProfile2", "standPanel", "screwDriver"
     ],
     "receiveShadows":
     [
         "floor", "frontWall", "rearWall", "rightWall", "leftWall", "rearWallDoorBigPart", "tableTop",
         "tableStandDoor", "tableStand", "tableLeg", "tableLeg_001", "tableLeg_002",
         "tableTop_001", "tableLeg_004", "tableLeg_003", "tableLeg_005", "tableLeg_006", "tableLeg_008", "tableLeg_007",
-        "dryWallSheet", "metalProfile",  "metalProfile_001", "metalProfile_002", "standPanel",
+        "dryWallSheet", "dryWallSheet1", "metalProfile",  "metalProfile_001", "metalProfile_002", "standPanel",
         "standBase", "concreteBlock", "concreteBlock_001", "woodenBar", "woodenBar_003", "woodenBar_001", "woodenBar_002"
     ],
     "doubleSide":
