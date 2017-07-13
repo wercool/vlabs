@@ -198,12 +198,15 @@ HeadYaw_10.0
 BodyTilt_15.0
 #push metal profile
 LeftForearmRoll_240.0
-Delay_5000
-BaseTranslate_7.72_4.0_C
+Delay_5500
+BaseTranslate_7.78_4.0_C
 ObjRot_metalProfile2_z_-0.0_500
 ObjRot_metalProfile2_y_-0.0_500
 ObjTranslate_metalProfile2_x_20.47_500
-RightLimb_64.0
-RightForearm_44.0
-RightShoulder_37.0
-RightForearmRoll_70.0
+Delay_1500
+BodyTilt_10.0
+RightLimb_62.0
+LeftForearm_22.0
+RightForearm_48.0
+RightShoulder_34.0
+RightForearmRoll_80.0
