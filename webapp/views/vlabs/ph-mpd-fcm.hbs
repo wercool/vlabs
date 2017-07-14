@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <title>Friction coefficient measurement [ph-mpd-fcm]</title>
     <link rel="stylesheet" type="text/css" href="/vl/css/important.css">
+    <link rel="stylesheet" href="/vl/js/jquery-ui/jquery-ui.css">
     <!-- Include this VLab specific styles -->
     <link rel="stylesheet" type="text/css" href="/vl/ph-mpd-fcm/css/ph-mpd-fcm.css">
 </head
 <body>
     <!-- Include jQuery -->
     <script src="/vl/js/jquery-1.8.2.min.js"></script>
+    <!-- Include jQuery UI-->
+    <script src="/vl/js/jquery-ui/jquery-ui.min.js"></script>
     <!-- Include jQuery Popup Overlay -->
     <script src="/vl/js/jquery.popupoverlay.js"></script>
     <!-- Tween.js -->
@@ -51,13 +54,32 @@
     <span style="font-family: 'AktakomPowerSupplyScreenFont', bold;">&nbsp;</span>
 
     <script>
+        var executeScriptDialog;
+        var LabRef;
+
         $(document).ready(function() {
             $("#notificationPopup").popup({
                 opacity: 0.2
             });
 
-            new PhMpdFcm("webGLContainer");
+            LabRef = new PhMpdFcm("webGLContainer");
+
+            executeScriptDialog = $("#execute-script-dialog").dialog({
+                autoOpen: false,
+                height: 400,
+                width: 350,
+                modal: false,
+                buttons: {
+                    "Execute": function(){
+                        LabRef.Valter.executeScript($("#scriptText").val());
+                    },
+                    "Cancel": function() {
+                      executeScriptDialog.dialog("close");
+                    }
+                }
+            });
         });
     </script>
 </body>
+    <div id="execute-script-dialog" title="Execute Script"><textarea id="scriptText" style="width:95%; height:95%"></textarea></div>
 </html>

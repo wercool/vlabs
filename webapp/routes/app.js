@@ -10,7 +10,7 @@ router.get('/vlabs/ph-mpd-fcm', function(req, res, next) {
 });
 
 router.get('/vlabs/valter-lab', function(req, res, next) {
-    res.render('vlabs/valter-lab.hbs');
+    res.render('vlabs/valter-lab.hbs', {test: req.query.test});
 });
 
 module.exports = router;

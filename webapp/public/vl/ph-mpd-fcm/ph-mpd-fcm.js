@@ -33,7 +33,8 @@ function PhMpdFcm(webGLContainer)
     var initialSlopingBodyPosition = null;
     var slopingSurfaceFixtureContact = false;
     var kukaReturnsSlopingBodyStep = 0;
-    var valter = null;
+
+    self.Valter = null;
 
     var scenePostBuilt = function()
     {
@@ -162,7 +163,7 @@ function PhMpdFcm(webGLContainer)
                         [self, null, false, "slopingBody", [2, 28]]);
 
         // Valter
-        valter = new Valter(self, new THREE.Vector3(0, 2.57, 20), true);
+        self.Valter = new Valter(self, new THREE.Vector3(0, 2.57, 20), true);
 
         // this VLab constants
         pulleyPos = activeObjects["pulley"].position.clone();

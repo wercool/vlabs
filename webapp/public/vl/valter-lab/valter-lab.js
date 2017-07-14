@@ -1,6 +1,6 @@
 "use strict";
 
-function ValterLab(webGLContainer)
+function ValterLab(webGLContainer, executeScript)
 {
     var self = this;
 
@@ -113,7 +113,7 @@ function ValterLab(webGLContainer)
         self.getVlabScene().add(lensFlare);
 
         // Valter
-        self.Valter = new Valter(self, new THREE.Vector3(0, 2.27, 5), true);
+        self.Valter = new Valter(self, new THREE.Vector3(0, 2.27, 5), true, executeScript);
 
         // this VLab constants
 
@@ -130,6 +130,33 @@ function ValterLab(webGLContainer)
         // actually start VLab
         self.setPhysijsScenePause(false);
         self.setSceneRenderPause(false);
+
+        self.getVlabScene().getObjectByName("screwHead1").visible = false;
+        self.getVlabScene().getObjectByName("screwHead2").visible = true;
+
+        // Add dev manipulation controls
+        // var control = new THREE.TransformControls(self.getDefaultCamera(), self.WebGLRenderer.domElement);
+        // control.addEventListener("change", function(){
+        //                             //console.log(this.model.position);
+        //                             if (self.pressedKey == 82) //r
+        //                             {
+        //                                 if (control.getMode() != "rotate")
+        //                                 {
+        //                                     control.setMode("rotate");
+        //                                 }
+        //                             }
+        //                             if (self.pressedKey == 84) //t
+        //                             {
+        //                                 if (control.getMode() != "translate")
+        //                                 {
+        //                                     control.setMode("translate");
+        //                                 }
+        //                             }
+        //                             console.log("Position: ", self.getVlabScene().getObjectByName("screwHead2").position);
+        //                         }.bind(self));
+        // control.attach(self.getVlabScene().getObjectByName("screwHead2"));
+        // control.setSize(1.0);
+        // self.getVlabScene().add(control);
     };
 
     var simulationStep = function()

@@ -2,7 +2,7 @@
 
 class Valter
 {
-    constructor (vlab, pos, testMode)
+    constructor (vlab, pos, testMode, executeScriptOnStart)
     {
         this.vlab = vlab;
         this.initialized = false;
@@ -10,6 +10,18 @@ class Valter
         this.initialModelPosition = pos;
         this.valterJSON = "/vl/models/valter/valter.json";
         this.testMode = testMode;
+        if (typeof executeScriptOnStart !== "undefined")
+        {
+            if (executeScriptOnStart)
+            {
+                this.executeScriptOnStart = true;
+            }
+            else
+            {
+                this.executeScriptOnStart = false;
+            }
+        }
+
         this.vlab.trace("Valter initializing...");
 
         this.activeObjects = {};
@@ -368,28 +380,31 @@ class Valter
 
         if (this.testMode)
         {
-            var control = new THREE.TransformControls(this.vlab.getDefaultCamera(), this.vlab.WebGLRenderer.domElement);
-            control.addEventListener("change", function(){
-                                        //console.log(this.model.position);
-                                        if (this.vlab.pressedKey == 82) //r
-                                        {
-                                            if (control.getMode() != "rotate")
+            if (!this.executeScriptOnStart)
+            {
+                var control = new THREE.TransformControls(this.vlab.getDefaultCamera(), this.vlab.WebGLRenderer.domElement);
+                control.addEventListener("change", function(){
+                                            //console.log(this.model.position);
+                                            if (this.vlab.pressedKey == 82) //r
                                             {
-                                                control.setMode("rotate");
+                                                if (control.getMode() != "rotate")
+                                                {
+                                                    control.setMode("rotate");
+                                                }
                                             }
-                                        }
-                                        if (this.vlab.pressedKey == 84) //t
-                                        {
-                                            if (control.getMode() != "translate")
+                                            if (this.vlab.pressedKey == 84) //t
                                             {
-                                                control.setMode("translate");
+                                                if (control.getMode() != "translate")
+                                                {
+                                                    control.setMode("translate");
+                                                }
                                             }
-                                        }
-                                        console.log("Position: ", this.model.position);
-                                    }.bind(this));
-            control.attach(this.model);
-            control.setSize(1.0);
-            this.vlab.getVlabScene().add(control);
+                                            console.log("Position: ", this.model.position);
+                                        }.bind(this));
+                control.attach(this.model);
+                control.setSize(1.0);
+                this.vlab.getVlabScene().add(control);
+            }
 
             //dummy manipulation object
             var manipulationObjectGeometry = new THREE.SphereGeometry(0.25, 32, 32);
@@ -399,34 +414,45 @@ class Valter
             this.vlab.getVlabScene().add(this.manipulationObject);
             this.manipulationObject.position.z = 12.0;
             this.manipulationObject.position.y = 15.0;
-            var manipulationObjectControl = new THREE.TransformControls(this.vlab.getDefaultCamera(), this.vlab.WebGLRenderer.domElement);
-            manipulationObjectControl.addEventListener("change", function(){
-                                                            if (this.vlab.pressedKey != null)
-                                                            {
-                                                                if (this.vlab.pressedKey == 17) //ctrlKey
+            if (this.executeScriptOnStart)
+            {
+                this.manipulationObject.visible = false;
+            }
+
+            if (!this.executeScriptOnStart)
+            {
+                var manipulationObjectControl = new THREE.TransformControls(this.vlab.getDefaultCamera(), this.vlab.WebGLRenderer.domElement);
+                manipulationObjectControl.addEventListener("change", function(){
+                                                                if (this.vlab.pressedKey != null)
                                                                 {
-                                                                    console.log(this.manipulationObject.position);
+                                                                    if (this.vlab.pressedKey == 17) //ctrlKey
+                                                                    {
+                                                                        console.log(this.manipulationObject.position);
+                                                                    }
                                                                 }
-                                                            }
-                                                        }.bind(this));
-            manipulationObjectControl.attach(this.manipulationObject);
-            manipulationObjectControl.setSize(1.0);
-            this.vlab.getVlabScene().add(manipulationObjectControl);
+                                                            }.bind(this));
+                manipulationObjectControl.attach(this.manipulationObject);
+                manipulationObjectControl.setSize(1.0);
+                this.vlab.getVlabScene().add(manipulationObjectControl);
+            }
 
-            var matrix = new THREE.Matrix4();
-            matrix.extractRotation(this.model.matrix);
-            var valterForwardDirection = new THREE.Vector3(0, 1, 0);
-            valterForwardDirection.applyMatrix4(matrix);
-            this.activeObjects["valterForwardDirectionVector"] = new THREE.ArrowHelper(valterForwardDirection, this.model.position, 10.0, 0x0000ff, 1.0, 0.3);
-            this.vlab.getVlabScene().add(this.activeObjects["valterForwardDirectionVector"]);
+            if (!this.executeScriptOnStart)
+            {
+                var matrix = new THREE.Matrix4();
+                matrix.extractRotation(this.model.matrix);
+                var valterForwardDirection = new THREE.Vector3(0, 1, 0);
+                valterForwardDirection.applyMatrix4(matrix);
+                this.activeObjects["valterForwardDirectionVector"] = new THREE.ArrowHelper(valterForwardDirection, this.model.position, 10.0, 0x0000ff, 1.0, 0.3);
+                this.vlab.getVlabScene().add(this.activeObjects["valterForwardDirectionVector"]);
 
-            var manipulationObjectXZProjPos = this.manipulationObject.position.clone();
-            manipulationObjectXZProjPos.y = this.model.position.y;
-            var valterToManipulationObjectDirectionVector = this.model.position.clone().sub(manipulationObjectXZProjPos.clone());
-            var valterToManipulationObjectDirectionVectorLength = valterToManipulationObjectDirectionVector.clone().length();
-            valterToManipulationObjectDirectionVector.normalize();
-            this.activeObjects["valterToManipulationObjectDirectionVector"] = new THREE.ArrowHelper(valterToManipulationObjectDirectionVector, this.model.position, valterToManipulationObjectDirectionVectorLength, 0xffffff, 1.0, 0.3);
-            this.vlab.getVlabScene().add(this.activeObjects["valterToManipulationObjectDirectionVector"]);
+                var manipulationObjectXZProjPos = this.manipulationObject.position.clone();
+                manipulationObjectXZProjPos.y = this.model.position.y;
+                var valterToManipulationObjectDirectionVector = this.model.position.clone().sub(manipulationObjectXZProjPos.clone());
+                var valterToManipulationObjectDirectionVectorLength = valterToManipulationObjectDirectionVector.clone().length();
+                valterToManipulationObjectDirectionVector.normalize();
+                this.activeObjects["valterToManipulationObjectDirectionVector"] = new THREE.ArrowHelper(valterToManipulationObjectDirectionVector, this.model.position, valterToManipulationObjectDirectionVectorLength, 0xffffff, 1.0, 0.3);
+                this.vlab.getVlabScene().add(this.activeObjects["valterToManipulationObjectDirectionVector"]);
+            }
 
             var GUIcontrols1 = new dat.GUI();
             GUIcontrols1.add(this.model.rotation, 'z', -6.28, 0.0).name("Base Yaw").step(0.01).listen().onChange(this.baseRotation.bind(this));;
@@ -461,6 +487,13 @@ class Valter
             if (typeof executeScriptDialog !== 'undefined')
             {
                 GUIcontrols1.add(this.guiControls, 'executeScript').name("Execute Script");
+                if (this.executeScriptOnStart)
+                {
+                    var scriptText = $("#scriptText").val()
+                    this.scriptLines = scriptText.split("\n");
+                    this.scriptExecution();
+                    dat.GUI.toggleHide();
+                }
             }
         }
 
@@ -610,7 +643,7 @@ class Valter
             }
             this.delayedCalls = [];
 
-            if (this.testMode)
+            if (this.testMode && !this.executeScriptOnStart)
             {
                 var matrix = new THREE.Matrix4();
                 matrix.extractRotation(this.model.matrix);
@@ -1776,7 +1809,7 @@ class Valter
                 objectRotTween.start();
                 valterRef.scriptExecution();
             break;
-            case "ObjTranslate":
+            case "ObjTranslate": //ObjTranslate_screwHead1_x_20.23_100
                 var translateValue = parseFloat(scriptLineParts[3]);
                 var objPosition = valterRef.vlab.getVlabScene().getObjectByName(scriptLineParts[1]).position;
                 console.log(objPosition);
@@ -1795,6 +1828,12 @@ class Valter
                     break;
                 }
                 objPosTween.start();
+                valterRef.scriptExecution();
+            break;
+            case "ObjVisibility": //ObjTranslate_screwHead1_0
+                var visibilityValue = parseFloat(scriptLineParts[2]);
+                var obj = valterRef.vlab.getVlabScene().getObjectByName(scriptLineParts[1]);
+                obj.visible = (parseInt(visibilityValue) == 1) ? true : false;
                 valterRef.scriptExecution();
             break;
         }
