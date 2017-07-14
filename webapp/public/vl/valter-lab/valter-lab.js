@@ -132,7 +132,7 @@ function ValterLab(webGLContainer, executeScript)
         self.setSceneRenderPause(false);
 
         self.getVlabScene().getObjectByName("screwHead1").visible = false;
-        self.getVlabScene().getObjectByName("screwHead2").visible = true;
+        self.getVlabScene().getObjectByName("screwHead2").visible = false;
 
         // Add dev manipulation controls
         // var control = new THREE.TransformControls(self.getDefaultCamera(), self.WebGLRenderer.domElement);
