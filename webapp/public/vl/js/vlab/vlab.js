@@ -145,7 +145,7 @@ function VLab(vlabNature)
             return;
         }
 
-        defaultCamera = new THREE.PerspectiveCamera(70, webglContainer.width() / webglContainer.height(), 0.1, 100);
+        defaultCamera = new THREE.PerspectiveCamera(70, webglContainer.width() / webglContainer.height(), 0.1, 200);
 
         webglContainerDOM.addEventListener("mousemove", mouseMove, false);
         webglContainerDOM.addEventListener("mousedown", mouseDown, false);

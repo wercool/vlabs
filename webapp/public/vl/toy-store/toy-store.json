@@ -1,0 +1,41 @@
+{
+    "presets": {"tetha": 0},
+    "title":                "Valter in Toy Store",
+    "sceneFile":            "/vl/toy-store/scene/toy-store.dae",
+    "isPhysijsScene":       false,
+    "showStatistics":       true,
+    "showAxis":             false,
+    "showTooltips":         true,
+    "shadows":              true,
+    "forceShadows":         false,
+    "shadowsMapSize":       512,
+    "antialias":            false,
+    "canvasAlphaBuffer":    true,
+    "castShadows":
+    [
+        "Lamp1"
+    ],
+    "receiveShadows":
+    [
+        "floor", "frontWall", "rightWall", "leftWall"
+    ],
+    "doubleSide":
+    [
+
+    ],
+    "castShadowsExecptions":
+    [
+    ],
+    "receiveShadowsExecptions":
+    [
+    ],
+    "maps":
+    [
+    ],
+    "interactionHelpers":
+    {
+    },
+    "interactors":
+    {
+    }
+}
