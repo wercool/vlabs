@@ -13,6 +13,10 @@ router.get('/vlabs/valter-lab', function(req, res, next) {
     res.render('vlabs/valter-lab.hbs', {test: req.query.test});
 });
 
+router.get('/vlabs/valter-ik-lab', function(req, res, next) {
+    res.render('vlabs/valter-ik-lab.hbs', {test: req.query.test});
+});
+
 router.get('/vlabs/toy-store', function(req, res, next) {
     res.render('vlabs/toy-store.hbs', {test: req.query.test});
 });

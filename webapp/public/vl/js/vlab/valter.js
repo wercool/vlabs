@@ -331,6 +331,9 @@ class Valter
         this.activeObjects["smallWheelRR"] = this.vlab.getVlabScene().getObjectByName("smallWheelRR");
         this.activeObjects["smallWheelLR"] = this.vlab.getVlabScene().getObjectByName("smallWheelLR");
 
+        this.activeObjects["rPalmPad"] = this.vlab.getVlabScene().getObjectByName("rPalmPad");
+        this.activeObjects["lPalmPad"] = this.vlab.getVlabScene().getObjectByName("lPalmPad");
+
         this.activeObjects["rightHand"] = {
             f0_0: {obj: this.vlab.getVlabScene().getObjectByName("r_0_finger_p1"), angle: this.vlab.getVlabScene().getObjectByName("r_0_finger_p1").rotation.x},
             f0_1: {obj: this.vlab.getVlabScene().getObjectByName("r_0_finger_p2"), angle: this.vlab.getVlabScene().getObjectByName("r_0_finger_p2").rotation.z},
@@ -1518,10 +1521,10 @@ class Valter
                         valterRef.jointsTweens.bodyYaw.stop();
                     }
                 }
-                var valueRad = -1 * scriptLineParts[1] * Math.PI / 180;
+                var valueRad = (scriptLineParts[2] == "rad") ? scriptLineParts[1] * 1.0 : -1 * scriptLineParts[1] * Math.PI / 180;
                 valterRef.jointsTweens.bodyYaw = new TWEEN.Tween(valterRef.joints);
                 valterRef.jointsTweens.bodyYaw.easing(TWEEN.Easing.Cubic.InOut);
-                valterRef.jointsTweens.bodyYaw.to({bodyYaw: valueRad}, 8000 * (1 - Math.abs(valueRad)));
+                valterRef.jointsTweens.bodyYaw.to({bodyYaw: valueRad}, 4000 * Math.abs(valterRef.joints.bodyYaw - valueRad));
                 valterRef.jointsTweens.bodyYaw.onUpdate(function(){
                     valterRef.activeObjects["valterBodyP1"].rotation.z = valterRef.joints.bodyYaw;
                     valterRef.baseToBodyCableSleeveAnimation();
@@ -1537,10 +1540,10 @@ class Valter
                         valterRef.jointsTweens.bodyTilt.stop();
                     }
                 }
-                var valueRad = -1 * scriptLineParts[1] * Math.PI / 180;
+                var valueRad = (scriptLineParts[2] == "rad") ? scriptLineParts[1] * 1.0 : -1 * scriptLineParts[1] * Math.PI / 180;
                 valterRef.jointsTweens.bodyTilt = new TWEEN.Tween(valterRef.joints);
                 valterRef.jointsTweens.bodyTilt.easing(TWEEN.Easing.Cubic.InOut);
-                valterRef.jointsTweens.bodyTilt.to({bodyTilt: valueRad}, 8000 * (1 - Math.abs(valueRad)));
+                valterRef.jointsTweens.bodyTilt.to({bodyTilt: valueRad}, 8000 * Math.abs(valterRef.joints.bodyTilt - valueRad));
                 valterRef.jointsTweens.bodyTilt.onUpdate(function(){
                     valterRef.activeObjects["bodyFrameAxisR"].rotation.x = valterRef.joints.bodyTilt;
                     valterRef.bodyToTorsoCableSleeveAnimation();
@@ -1627,7 +1630,7 @@ class Valter
                         valterRef.jointsTweens.rightLimb.stop();
                     }
                 }
-                var valueRad = scriptLineParts[1] * Math.PI / 180;
+                var valueRad = (scriptLineParts[2] == "rad") ? scriptLineParts[1] * 1.0 : scriptLineParts[1] * Math.PI / 180;
                 valterRef.jointsTweens.rightLimb = new TWEEN.Tween(valterRef.joints);
                 valterRef.jointsTweens.rightLimb.to({rightLimb: valueRad}, 2000);
                 valterRef.jointsTweens.rightLimb.onUpdate(function(){
@@ -1661,7 +1664,7 @@ class Valter
                         valterRef.jointsTweens.rightForearm.stop();
                     }
                 }
-                var valueRad = scriptLineParts[1] * Math.PI / 180;
+                var valueRad = (scriptLineParts[2] == "rad") ? scriptLineParts[1] * 1.0 : scriptLineParts[1] * Math.PI / 180;
                 valterRef.jointsTweens.rightForearm = new TWEEN.Tween(valterRef.joints);
                 valterRef.jointsTweens.rightForearm.to({rightForearm: valueRad}, 2000);
                 valterRef.jointsTweens.rightForearm.onUpdate(function(){
@@ -1729,7 +1732,7 @@ class Valter
                         valterRef.jointsTweens.rightShoulder.stop();
                     }
                 }
-                var valueRad = scriptLineParts[1] * Math.PI / 180;
+                var valueRad = (scriptLineParts[2] == "rad") ? scriptLineParts[1] * 1.0 : scriptLineParts[1] * Math.PI / 180;
                 valterRef.jointsTweens.rightShoulder = new TWEEN.Tween(valterRef.joints);
                 valterRef.jointsTweens.rightShoulder.to({rightShoulder: valueRad}, 2000);
                 valterRef.jointsTweens.rightShoulder.onUpdate(function(){
@@ -1763,7 +1766,7 @@ class Valter
                         valterRef.jointsTweens.rightArm.stop();
                     }
                 }
-                var valueRad = -1.22 - scriptLineParts[1] * Math.PI / 180;
+                var valueRad = (scriptLineParts[2] == "rad") ? scriptLineParts[1] * 1.0 : -1.22 - scriptLineParts[1] * Math.PI / 180;
                 valterRef.jointsTweens.rightArm = new TWEEN.Tween(valterRef.joints);
                 valterRef.jointsTweens.rightArm.to({rightArm: valueRad}, 2000);
                 valterRef.jointsTweens.rightArm.onUpdate(function(){
@@ -1835,6 +1838,10 @@ class Valter
                 var obj = valterRef.vlab.getVlabScene().getObjectByName(scriptLineParts[1]);
                 obj.visible = (parseInt(visibilityValue) == 1) ? true : false;
                 valterRef.scriptExecution();
+            break;
+            case "GetRightPalmPadPosition":
+                var rPalmPadPosition = new THREE.Vector3().setFromMatrixPosition(valterRef.activeObjects["rPalmPad"].matrixWorld);
+                console.log(rPalmPadPosition);
             break;
         }
     }

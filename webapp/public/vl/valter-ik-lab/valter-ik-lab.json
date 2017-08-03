@@ -1,0 +1,45 @@
+{
+    "presets": {"tetha": 0},
+    "title":                "Valter Lab",
+    "sceneFile":            "/vl/valter-ik-lab/scene/valter-ik-lab.dae",
+    "isPhysijsScene":       false,
+    "showStatistics":       true,
+    "showAxis":             false,
+    "showTooltips":         false,
+    "shadows":              false,
+    "forceShadows":         false,
+    "shadowsMapSize":       512,
+    "antialias":            false,
+    "canvasAlphaBuffer":    false,
+    "advanceLighting":      false,
+    "advanceLighting1src":  true,
+    "castShadows":
+    [
+        "Lamp1", "doorCloserLever1", "doorCloserLever2", "tableTop", "tableLeg", "tableLeg_001", "tableLeg_002", "foamContainer"
+    ],
+    "receiveShadows":
+    [
+        "floor", "frontWall", "rearWall", "rightWall", "leftWall", "rearWallDoorBigPart", "tableTop",
+        "tableStandDoor", "tableStand", "tableLeg", "tableLeg_001", "tableLeg_002",
+        "tableTop_001", "tableLeg_004", "tableLeg_003", "tableLeg_005", "tableLeg_006", "tableLeg_008", "tableLeg_007"
+    ],
+    "doubleSide":
+    [
+
+    ],
+    "castShadowsExecptions":
+    [
+    ],
+    "receiveShadowsExecptions":
+    [
+    ],
+    "maps":
+    [
+    ],
+    "interactionHelpers":
+    {
+    },
+    "interactors":
+    {
+    }
+}

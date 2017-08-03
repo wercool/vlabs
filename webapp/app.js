@@ -13,6 +13,7 @@ var app = express();
 // app routes definitions
 var appRoutes = require('./routes/app');
 var apiRoutes = require('./routes/api');
+var srvRoutes = require('./routes/srv');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -44,6 +45,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // app routes
 app.use('/', appRoutes);
 app.use('/api', apiRoutes);
+app.use('/srv', srvRoutes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
