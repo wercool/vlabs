@@ -189,7 +189,7 @@ function ValterLab(webGLContainer, executeScript)
         eefZ: 0.0,
     };
 
-    var dVal = 0.001;
+    var dVal = 0.01;
 
     self.IKBruteforce = function()
     {
