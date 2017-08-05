@@ -151,7 +151,7 @@ function ValterLab(webGLContainer, executeScript)
         // control.setSize(1.0);
         // self.getVlabScene().add(control);
 
-        setTimeout(self.waitingForValterInitialization.bind(self.Valter), 50);
+        setTimeout(self.waitingForValterInitialization.bind(self.Valter), 250);
     };
 
     self.waitingForValterInitialization = function()
@@ -159,7 +159,7 @@ function ValterLab(webGLContainer, executeScript)
         console.log("Wainting for Valter initialization...");
         if (!self.Valter.initialized)
         {
-            setTimeout(self.waitingForValterInitialization.bind(self.Valter), 50);
+            setTimeout(self.waitingForValterInitialization.bind(self.Valter), 250);
             return;
         }
         // actually start VLab
@@ -168,11 +168,11 @@ function ValterLab(webGLContainer, executeScript)
 
         // self.Valter.activeObjects["rightForearmYaw"].rotation.z = -0.25;
 
-        self.Valter.activeObjects["valterBodyP1"].rotation.z = -1.57;
-        self.Valter.activeObjects["forearmFrameRight"].rotation.y = -1.57;
-        self.Valter.activeObjects["armRightShoulderAxis"].rotation.x = -0.85;
-        self.Valter.activeObjects["rightForearmTilt"].rotation.y = 1.0;
-        self.Valter.activeObjects["rightArm"].rotation.y = -1.22;
+        // self.Valter.activeObjects["valterBodyP1"].rotation.z = -1.57;
+        // self.Valter.activeObjects["forearmFrameRight"].rotation.y = -1.57;
+        // self.Valter.activeObjects["armRightShoulderAxis"].rotation.x = -0.85;
+        // self.Valter.activeObjects["rightForearmTilt"].rotation.y = 1.0;
+        // self.Valter.activeObjects["rightArm"].rotation.y = -1.22;
 
         setTimeout(self.IKBruteforce.bind(self.Valter), 500);
     }
@@ -289,9 +289,12 @@ function ValterLab(webGLContainer, executeScript)
         jointStateAndEEFPos.eefY = rPalmPadPosition.y.toFixed(3);
         jointStateAndEEFPos.eefZ = rPalmPadPosition.z.toFixed(3);
 
-        $.post("/srv/savejointstates", jointStateAndEEFPos, function(result){
-            self.IKBruteforce();
-        });
+console.log(self.Valter.activeObjects["valterBaseToRightPalmPadDirectionVector"].line);
+// setTimeout(self.IKBruteforce.bind(self.Valter), 500);
+
+        // $.post("/srv/savejointstates", jointStateAndEEFPos, function(result){
+        //     self.IKBruteforce();
+        // });
     }
 
     var simulationStep = function()
