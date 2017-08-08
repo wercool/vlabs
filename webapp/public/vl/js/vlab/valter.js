@@ -456,12 +456,12 @@ class Valter
                 this.activeObjects["valterToManipulationObjectDirectionVector"] = new THREE.ArrowHelper(valterToManipulationObjectDirectionVector, this.model.position, valterToManipulationObjectDirectionVectorLength, 0xffffff, 1.0, 0.3);
                 this.vlab.getVlabScene().add(this.activeObjects["valterToManipulationObjectDirectionVector"]);
 
-                var rPalmPadPosition = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["rPalmPad"].matrixWorld);
-                var valterBaseToRightPalmPadDirectionVector = this.model.position.clone().sub(rPalmPadPosition.clone()).negate();
-                var valterBaseToRightPalmPadDirectionVectorLength = valterBaseToRightPalmPadDirectionVector.clone().length();
-                valterBaseToRightPalmPadDirectionVector.normalize();
-                this.activeObjects["valterBaseToRightPalmPadDirectionVector"] = new THREE.ArrowHelper(valterBaseToRightPalmPadDirectionVector, this.model.position, valterBaseToRightPalmPadDirectionVectorLength, 0x00ff00, 1.0, 0.3);
-                this.vlab.getVlabScene().add(this.activeObjects["valterBaseToRightPalmPadDirectionVector"]);
+                // var rPalmPadPosition = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["rPalmPad"].matrixWorld);
+                // var valterBaseToRightPalmPadDirectionVector = this.model.position.clone().sub(rPalmPadPosition.clone()).negate();
+                // var valterBaseToRightPalmPadDirectionVectorLength = valterBaseToRightPalmPadDirectionVector.clone().length();
+                // valterBaseToRightPalmPadDirectionVector.normalize();
+                // this.activeObjects["valterBaseToRightPalmPadDirectionVector"] = new THREE.ArrowHelper(valterBaseToRightPalmPadDirectionVector, this.model.position, valterBaseToRightPalmPadDirectionVectorLength, 0x00ff00, 1.0, 0.3);
+                // this.vlab.getVlabScene().add(this.activeObjects["valterBaseToRightPalmPadDirectionVector"]);
             }
 
             var GUIcontrols1 = new dat.GUI();
@@ -674,13 +674,13 @@ class Valter
                     this.activeObjects["valterToManipulationObjectDirectionVector"].setLength(valterToManipulationObjectDirectionVectorLength, 1.0, 0.3);
                 }
 
-                var rPalmPadPosition = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["rPalmPad"].matrixWorld);
-                var valterBaseToRightPalmPadDirectionVector = this.model.position.clone().sub(rPalmPadPosition.clone()).negate();
-                var valterBaseToRightPalmPadDirectionVectorLength = valterBaseToRightPalmPadDirectionVector.clone().length();
-                valterBaseToRightPalmPadDirectionVector.normalize();
-                this.activeObjects["valterBaseToRightPalmPadDirectionVector"].position.copy(this.model.position);
-                this.activeObjects["valterBaseToRightPalmPadDirectionVector"].setDirection(valterBaseToRightPalmPadDirectionVector);
-                this.activeObjects["valterBaseToRightPalmPadDirectionVector"].setLength(valterBaseToRightPalmPadDirectionVectorLength, 1.0, 0.3);
+                // var rPalmPadPosition = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["rPalmPad"].matrixWorld);
+                // var valterBaseToRightPalmPadDirectionVector = this.model.position.clone().sub(rPalmPadPosition.clone()).negate();
+                // var valterBaseToRightPalmPadDirectionVectorLength = valterBaseToRightPalmPadDirectionVector.clone().length();
+                // valterBaseToRightPalmPadDirectionVector.normalize();
+                // this.activeObjects["valterBaseToRightPalmPadDirectionVector"].position.copy(this.model.position);
+                // this.activeObjects["valterBaseToRightPalmPadDirectionVector"].setDirection(valterBaseToRightPalmPadDirectionVector);
+                // this.activeObjects["valterBaseToRightPalmPadDirectionVector"].setLength(valterBaseToRightPalmPadDirectionVectorLength, 1.0, 0.3);
             }
         }
     }
