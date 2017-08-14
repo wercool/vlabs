@@ -30,7 +30,7 @@ router.post('/savejointstates', function(req, res, next) {
 
         con.query(sql, function (err, result) {
             if (err) throw err;
-            console.log(sql);
+            // console.log(sql);
         });
 
     return res.status(200).send({

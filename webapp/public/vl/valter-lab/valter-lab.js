@@ -113,7 +113,7 @@ function ValterLab(webGLContainer, executeScript)
         self.getVlabScene().add(lensFlare);
 
         // Valter
-        self.Valter = new Valter(self, new THREE.Vector3(0, 2.27, 5), true, executeScript);
+        self.Valter = new Valter(self, new THREE.Vector3(0, 0, 5), true, executeScript);
 
         // this VLab constants
 

@@ -162,8 +162,8 @@ function PhMpdFcm(webGLContainer)
                         KukaVacuumGripper,
                         [self, null, false, "slopingBody", [2, 28]]);
 
-        // Valter
-        self.Valter = new Valter(self, new THREE.Vector3(0, 2.57, 20), true);
+// Valter
+// self.Valter = new Valter(self, new THREE.Vector3(0, 2.57, 20), true);
 
         // this VLab constants
         pulleyPos = activeObjects["pulley"].position.clone();

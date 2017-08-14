@@ -38,7 +38,7 @@ function ToyStore(webGLContainer, executeScript)
         self.getVlabScene().add(light);
 
         // Valter
-        //self.Valter = new Valter(self, new THREE.Vector3(-20.0, 2.27, -52.0), true, executeScript);
+        //self.Valter = new Valter(self, new THREE.Vector3(-20.0, 0.0, -52.0), true, executeScript);
 
         // this VLab constants
         initialDefaultCameraPosVectorLength = self.getDefaultCameraPosition().length();
