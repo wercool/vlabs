@@ -1889,11 +1889,10 @@ class Valter
             {
                 console.log("Solution found for RArm EEF");
                 // console.log(rArmIK);
-                var rArmIK_rightArm = ((rArmIK.rightArm + 0.2) <= -1.22) ? rArmIK.rightArm + 0.2 : rArmIK.rightArm;
                 valterRef.scriptLines = [];
                 valterRef.scriptLines.push("BodyYaw_" +         (rArmIK.bodyYaw)            + "_rad");
                 valterRef.scriptLines.push("BodyTilt_" +        (rArmIK.bodyTilt)           + "_rad");
-                valterRef.scriptLines.push("RightArm_" +        (rArmIK_rightArm)           + "_rad");
+                valterRef.scriptLines.push("RightArm_" +        (rArmIK.rightArm)           + "_rad");
                 valterRef.scriptLines.push("RightForearm_" +    (rArmIK.rightForearm)       + "_rad");
                 valterRef.scriptLines.push("RightLimb_" +       (rArmIK.rightLimb)          + "_rad");
                 valterRef.scriptLines.push("RightShoulder_" +   (rArmIK.rightShoulder)      + "_rad");
