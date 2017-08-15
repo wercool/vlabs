@@ -166,6 +166,7 @@ function ValterLab(webGLContainer, executeScript)
         self.setPhysijsScenePause(false);
         self.setSceneRenderPause(false);
 
+/*
         //rightForearmYaw
         // self.Valter.activeObjects["rightForearmYaw"].rotation.z = -0.25;
         //rightForeArmRoll
@@ -174,21 +175,22 @@ function ValterLab(webGLContainer, executeScript)
 
 
         //bodyYaw
-        self.Valter.activeObjects["valterBodyP1"].rotation.z = 0.050;//default: -0.750;
+        self.Valter.activeObjects["valterBodyP1"].rotation.z = 0.600;//default: -0.750;
         //bodyTilt
-        self.Valter.activeObjects["bodyFrameAxisR"].rotation.x = -0.500;//default: 0.0;
+        self.Valter.activeObjects["bodyFrameAxisR"].rotation.x = -0.250;//default: 0.0;
         //rightLimb
-        self.Valter.activeObjects["armRightShoulderAxis"].rotation.x = 0.100;//default: -0.4;
+        self.Valter.activeObjects["armRightShoulderAxis"].rotation.x = 0.600;//default: -0.4;
         //rightForearm
-        self.Valter.activeObjects["rightForearmTilt"].rotation.y = -0.250;//default: 1.0;
+        self.Valter.activeObjects["rightForearmTilt"].rotation.y = 0.750;//default: 1.0;
         //rightShoulder
-        self.Valter.activeObjects["bodyFrameR"].rotation.z = 0.600;//default: 0.0;
+        self.Valter.activeObjects["bodyFrameR"].rotation.z = 0.250;//default: 0.0;
         //rightArm
-        self.Valter.activeObjects["rightArm"].rotation.y = -2.720;// default: -1.22;
+        self.Valter.activeObjects["rightArm"].rotation.y = -1.720;// default: -1.22;
 
 
 
         setTimeout(self.IKBruteforce.bind(self.Valter), 500);
+*/
     }
 
     var jointStateAndEEFPos = {
@@ -323,7 +325,7 @@ function ValterLab(webGLContainer, executeScript)
 
 // setTimeout(self.IKBruteforce.bind(self.Valter), 1);
 
-        $.post("/srv/savejointstates", jointStateAndEEFPos, function(result){
+        $.post("/srv/savejointstatesrarm", jointStateAndEEFPos, function(result){
             self.IKBruteforce();
         });
     }

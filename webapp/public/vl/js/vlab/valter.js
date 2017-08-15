@@ -124,6 +124,9 @@ class Valter
             },
             executeScript:function(){
                 self.executeScript();
+            },
+            rightArmIK:function(){
+                self.rightArmIK();
             }
         };
 
@@ -494,6 +497,7 @@ class Valter
             GUIcontrols1.add(this.guiControls, 'say').name("Valter says");
             GUIcontrols1.add(this.guiControls, 'talk').name("Valter talks");
             GUIcontrols1.add(this.guiControls, 'navigate').name("Navigate");
+            GUIcontrols1.add(this.guiControls, 'rightArmIK').name("Solve Right Arm IK");
             if (typeof executeScriptDialog !== 'undefined')
             {
                 GUIcontrols1.add(this.guiControls, 'executeScript').name("Execute Script");
@@ -1859,5 +1863,48 @@ class Valter
                 console.log(rPalmPadPosition);
             break;
         }
+    }
+
+    rightArmIK()
+    {
+        var eefPos = new THREE.Vector3().setFromMatrixPosition(this.manipulationObject.matrixWorld);
+        // console.log("Global RArm EEF: ",  eefPos);
+        this.model.worldToLocal(eefPos);
+        eefPos.multiply(this.model.scale);
+        // console.log("Local RArm EEF: ",  eefPos);
+
+        eefPos.x = eefPos.x.toFixed(3);
+        eefPos.y = eefPos.y.toFixed(3);
+        eefPos.z = eefPos.z.toFixed(3);
+
+        var valterRef = this;
+
+        $.ajax({
+            url: "/srv/solverarmik",
+            type: 'POST',
+            contentType: "application/json",
+            data: JSON.stringify(eefPos)
+        }).done(function(rArmIK){
+            if (rArmIK)
+            {
+                console.log("Solution found for RArm EEF");
+                // console.log(rArmIK);
+                var rArmIK_rightArm = ((rArmIK.rightArm + 0.2) <= -1.22) ? rArmIK.rightArm + 0.2 : rArmIK.rightArm;
+                valterRef.scriptLines = [];
+                valterRef.scriptLines.push("BodyYaw_" +         (rArmIK.bodyYaw)            + "_rad");
+                valterRef.scriptLines.push("BodyTilt_" +        (rArmIK.bodyTilt)           + "_rad");
+                valterRef.scriptLines.push("RightArm_" +        (rArmIK_rightArm)           + "_rad");
+                valterRef.scriptLines.push("RightForearm_" +    (rArmIK.rightForearm)       + "_rad");
+                valterRef.scriptLines.push("RightLimb_" +       (rArmIK.rightLimb)          + "_rad");
+                valterRef.scriptLines.push("RightShoulder_" +   (rArmIK.rightShoulder)      + "_rad");
+                valterRef.scriptLines.push("RightForearmRoll_90");
+                console.log(valterRef.scriptLines);
+                valterRef.scriptExecution();
+            }
+            else
+            {
+                console.log("Solution not found for RArm EEF");
+            }
+        });
     }
 }
