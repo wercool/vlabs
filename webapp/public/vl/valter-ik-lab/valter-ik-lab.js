@@ -167,29 +167,28 @@ function ValterLab(webGLContainer, executeScript)
         self.setSceneRenderPause(false);
 
 
-        //rightForearmYaw
-        // self.Valter.activeObjects["rightForearmYaw"].rotation.z = -0.25;
-        //rightForeArmRoll
-        self.Valter.activeObjects["forearmFrameRight"].rotation.y = -1.57;
+        // //rightForearmYaw
+        // // self.Valter.activeObjects["rightForearmYaw"].rotation.z = -0.25;
+        // //rightForeArmRoll
+        // self.Valter.activeObjects["forearmFrameRight"].rotation.y = -1.57;
+        //
+        // //bodyYaw
+        // self.Valter.activeObjects["valterBodyP1"].rotation.z = -0.750;//default: -0.750;
+        // //bodyTilt
+        // self.Valter.activeObjects["bodyFrameAxisR"].rotation.x = 0.0;//default: 0.0;
+        // //rightLimb
+        // self.Valter.activeObjects["armRightShoulderAxis"].rotation.x = -0.4;//default: -0.4;
+        // //rightForearm
+        // self.Valter.activeObjects["rightForearmTilt"].rotation.y = 0.5;//default: 0.5;
+        // //rightShoulder
+        // self.Valter.activeObjects["bodyFrameR"].rotation.z = 0.0;//default: 0.0;
+        // //rightArm
+        // self.Valter.activeObjects["rightArm"].rotation.y = -1.22;// default: -1.22;
+        //
+        //
+        //
+        // setTimeout(self.IKBruteforce.bind(self.Valter), 500);
 
-
-
-        //bodyYaw
-        self.Valter.activeObjects["valterBodyP1"].rotation.z = -0.750;//default: -0.750;
-        //bodyTilt
-        self.Valter.activeObjects["bodyFrameAxisR"].rotation.x = 0.0;//default: 0.0;
-        //rightLimb
-        self.Valter.activeObjects["armRightShoulderAxis"].rotation.x = -0.4;//default: -0.4;
-        //rightForearm
-        self.Valter.activeObjects["rightForearmTilt"].rotation.y = 1.0;//default: 1.0;
-        //rightShoulder
-        self.Valter.activeObjects["bodyFrameR"].rotation.z = 0.0;//default: 0.0;
-        //rightArm
-        self.Valter.activeObjects["rightArm"].rotation.y = -1.20;// default: -1.22;
-
-
-
-        setTimeout(self.IKBruteforce.bind(self.Valter), 500);
     }
 
     var jointStateAndEEFPos = {
@@ -206,15 +205,67 @@ function ValterLab(webGLContainer, executeScript)
 
 
     var dValBodyYaw = 0.05;
-    var dValBodyTilt = 0.05;
-    var dValRightLimb = 0.25;
-    var dValRightForearm = 0.25;
+    var dValBodyTilt = 0.5;
+    var dValRightLimb = 0.1;
+    var dValRightForearm = 0.1;
     var dValRightShoulder = 0.05;
-    var dValRightArm = 0.25;
+    var dValRightArm = 0.1;
 
 
     self.IKBruteforce = function()
     {
+        //rightArm
+        if (self.Valter.activeObjects["rightArm"].rotation.y > -2.5)
+        {
+            //rightForearm
+            if (self.Valter.activeObjects["rightForearmTilt"].rotation.y > -0.5)
+            {
+                //rightLimb
+                if (self.Valter.activeObjects["armRightShoulderAxis"].rotation.x < 1.0)
+                {
+                    //bodyYaw
+                    if (self.Valter.activeObjects["valterBodyP1"].rotation.z <= 0.75)
+                    {
+                        self.Valter.activeObjects["valterBodyP1"].rotation.z += dValBodyYaw;
+                        self.sendJointStateAndEEFPos();
+                        return;
+                    }
+                    else if (self.Valter.activeObjects["valterBodyP1"].rotation.z >= 0.75)
+                    {
+                        self.Valter.activeObjects["valterBodyP1"].rotation.z = -0.750;
+                    }
+                    self.Valter.activeObjects["armRightShoulderAxis"].rotation.x += dValRightLimb;
+                    self.sendJointStateAndEEFPos();
+                    return;
+                }
+                else if (self.Valter.activeObjects["armRightShoulderAxis"].rotation.x >= 1.0)
+                {
+                    self.Valter.activeObjects["armRightShoulderAxis"].rotation.x = -0.4;
+                }
+                self.Valter.activeObjects["rightForearmTilt"].rotation.y -= dValRightForearm;
+                self.sendJointStateAndEEFPos();
+                return;
+            }
+            else if (self.Valter.activeObjects["rightForearmTilt"].rotation.y <= -0.5)
+            {
+                self.Valter.activeObjects["rightForearmTilt"].rotation.y = 0.5;
+            }
+            self.Valter.activeObjects["rightArm"].rotation.y -= dValRightArm;
+            self.sendJointStateAndEEFPos();
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+        return;
         //bodyYaw
         if (self.Valter.activeObjects["valterBodyP1"].rotation.z <= 0.75)
         {
@@ -297,6 +348,9 @@ function ValterLab(webGLContainer, executeScript)
 
     self.sendJointStateAndEEFPos = function()
     {
+        self.Valter.model.updateMatrix();
+        self.Valter.activeObjects["rPalmPad"].updateMatrix();
+
         jointStateAndEEFPos.bodyYaw             = self.Valter.activeObjects["valterBodyP1"].rotation.z.toFixed(3);
         jointStateAndEEFPos.bodyTilt            = self.Valter.activeObjects["bodyFrameAxisR"].rotation.x.toFixed(3);
         jointStateAndEEFPos.rightLimb           = self.Valter.activeObjects["armRightShoulderAxis"].rotation.x.toFixed(3);
@@ -304,10 +358,6 @@ function ValterLab(webGLContainer, executeScript)
         jointStateAndEEFPos.rightShoulder       = self.Valter.activeObjects["bodyFrameR"].rotation.z.toFixed(3);
         jointStateAndEEFPos.rightArm            = self.Valter.activeObjects["rightArm"].rotation.y.toFixed(3);
         // jointStateAndEEFPos.rightForearmYaw     = self.Valter.activeObjects["rightForearmYaw"].rotation.z.toFixed(2);
-
-
-        self.Valter.model.updateMatrix();
-        self.Valter.activeObjects["rPalmPad"].updateMatrix();
 
         var rPalmPadPosition = new THREE.Vector3().setFromMatrixPosition(self.Valter.activeObjects["rPalmPad"].matrixWorld);
 
@@ -323,9 +373,12 @@ function ValterLab(webGLContainer, executeScript)
 
 // console.log("Local: ", rPalmPadPosition);
 
-         $.post("/srv/savejointstatesrarm", jointStateAndEEFPos, function(result){
-            self.IKBruteforce();
-        });
+// setTimeout(self.IKBruteforce.bind(self.Valter), 1);
+
+        // $.post("/srv/savejointstatesrarm", jointStateAndEEFPos, function(result){
+        //     // self.IKBruteforce();
+        //     setTimeout(self.IKBruteforce.bind(self.Valter), 10);
+        // });
     }
 
     var simulationStep = function()

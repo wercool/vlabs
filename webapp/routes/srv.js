@@ -27,7 +27,7 @@ router.post('/savejointstatesrarm', function(req, res, next) {
         req.body.rightForearm + ", " +
         req.body.rightShoulder + ", " +
         req.body.rightArm + ")";
-
+// console.log(sql);
         con.query(sql, function (err, result) {
             if (err) throw err;
             // console.log(sql);

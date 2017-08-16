@@ -1889,13 +1889,16 @@ class Valter
             {
                 console.log("Solution found for RArm EEF");
                 // console.log(rArmIK);
+
+                var rArmIK_rightArm = ((parseFloat(rArmIK.rightArm) + 0.15) < -1.22) ? (parseFloat(rArmIK.rightArm) + 0.15) : (parseFloat(rArmIK.rightArm));
+
                 valterRef.scriptLines = [];
-                valterRef.scriptLines.push("BodyYaw_" +         (rArmIK.bodyYaw)            + "_rad");
-                valterRef.scriptLines.push("BodyTilt_" +        (rArmIK.bodyTilt)           + "_rad");
-                valterRef.scriptLines.push("RightArm_" +        (rArmIK.rightArm)           + "_rad");
-                valterRef.scriptLines.push("RightForearm_" +    (rArmIK.rightForearm)       + "_rad");
-                valterRef.scriptLines.push("RightLimb_" +       (rArmIK.rightLimb)          + "_rad");
-                valterRef.scriptLines.push("RightShoulder_" +   (rArmIK.rightShoulder)      + "_rad");
+                valterRef.scriptLines.push("BodyYaw_" +         (rArmIK.bodyYaw)                            + "_rad");
+                valterRef.scriptLines.push("BodyTilt_" +        (rArmIK.bodyTilt)                           + "_rad");
+                valterRef.scriptLines.push("RightArm_" +        (rArmIK_rightArm)                           + "_rad");
+                valterRef.scriptLines.push("RightForearm_" +    (rArmIK.rightForearm)                       + "_rad");
+                valterRef.scriptLines.push("RightLimb_" +       (rArmIK.rightLimb)                          + "_rad");
+                valterRef.scriptLines.push("RightShoulder_" +   (rArmIK.rightShoulder)                      + "_rad");
                 valterRef.scriptLines.push("RightForearmRoll_90");
                 console.log(valterRef.scriptLines);
                 valterRef.scriptExecution();
