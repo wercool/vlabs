@@ -45,15 +45,15 @@ y_ = tf.placeholder(tf.float32, [None, 6])
 # outputs of 'y', and then average across the batch.
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
 
-train_step = tf.train.GradientDescentOptimizer(0.01).minimize(cross_entropy)
+train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
 
 sess = tf.InteractiveSession()
 tf.global_variables_initializer().run()
 
-trainStep = 1
+trainStepCnt = 0
 
 # Train
-for _ in range(10000):
+for step in range(100000):
     batchSize = 100
     normalizedBatch = valterIKDB.getBatch(batchSize)
 
@@ -66,20 +66,22 @@ for _ in range(10000):
         batchId = batchId + 1
 
     sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
+    print("Step %d" % step)
+    trainStepCnt = trainStepCnt + 1
+    if (trainStepCnt > 1000):
+        trainStepCnt = 0
+        # Test trained model
+        batchSize = 10000
+        normalizedTestBatch = valterIKDB.getBatch(batchSize)
+        testBatch_xs = np.zeros(shape=(batchSize, 3))
+        testBatch_ys = np.zeros(shape=(batchSize, 6))
+        testBatchId = 0
+        for testBatch in normalizedTestBatch:
+            testBatch_xs[testBatchId] = [testBatch[1], testBatch[2], testBatch[3]]
+            testBatch_ys[testBatchId] = [testBatch[4], testBatch[5], testBatch[6], testBatch[7], testBatch[8], testBatch[9]]
+            testBatchId = testBatchId + 1
 
-    # Test trained model
-    batchSize = 10000
-    normalizedTestBatch = valterIKDB.getBatch(batchSize)
-    testBatch_xs = np.zeros(shape=(batchSize, 3))
-    testBatch_ys = np.zeros(shape=(batchSize, 6))
-    testBatchId = 0
-    for testBatch in normalizedTestBatch:
-        testBatch_xs[testBatchId] = [testBatch[1], testBatch[2], testBatch[3]]
-        testBatch_ys[testBatchId] = [testBatch[4], testBatch[5], testBatch[6], testBatch[7], testBatch[8], testBatch[9]]
-        testBatchId = testBatchId + 1
-
-    correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    print("Step %d, Accuracy: %f" % (trainStep, sess.run(accuracy, feed_dict={x: testBatch_xs, y_: testBatch_ys})))
-    trainStep = trainStep + 1
+        correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        print("Accuracy: %f" % (sess.run(accuracy, feed_dict={x: testBatch_xs, y_: testBatch_ys})))
 
