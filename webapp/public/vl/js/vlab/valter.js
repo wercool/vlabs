@@ -1862,6 +1862,31 @@ class Valter
                 var rPalmPadPosition = new THREE.Vector3().setFromMatrixPosition(valterRef.activeObjects["rPalmPad"].matrixWorld);
                 console.log(rPalmPadPosition);
             break;
+            case "GetRightArmIKPCL":
+                var valterRef = this;
+                $.ajax({
+                    url: "/srv/rightarmikpcl",
+                    type: 'POST',
+                    contentType: "application/json"
+                }).done(function(results){
+                    var pclGeometry = new THREE.Geometry();
+                    for (var i = 0; i < results.length; i++)
+                    {
+                        var vertex = new THREE.Vector3();
+                        vertex.x = parseFloat(results[i].eefX);
+                        vertex.y = parseFloat(results[i].eefY);
+                        vertex.z = parseFloat(results[i].eefZ);
+                        vertex.multiplyScalar(1 / valterRef.model.scale.x);
+                        pclGeometry.vertices.push(vertex);
+                    }
+                    var pclMaterial = new THREE.PointsMaterial({
+                      color: 0x00ff00,
+                      size: 0.025
+                    });
+                    var pointCloud = new THREE.Points(pclGeometry, pclMaterial);
+                    valterRef.model.add(pointCloud);
+                });
+            break;
         }
     }
 
