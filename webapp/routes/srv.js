@@ -48,7 +48,7 @@ router.post('/solverarmik', function(req, res, next) {
        "eefX > " + parseFloat(req.body.x - granularity).toFixed(3) + " AND eefX < " + parseFloat(req.body.x + granularity).toFixed(3) + " AND " +
        "eefY > " + parseFloat(req.body.y - granularity).toFixed(3) + " AND eefY < " + parseFloat(req.body.y + granularity).toFixed(3) + " AND " +
        "eefZ > " + parseFloat(req.body.z - granularity).toFixed(3) + " AND eefZ < " + parseFloat(req.body.z + granularity).toFixed(3) + " " +
-       "LIMIT 100";
+       "LIMIT 500";
 
     console.log(sql);
 
@@ -71,6 +71,13 @@ router.post('/solverarmik', function(req, res, next) {
         console.log(result);
         res.send(result);
     });
+});
+
+router.post('/rightarmikpcl', function(req, res, next) {
+      var sql = "SELECT eefX, eefY, eefZ FROM rightArm";
+      con.query(sql, function (err, results) {
+          res.send(results);
+      });
 });
 
 module.exports = router;
