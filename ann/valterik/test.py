@@ -45,7 +45,7 @@ y_ = tf.placeholder(tf.float32, [None, 6])
 # outputs of 'y', and then average across the batch.
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
 
-train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+train_step = tf.train.GradientDescentOptimizer(0.001).minimize(cross_entropy)
 
 sess = tf.InteractiveSession()
 tf.global_variables_initializer().run()
@@ -53,8 +53,8 @@ tf.global_variables_initializer().run()
 trainStepCnt = 0
 
 # Train
-for step in range(100000):
-    batchSize = 100
+for step in range(10000000):
+    batchSize = 1000
     normalizedBatch = valterIKDB.getBatch(batchSize)
 
     batch_xs = np.zeros(shape=(batchSize, 3))
@@ -66,12 +66,12 @@ for step in range(100000):
         batchId = batchId + 1
 
     sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
-    print("Step %d" % step)
+    # print("Step %d" % step)
     trainStepCnt = trainStepCnt + 1
     if (trainStepCnt > 1000):
         trainStepCnt = 0
         # Test trained model
-        batchSize = 10000
+        batchSize = 250
         normalizedTestBatch = valterIKDB.getBatch(batchSize)
         testBatch_xs = np.zeros(shape=(batchSize, 3))
         testBatch_ys = np.zeros(shape=(batchSize, 6))
