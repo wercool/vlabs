@@ -32,6 +32,8 @@ class ValterIKDB:
         def query(self, queryStr):
             self.cur.execute(queryStr)
             return self.cur.fetchall()
+        def commit(self):
+            self.db.commit()
         def setBounds(self, boudns):
             self.eefXMin = boudns[0]
             self.eefXMax = boudns[1]
