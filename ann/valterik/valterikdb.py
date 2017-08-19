@@ -34,6 +34,14 @@ class ValterIKDB:
             return self.cur.fetchall()
         def commit(self):
             self.db.commit()
+        def retrieveBounds(self):
+            result = self.query("SELECT MIN(eefX), MAX(eefX), MIN(eefY), MAX(eefY), MIN(eefZ), MAX(eefZ) FROM rightArm")
+            self.eefXMin = result[0][0]
+            self.eefXMax = result[0][1]
+            self.eefYMin = result[0][2]
+            self.eefYMax = result[0][3]
+            self.eefZMin = result[0][4]
+            self.eefZMax = result[0][5]
         def setBounds(self, boudns):
             self.eefXMin = boudns[0]
             self.eefXMax = boudns[1]
@@ -78,3 +86,20 @@ class ValterIKDB:
                 sample.append(row[9])
                 normalizedBatch.append(sample)
             return normalizedBatch
+        def getFullIKSpace(self):
+            fullSet = []
+            result = self.query("SELECT * FROM rightArm")
+            for row in result:
+                sample = []
+                sample.append(row[0])
+                sample.append(self.getNormalizedX(row[1]))
+                sample.append(self.getNormalizedY(row[2]))
+                sample.append(self.getNormalizedZ(row[3]))
+                sample.append(row[4])
+                sample.append(row[5])
+                sample.append(row[6])
+                sample.append(row[7])
+                sample.append(row[8])
+                sample.append(row[9])
+                fullSet.append(sample)
+            return fullSet
