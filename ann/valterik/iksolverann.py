@@ -57,25 +57,30 @@ def neural_network_model(data):
                       'biases':  tf.Variable(tf.random_normal([n_joints]))}
 
     l1 = tf.add(tf.matmul(data, hidden_layer_1['weights']), hidden_layer_1['biases'])
-    l1 = tf.nn.sigmoid(l1)
+    l1 = tf.nn.relu(l1)
 
     l2 = tf.add(tf.matmul(l1, hidden_layer_2['weights']), hidden_layer_2['biases'])
-    l2 = tf.nn.sigmoid(l2)
+    l2 = tf.nn.relu(l2)
 
     l3 = tf.add(tf.matmul(l2, hidden_layer_3['weights']), hidden_layer_3['biases'])
-    l3 = tf.nn.sigmoid(l3)
+    l3 = tf.nn.relu(l3)
 
-    output = tf.add(tf.matmul(l3, output_layer['weights']), output_layer['biases'])
+    output = tf.matmul(l3, output_layer['weights']) + output_layer['biases']
 
     return output
 
 def train_neural_network(X):
-    prediction = neural_network_model(X)
-    cost = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=prediction, labels=Y))
-    optimizer = tf.train.AdamOptimizer().minimize(cost)
-
+    learning_rate = 0.001
     epochs = 10
     train_sample_idx = 0
+
+    prediction = neural_network_model(X)
+
+    # Define loss and optimizer
+    # cost = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=prediction, labels=Y))
+    # optimizer = tf.train.AdamOptimizer().minimize(cost)
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=Y))
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
