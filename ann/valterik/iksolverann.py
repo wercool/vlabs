@@ -8,20 +8,21 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 valterIKDB = ValterIKDB('')
 valterIKDB.dbConnect()
-# valterIKDB.retrieveBounds()
-eefXMin = -7.510000
-eefXMax = 12.743000
-eefYMin = -8.292000
-eefYMax = 12.649000
-eefZMin = 7.101000
-eefZMax = 20.797000
-valterIKDB.setBounds((eefXMin, eefXMax, eefYMin, eefYMax, eefZMin, eefZMax))
+valterIKDB.retrieveBounds()
+valterIKDB.printBounds()
+
+# eefXMin = -7.510000
+# eefXMax = 12.743000
+# eefYMin = -8.292000
+# eefYMax = 12.649000
+# eefZMin = 7.101000
+# eefZMax = 20.797000
+# valterIKDB.setBounds((eefXMin, eefXMax, eefYMin, eefYMax, eefZMin, eefZMax))
 
 fullIKSpace = valterIKDB.getFullIKSpace()
 shuffle(fullIKSpace)
 
 print "IK full space size: %d" % len(fullIKSpace)
-valterIKDB.printBounds()
 
 trainIKSpace_end = int(len(fullIKSpace) * 0.8)
 testIKSpace_start = int(len(fullIKSpace) * 0.8 + 1)
@@ -70,8 +71,8 @@ def neural_network_model(data):
     return output
 
 def train_neural_network(X):
-    learning_rate = 0.001
-    epochs = 10
+    learning_rate = 0.01
+    epochs =  10000
     train_sample_idx = 0
 
     prediction = neural_network_model(X)
@@ -89,22 +90,25 @@ def train_neural_network(X):
             # prepare training samples batch
             batch_xs = np.zeros(shape=(batch_size, 3))
             batch_ys = np.zeros(shape=(batch_size, 6))
-            for batch_sample_idx in range(batch_size):
-                batch_xs[batch_sample_idx] = [trainIKSpace[train_sample_idx][1], 
-                                              trainIKSpace[train_sample_idx][2], 
-                                              trainIKSpace[train_sample_idx][3]]
+            try:
+                for batch_sample_idx in range(batch_size):
+                    batch_xs[batch_sample_idx] = [trainIKSpace[train_sample_idx][1], 
+                                                  trainIKSpace[train_sample_idx][2], 
+                                                  trainIKSpace[train_sample_idx][3]]
 
-                batch_ys[batch_sample_idx] = [trainIKSpace[train_sample_idx][4], 
-                                              trainIKSpace[train_sample_idx][5], 
-                                              trainIKSpace[train_sample_idx][6],
-                                              trainIKSpace[train_sample_idx][7],
-                                              trainIKSpace[train_sample_idx][8],
-                                              trainIKSpace[train_sample_idx][9]]
-                train_sample_idx = train_sample_idx + 1
-
-            _, c = sess.run([optimizer, cost], feed_dict = {X: batch_xs, Y: batch_ys})
-            epoch_loss += c
-            print ("Epoch %d completed out of %d, loss: %f" % (epoch, epochs, epoch_loss))
+                    batch_ys[batch_sample_idx] = [trainIKSpace[train_sample_idx][4], 
+                                                  trainIKSpace[train_sample_idx][5], 
+                                                  trainIKSpace[train_sample_idx][6],
+                                                  trainIKSpace[train_sample_idx][7],
+                                                  trainIKSpace[train_sample_idx][8],
+                                                  trainIKSpace[train_sample_idx][9]]
+                    train_sample_idx = train_sample_idx + 1
+                _, c = sess.run([optimizer, cost], feed_dict = {X: batch_xs, Y: batch_ys})
+                epoch_loss += c
+                print ("Epoch %d completed out of %d, loss: %f" % (epoch, epochs, epoch_loss))
+            except IndexError:
+                print "Requested training sample is our of range in training IK space"
+                break
 
         # prepare test samples batch
         shuffle(testIKSpace_idxs)

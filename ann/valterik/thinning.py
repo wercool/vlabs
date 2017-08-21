@@ -17,7 +17,7 @@ valterIKDB.dbConnect()
 
 step = 0
 
-distance = 0.5
+distance = 0.2
 
 while True:
     result = valterIKDB.query("SELECT * FROM rightArm ORDER BY id DESC LIMIT %d, 1" % step)
