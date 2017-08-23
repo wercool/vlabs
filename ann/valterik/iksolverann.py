@@ -71,26 +71,26 @@ def neural_network_model(data):
     return output
 
 def train_neural_network(X):
-    learning_rate = 0.01
-    epochs =  10000
-    train_sample_idx = 0
+    learning_rate = 0.001
+    epochs = 10
 
     prediction = neural_network_model(X)
 
     # Define loss and optimizer
-    # cost = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=prediction, labels=Y))
-    # optimizer = tf.train.AdamOptimizer().minimize(cost)
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=Y))
+    # https://github.com/tensorflow/tensorflow/issues/4074
+    cost = tf.reduce_mean(tf.squared_difference(prediction, Y))
     optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         for epoch in range(epochs):
             epoch_loss = 0
-            # prepare training samples batch
-            batch_xs = np.zeros(shape=(batch_size, 3))
-            batch_ys = np.zeros(shape=(batch_size, 6))
-            try:
+            train_sample_idx = 0
+            for _ in range(int(len(trainIKSpace) / batch_size)):
+                # prepare training samples batch
+                batch_xs = np.zeros(shape=(batch_size, 3))
+                batch_ys = np.zeros(shape=(batch_size, 6))
+
                 for batch_sample_idx in range(batch_size):
                     batch_xs[batch_sample_idx] = [trainIKSpace[train_sample_idx][1], 
                                                   trainIKSpace[train_sample_idx][2], 
@@ -105,15 +105,13 @@ def train_neural_network(X):
                     train_sample_idx = train_sample_idx + 1
                 _, c = sess.run([optimizer, cost], feed_dict = {X: batch_xs, Y: batch_ys})
                 epoch_loss += c
-                print ("Epoch %d completed out of %d, loss: %f" % (epoch, epochs, epoch_loss))
-            except IndexError:
-                print "Requested training sample is our of range in training IK space"
-                break
+            print ("Epoch %d completed out of %d, loss: %f" % (epoch, epochs, epoch_loss))
 
         # prepare test samples batch
         shuffle(testIKSpace_idxs)
         test_batch_xs = np.zeros(shape=(batch_size, 3))
         test_batch_ys = np.zeros(shape=(batch_size, 6))
+
         for batch_test_sample_idx in range(batch_size):
             test_batch_xs[batch_test_sample_idx] = [testIKSpace[testIKSpace_idxs[batch_test_sample_idx]][1], 
                                                     testIKSpace[testIKSpace_idxs[batch_test_sample_idx]][2], 
