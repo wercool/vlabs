@@ -35,17 +35,30 @@ fullIKSpace = None
 print "IK train space size: %d" % len(trainIKSpace)
 print "IK test space size: %d" % len(testIKSpace)
 
-testIKSpace_idxs = range(len(testIKSpace))
-
-n_node_hl1 = 500
-n_node_hl2 = 500
-n_node_hl3 = 500
+n_node_hl1 = 100
+n_node_hl2 = 100
+n_node_hl3 = 100
 
 n_joints = 6
 batch_size = 100
 
 X = tf.placeholder(tf.float32, [None, 3])
 Y = tf.placeholder(tf.float32, [None, 6])
+
+test_batch_xs = np.zeros(shape=(len(testIKSpace), 3))
+test_batch_ys = np.zeros(shape=(len(testIKSpace), 6))
+
+for batch_test_sample_idx in range(len(testIKSpace)):
+    test_batch_xs[batch_test_sample_idx] = [testIKSpace[batch_test_sample_idx][1], 
+                                            testIKSpace[batch_test_sample_idx][2], 
+                                            testIKSpace[batch_test_sample_idx][3]]
+
+    test_batch_ys[batch_test_sample_idx] = [testIKSpace[batch_test_sample_idx][4], 
+                                            testIKSpace[batch_test_sample_idx][5], 
+                                            testIKSpace[batch_test_sample_idx][6],
+                                            testIKSpace[batch_test_sample_idx][7],
+                                            testIKSpace[batch_test_sample_idx][8],
+                                            testIKSpace[batch_test_sample_idx][9]]
 
 def neural_network_model(data):
     hidden_layer_1 = {'weights': tf.Variable(tf.random_normal([3, n_node_hl1])),
@@ -71,8 +84,8 @@ def neural_network_model(data):
     return output
 
 def train_neural_network(X):
-    learning_rate = 0.001
-    epochs = 10
+    learning_rate = 0.0005
+    epochs = 100000
 
     prediction = neural_network_model(X)
 
@@ -103,29 +116,12 @@ def train_neural_network(X):
                                                   trainIKSpace[train_sample_idx][8],
                                                   trainIKSpace[train_sample_idx][9]]
                     train_sample_idx = train_sample_idx + 1
-                _, c = sess.run([optimizer, cost], feed_dict = {X: batch_xs, Y: batch_ys})
+                _, c = sess.run([optimizer, cost], feed_dict={X: batch_xs, Y: batch_ys})
                 epoch_loss += c
-            print ("Epoch %d completed out of %d, loss: %f" % (epoch, epochs, epoch_loss))
+            print ("Epoch %d completed out of %d, loss: %f" % (epoch + 1, epochs, epoch_loss))
 
-        # prepare test samples batch
-        shuffle(testIKSpace_idxs)
-        test_batch_xs = np.zeros(shape=(batch_size, 3))
-        test_batch_ys = np.zeros(shape=(batch_size, 6))
-
-        for batch_test_sample_idx in range(batch_size):
-            test_batch_xs[batch_test_sample_idx] = [testIKSpace[testIKSpace_idxs[batch_test_sample_idx]][1], 
-                                                    testIKSpace[testIKSpace_idxs[batch_test_sample_idx]][2], 
-                                                    testIKSpace[testIKSpace_idxs[batch_test_sample_idx]][3]]
-
-            test_batch_ys[batch_test_sample_idx] = [testIKSpace[testIKSpace_idxs[batch_test_sample_idx]][4], 
-                                                    testIKSpace[testIKSpace_idxs[batch_test_sample_idx]][5], 
-                                                    testIKSpace[testIKSpace_idxs[batch_test_sample_idx]][6],
-                                                    testIKSpace[testIKSpace_idxs[batch_test_sample_idx]][7],
-                                                    testIKSpace[testIKSpace_idxs[batch_test_sample_idx]][8],
-                                                    testIKSpace[testIKSpace_idxs[batch_test_sample_idx]][9]]
-
-        correct_prediction = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-        print("Accuracy: %f" % (sess.run(accuracy, feed_dict={X: test_batch_xs, Y: test_batch_ys})))
+            correct_prediction = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
+            accuracy = tf.reduce_mean(tf.cast(correct_prediction, 'float'))
+            print("Accuracy: %f" % (sess.run(accuracy, feed_dict={X: test_batch_xs, Y: test_batch_ys})))
 
 train_neural_network(X)

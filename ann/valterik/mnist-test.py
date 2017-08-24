@@ -63,8 +63,8 @@ def train_neural_network(X):
             print ("Epoch %d completed out of %d, loss: %f" % (epoch, epochs, epoch_loss))
 
 
-        correct_prediction = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-        print("Accuracy: %f" % (sess.run(accuracy, feed_dict={X: mnist.test.images, Y: mnist.test.labels})))
+            correct_prediction = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
+            accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+            print("Accuracy: %f" % (sess.run(accuracy, feed_dict={X: mnist.test.images, Y: mnist.test.labels})))
 
 train_neural_network(X)
