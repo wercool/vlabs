@@ -16,6 +16,10 @@ batch_size = 100
 X = tf.placeholder(tf.float32, [None, 784])
 Y = tf.placeholder(tf.float32, [None, 10])
 
+output_layer_w = tf.Variable(tf.random_normal([n_node_hl3, n_classes]), name='output_layer_w')
+output_layer_b = tf.Variable(tf.random_normal([n_classes]))
+
+#https://pythonprogramming.net/community/262/TensorFlow%20For%20loop%20to%20set%20weights%20and%20biases/
 def neural_network_model(data):
     hidden_layer_1 = {'weights': tf.Variable(tf.random_normal([784, n_node_hl1])),
                       'biases':  tf.Variable(tf.random_normal([n_node_hl1]))}
@@ -23,8 +27,8 @@ def neural_network_model(data):
                       'biases':  tf.Variable(tf.random_normal([n_node_hl2]))}
     hidden_layer_3 = {'weights': tf.Variable(tf.random_normal([n_node_hl2, n_node_hl3])),
                       'biases':  tf.Variable(tf.random_normal([n_node_hl3]))}
-    output_layer   = {'weights': tf.Variable(tf.random_normal([n_node_hl3, n_classes])),
-                      'biases':  tf.Variable(tf.random_normal([n_classes]))}
+    output_layer   = {'weights': output_layer_w,
+                      'biases':  output_layer_b}
 
     l1 = tf.add(tf.matmul(data, hidden_layer_1['weights']), hidden_layer_1['biases'])
     l1 = tf.nn.relu(l1)
@@ -41,7 +45,7 @@ def neural_network_model(data):
 
 def train_neural_network(X):
     learning_rate = 0.001
-    epochs = 10
+    epochs = 1
 
     prediction = neural_network_model(X)
 
@@ -66,5 +70,6 @@ def train_neural_network(X):
             correct_prediction = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
             accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
             print("Accuracy: %f" % (sess.run(accuracy, feed_dict={X: mnist.test.images, Y: mnist.test.labels})))
+        sess.run(output_layer_w)
 
 train_neural_network(X)
