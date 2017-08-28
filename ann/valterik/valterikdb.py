@@ -168,20 +168,38 @@ class ValterIKDB:
                 sample.append(self.getNormalizedRightArm(row[9]))
                 normalizedBatch.append(sample)
             return normalizedBatch
+        # def getFullIKSpace(self):
+        #     fullSet = []
+        #     result = self.query("SELECT * FROM rightArm")
+        #     for row in result:
+        #         sample = []
+        #         sample.append(row[0])
+        #         sample.append(self.getNormalizedX(row[1]))
+        #         sample.append(self.getNormalizedY(row[2]))
+        #         sample.append(self.getNormalizedZ(row[3]))
+        #         sample.append(self.getNormalizedBodyYaw(row[4]))
+        #         # sample.append(self.getNormalizedBodyTilt(row[5]))
+        #         sample.append(self.getNormalizedRightLimb(row[6]))
+        #         sample.append(self.getNormalizedRightForearm(row[7]))
+        #         # sample.append(self.getNormalizedRightShoulder(row[8]))
+        #         # sample.append(self.getNormalizedRightArm(row[9]))
+        #         fullSet.append(sample)
+        #     return fullSet
+
         def getFullIKSpace(self):
             fullSet = []
             result = self.query("SELECT * FROM rightArm")
             for row in result:
                 sample = []
                 sample.append(row[0])
-                sample.append(self.getNormalizedX(row[1]))
-                sample.append(self.getNormalizedY(row[2]))
-                sample.append(self.getNormalizedZ(row[3]))
-                sample.append(self.getNormalizedBodyYaw(row[4]))
-                # sample.append(self.getNormalizedBodyTilt(row[5]))
-                sample.append(self.getNormalizedRightLimb(row[6]))
-                sample.append(self.getNormalizedRightForearm(row[7]))
-                # sample.append(self.getNormalizedRightShoulder(row[8]))
-                # sample.append(self.getNormalizedRightArm(row[9]))
+                sample.append(row[1])
+                sample.append(row[2])
+                sample.append(row[3])
+                sample.append(row[4])
+                # sample.append(row[5])
+                sample.append(row[6])
+                sample.append(row[7])
+                # sample.append(row[8])
+                # sample.append(row[9])
                 fullSet.append(sample)
             return fullSet

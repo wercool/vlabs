@@ -102,13 +102,14 @@ def train_neural_network(X):
     # Define loss and optimizer
 
     # https://github.com/tensorflow/tensorflow/issues/4074
-    # cost = tf.reduce_mean(tf.squared_difference(prediction, Y))
+    cost = tf.reduce_mean(tf.squared_difference(prediction, Y))
     # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
 
     # https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/3_NeuralNetworks/autoencoder.py
-    cost = tf.reduce_mean(tf.pow(Y - prediction, 2))
+    # cost = tf.reduce_mean(tf.pow(Y - prediction, 2))
     # optimizer = tf.train.RMSPropOptimizer(learning_rate).minimize(cost)
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
+    # optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
 
     satisfaction = 0
 
@@ -144,18 +145,17 @@ def train_neural_network(X):
             print("Epoch %d of %d, Loss: %f, Accuracy: %f" % (epoch + 1, epochs, epoch_loss, accuracy))
 
             test_xs = np.zeros(shape=(1, 3))
-            test_xs[0][0] = 0.24
-            test_xs[0][1] = -0.06666666666666676
-            test_xs[0][2] = -0.06666666666666676
+            # SELECT CONCAT(eefX, ', ', eefY, ', ', eefZ) as eef, bodyYaw, rightLimb, rightForearm FROM rightArm WHERE id = 2000;
+            test_xs[0] = [6.823, 6.437, 18.123] 
             result = sess.run(prediction, feed_dict={X: test_xs})
             print result
 
-            if accuracy > 0.95:
+            if accuracy > 0.99:
                 satisfaction += 1
             else:
                 satisfaction = 0
 
-            if (satisfaction > 0):
+            if (satisfaction > 10):
                 hl1_w_  = hl1_w.eval()
                 hl1_b_  = hl1_b.eval()
                 hl2_w_  = hl2_w.eval()
