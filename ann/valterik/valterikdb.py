@@ -145,11 +145,11 @@ class ValterIKDB:
             eefYn           = self.getNormalizedY(result[0][1])
             eefZn           = self.getNormalizedZ(result[0][2])
             bodyYawn        = self.getNormalizedBodyYaw(result[0][3])
-            bodyTiltn       = self.getNormalizedBodyTilt(result[0][4])
+            bodyTiltn       = 0 #self.getNormalizedBodyTilt(result[0][4])
             rightLimbn      = self.getNormalizedRightLimb(result[0][5])
             rightForearmn   = self.getNormalizedRightForearm(result[0][6])
-            rightShouldern  = self.getNormalizedRightShoulder(result[0][7])
-            rightArmn       = self.getNormalizedRightArm(result[0][8])
+            rightShouldern  = 0 #self.getNormalizedRightShoulder(result[0][7])
+            rightArmn       = 0 #self.getNormalizedRightArm(result[0][8])
             return (eefXn, eefYn, eefZn, bodyYawn, bodyTiltn, rightLimbn, rightForearmn, rightShouldern, rightArmn)
         def getBatch(self, size):
             normalizedBatch = []

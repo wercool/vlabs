@@ -11,13 +11,9 @@ valterIKDB.dbConnect()
 valterIKDB.retrieveBounds()
 valterIKDB.printBounds()
 
-# eefXMin = -7.510000
-# eefXMax = 12.743000
-# eefYMin = -8.292000
-# eefYMax = 12.649000
-# eefZMin = 7.101000
-# eefZMax = 20.797000
-# valterIKDB.setBounds((eefXMin, eefXMax, eefYMin, eefYMax, eefZMin, eefZMax))
+
+# print valterIKDB.getNormalizedInput(1000)
+# quit()
 
 fullIKSpace = valterIKDB.getFullIKSpace()
 shuffle(fullIKSpace)
@@ -85,10 +81,10 @@ def neural_network_model(data):
                       'biases':  outl_b}
 
     l1 = tf.add(tf.matmul(data, hidden_layer_1['weights']), hidden_layer_1['biases'])
-    l1 = tf.nn.relu(l1)
+    l1 = tf.nn.sigmoid(l1)
 
     l2 = tf.add(tf.matmul(l1, hidden_layer_2['weights']), hidden_layer_2['biases'])
-    l2 = tf.nn.relu(l2)
+    l2 = tf.nn.sigmoid(l2)
 
     # l3 = tf.add(tf.matmul(l2, hidden_layer_3['weights']), hidden_layer_3['biases'])
     # l3 = tf.nn.relu(l3)
@@ -98,22 +94,28 @@ def neural_network_model(data):
     return output
 
 def train_neural_network(X):
-    learning_rate = 0.0005
-    epochs = 10000
+    learning_rate = 0.001
+    epochs = 1000
 
     prediction = neural_network_model(X)
 
     # Define loss and optimizer
+
     # https://github.com/tensorflow/tensorflow/issues/4074
-    cost = tf.reduce_mean(tf.squared_difference(prediction, Y))
-    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+    # cost = tf.reduce_mean(tf.squared_difference(prediction, Y))
+    # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+
+    # https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/3_NeuralNetworks/autoencoder.py
+    cost = tf.reduce_mean(tf.pow(Y - prediction, 2))
+    # optimizer = tf.train.RMSPropOptimizer(learning_rate).minimize(cost)
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
 
     satisfaction = 0
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         for epoch in range(epochs):
-            shuffle(trainIKSpace)
+            # shuffle(trainIKSpace)
             epoch_loss = 0
             train_sample_idx = 0
             for _ in range(int(len(trainIKSpace) / batch_size)):
@@ -141,12 +143,19 @@ def train_neural_network(X):
             accuracy = sess.run(accuracy_model, feed_dict={X: test_batch_xs, Y: test_batch_ys})
             print("Epoch %d of %d, Loss: %f, Accuracy: %f" % (epoch + 1, epochs, epoch_loss, accuracy))
 
-            if accuracy > 0.65:
+            test_xs = np.zeros(shape=(1, 3))
+            test_xs[0][0] = 0.24
+            test_xs[0][1] = -0.06666666666666676
+            test_xs[0][2] = -0.06666666666666676
+            result = sess.run(prediction, feed_dict={X: test_xs})
+            print result
+
+            if accuracy > 0.95:
                 satisfaction += 1
             else:
                 satisfaction = 0
 
-            if (satisfaction > 1):
+            if (satisfaction > 0):
                 hl1_w_  = hl1_w.eval()
                 hl1_b_  = hl1_b.eval()
                 hl2_w_  = hl2_w.eval()
