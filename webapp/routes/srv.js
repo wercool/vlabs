@@ -43,6 +43,8 @@ router.post('/solverarmik', function(req, res, next) {
 
     var granularity = 1.0;
 
+    // SELECT * FROM rightArm WHERE eefX > AND eefX < AND eefY > AND eefY < AND eefZ > AND eefZ <
+    console.log([parseFloat(req.body.x), parseFloat(req.body.y), parseFloat(req.body.z)]);
     var sql = "SELECT * FROM rightArm " +
        "WHERE " +
        "eefX > " + parseFloat(req.body.x - granularity).toFixed(3) + " AND eefX < " + parseFloat(req.body.x + granularity).toFixed(3) + " AND " +

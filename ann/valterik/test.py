@@ -12,8 +12,22 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # print y_
 # quit()
 
+
+
+
+
 valterIKDB = ValterIKDB('')
 valterIKDB.dbConnect()
+valterIKDB.retrieveBounds()
+valterIKDB.printBounds()
+quit()
+
+
+
+
+valterIKDB = ValterIKDB('')
+valterIKDB.dbConnect()
+
 
 #valterIKDB.getBounds()
 eefXMin = -7.510000

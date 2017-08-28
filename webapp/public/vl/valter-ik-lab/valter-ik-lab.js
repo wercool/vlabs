@@ -174,20 +174,28 @@ function ValterLab(webGLContainer, executeScript)
         //
         // //bodyYaw
         // self.Valter.activeObjects["valterBodyP1"].rotation.z = -0.750;//default: -0.750;
-        // //bodyTilt
-        // self.Valter.activeObjects["bodyFrameAxisR"].rotation.x = 0.0;//default: 0.0;
-        // //rightLimb
-        // self.Valter.activeObjects["armRightShoulderAxis"].rotation.x = -0.4;//default: -0.4;
+        // // //bodyTilt
+        // // self.Valter.activeObjects["bodyFrameAxisR"].rotation.x = 0.0;//default: 0.0;
+        // // //rightLimb
+        // // self.Valter.activeObjects["armRightShoulderAxis"].rotation.x = -0.4;//default: -0.4;
         // //rightForearm
         // self.Valter.activeObjects["rightForearmTilt"].rotation.y = 0.5;//default: 0.5;
-        // //rightShoulder
-        // self.Valter.activeObjects["bodyFrameR"].rotation.z = 0.0;//default: 0.0;
-        // //rightArm
-        // self.Valter.activeObjects["rightArm"].rotation.y = -1.22;// default: -1.22;
+        // // //rightShoulder
+        // // self.Valter.activeObjects["bodyFrameR"].rotation.z = 0.0;//default: 0.0;
+        // // //rightArm
+        // // self.Valter.activeObjects["rightArm"].rotation.y = -1.22;// default: -1.22;
         //
         //
         //
         // setTimeout(self.IKBruteforce.bind(self.Valter), 500);
+
+        setTimeout(function(){
+            var localPos = new THREE.Vector3(-1.377, 7.423, 14.783);
+            var eefPos = self.Valter.model.localToWorld(localPos);
+            eefPos.multiplyScalar(1 / self.Valter.model.scale.x);
+            self.Valter.manipulationObject.position.copy(eefPos);
+            self.Valter.rightArmIKANN(localPos);
+        }, 500);
 
     }
 
@@ -214,9 +222,9 @@ function ValterLab(webGLContainer, executeScript)
 
     self.IKBruteforce = function()
     {
-        //rightArm
-        if (self.Valter.activeObjects["rightArm"].rotation.y > -2.5)
-        {
+        // //rightArm
+        // if (self.Valter.activeObjects["rightArm"].rotation.y > -2.5)
+        // {
             //rightForearm
             if (self.Valter.activeObjects["rightForearmTilt"].rotation.y > -0.5)
             {
@@ -250,9 +258,9 @@ function ValterLab(webGLContainer, executeScript)
             {
                 self.Valter.activeObjects["rightForearmTilt"].rotation.y = 0.5;
             }
-            self.Valter.activeObjects["rightArm"].rotation.y -= dValRightArm;
-            self.sendJointStateAndEEFPos();
-        }
+        //     self.Valter.activeObjects["rightArm"].rotation.y -= dValRightArm;
+        //     self.sendJointStateAndEEFPos();
+        // }
 
 
 

@@ -178,10 +178,10 @@ class ValterIKDB:
                 sample.append(self.getNormalizedY(row[2]))
                 sample.append(self.getNormalizedZ(row[3]))
                 sample.append(self.getNormalizedBodyYaw(row[4]))
-                sample.append(self.getNormalizedBodyTilt(row[5]))
+                # sample.append(self.getNormalizedBodyTilt(row[5]))
                 sample.append(self.getNormalizedRightLimb(row[6]))
                 sample.append(self.getNormalizedRightForearm(row[7]))
-                sample.append(self.getNormalizedRightShoulder(row[8]))
-                sample.append(self.getNormalizedRightArm(row[9]))
+                # sample.append(self.getNormalizedRightShoulder(row[8]))
+                # sample.append(self.getNormalizedRightArm(row[9]))
                 fullSet.append(sample)
             return fullSet

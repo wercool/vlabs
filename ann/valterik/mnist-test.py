@@ -70,6 +70,10 @@ def train_neural_network(X):
             correct_prediction = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
             accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
             print("Accuracy: %f" % (sess.run(accuracy, feed_dict={X: mnist.test.images, Y: mnist.test.labels})))
-        sess.run(output_layer_w)
+
+        # sess.run(output_layer_w)
+        weights = output_layer_w.eval()
+        biases  = output_layer_b.eval()
+        print biases
 
 train_neural_network(X)
