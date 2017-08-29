@@ -45,7 +45,7 @@ def neural_network_model(data):
 
     output = tf.matmul(l2, output_layer['weights']) + output_layer['biases']
 
-    return output
+    return output, l2
 
 prediction = neural_network_model(X)
 
@@ -54,5 +54,6 @@ sess.run(tf.global_variables_initializer())
 test_xs = np.zeros(shape=(1, 3))
 # SELECT CONCAT(eefX, ', ', eefY, ', ', eefZ) as eef, bodyYaw, rightLimb, rightForearm FROM rightArm WHERE id = 2000;
 test_xs[0] = [5.972, 5.046, 13.674]
-result = sess.run(prediction, feed_dict={X: test_xs})
+result, l2 = sess.run(prediction, feed_dict={X: test_xs})
 print result
+# print l2

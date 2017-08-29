@@ -49,7 +49,8 @@ class Valter
         this.initialValuesArray = {};
 
         this.settings = {
-            coveringsVisibility: true
+            coveringsVisibility: true,
+            annIK: false
         };
 
         this.scriptLines = [];
@@ -72,6 +73,47 @@ class Valter
             rightPalmYaw: 0.0,
             rightForearmRoll: 0.0,
             leftForearmRoll: 0.0,
+        };
+
+        this.jointLimits = {
+            baseYawMin: -6.28,
+            baseYawMax: 0.0,
+            bodyYawMin: -1.57,
+            bodyYawMax: 1.57,
+            bodyTiltMin: -0.8,
+            bodyTiltMax: 0.0,
+            headYawMin: -4.42,
+            headYawMax: -1.86,
+            headTiltMin: -2.85,
+            headTiltMax: -1.8,
+            rightArmMin: -2.57,
+            rightArmMax: -1.22,
+            leftArmMin: -2.57,
+            leftArmMax: -1.22,
+            rightLimbMin: -0.85,
+            rightLimbMax: 1.4,
+            leftLimbMin: 0.0,
+            leftLimbMax: 0.0,
+            rightShoulderMin: 0.0,
+            rightShoulderMax: 1.0,
+            leftShoulderMin: -1.0,
+            leftShoulderMax: 0.0,
+            rightForearmMin: -0.5,
+            rightForearmMax: 1.0,
+            leftForearmMin: -0.5,
+            leftForearmMax: 1.0,
+            leftPalmYawMin: -0.5,
+            leftPalmYawMax: 0.5,
+            rightPalmYawMin: -0.5,
+            rightPalmYawMax: 0.5,
+            rightForearmRollMin: -3.14,
+            rightForearmRollMax: 0.0,
+            leftForearmRollMin: -3.14,
+            leftForearmRollMax: 0.0,
+            rightForearmYawMin: -0.25,
+            rightForearmYawMax: 0.4,
+            leftForearmYawMin: -0.25,
+            leftForearmYawMax: 0.4
         };
 
         this.jointsTweens = {
@@ -427,8 +469,12 @@ class Valter
 
             if (!this.executeScriptOnStart)
             {
-                var manipulationObjectControl = new THREE.TransformControls(this.vlab.getDefaultCamera(), this.vlab.WebGLRenderer.domElement);
-                manipulationObjectControl.addEventListener("change", function(){
+                this.manipulationObjectControl = new THREE.TransformControls(this.vlab.getDefaultCamera(), this.vlab.WebGLRenderer.domElement);
+                this.manipulationObjectControl.addEventListener("change", function(){
+                                                                if (this.settings.annIK)
+                                                                {
+                                                                    self.rightArmFollowManipulationObject();
+                                                                }
                                                                 if (this.vlab.pressedKey != null)
                                                                 {
                                                                     if (this.vlab.pressedKey == 17) //ctrlKey
@@ -437,9 +483,9 @@ class Valter
                                                                     }
                                                                 }
                                                             }.bind(this));
-                manipulationObjectControl.attach(this.manipulationObject);
-                manipulationObjectControl.setSize(1.0);
-                this.vlab.getVlabScene().add(manipulationObjectControl);
+                this.manipulationObjectControl.attach(this.manipulationObject);
+                this.manipulationObjectControl.setSize(1.0);
+                this.vlab.getVlabScene().add(this.manipulationObjectControl);
             }
 
             if (!this.executeScriptOnStart)
@@ -467,29 +513,72 @@ class Valter
                 // this.vlab.getVlabScene().add(this.activeObjects["valterBaseToRightPalmPadDirectionVector"]);
             }
 
+
+        this.jointLimits = {
+            baseYawMin: -6.28,
+            baseYawMax: 0.0,
+            bodyYawMin: -1.57,
+            bodyYawMax: 1.57,
+            bodyTiltMin: -0.8,
+            bodyTiltMax: 0.0,
+            headYawMin: -4.42,
+            headYawMax: -1.86,
+            headTiltMin: -2.85,
+            headTiltMax: -1.8,
+            rightArmMin: -2.57,
+            rightArmMax: -1.22,
+            leftArmMin: -2.57,
+            leftArmMax: -1.22,
+            rightLimbMin: -0.85,
+            rightLimbMax: 1.4,
+            leftLimbMin: -0.85,
+            leftLimbMax: 1.4,
+            rightShoulderMin: 0.0,
+            rightShoulderMax: 1.0,
+            leftShoulderMin: -1.0,
+            leftShoulderMax: 0.0,
+            rightForearmMin: -0.5,
+            rightForearmMax: 1.0,
+            leftForearmMin: -0.5,
+            leftForearmMax: 1.0,
+            leftPalmYawMin: -0.5,
+            leftPalmYawMax: 0.5,
+            rightPalmYawMin: -0.5,
+            rightPalmYawMax: 0.5,
+            rightForearmRollMin: -3.14,
+            rightForearmRollMax: 0.0,
+            leftForearmRollMin: -3.14,
+            leftForearmRollMax: 0.0,
+            rightForearmYawMin: -0.25,
+            rightForearmYawMax: 0.4,
+            leftForearmYawMin: -0.25,
+            leftForearmYawMax: 0.4
+        };
+
+
             var GUIcontrols1 = new dat.GUI();
-            GUIcontrols1.add(this.model.rotation, 'z', -6.28, 0.0).name("Base Yaw").step(0.01).listen().onChange(this.baseRotation.bind(this));;
-            GUIcontrols1.add(this.activeObjects["valterBodyP1"].rotation, 'z', -1.57, 1.57).name("Body Yaw").step(0.01).onChange(this.baseToBodyCableSleeveAnimation.bind(this));
-            GUIcontrols1.add(this.activeObjects["bodyFrameAxisR"].rotation, 'x', -0.8, 0.0).name("Body Tilt").step(0.01).onChange(this.bodyToTorsoCableSleeveAnimation.bind(this));
-            GUIcontrols1.add(this.joints, 'rightShoulder', 0.0, 1.0).name("Right Shoulder").step(0.01).onChange(this.rightShoulderRotate.bind(this));
-            GUIcontrols1.add(this.joints, 'leftShoulder', -1.0, 0.0).name("Left Shoulder").step(0.01).onChange(this.leftShoulderRotate.bind(this));;
-            GUIcontrols1.add(this.activeObjects["armRightShoulderAxis"].rotation, 'x', -0.85, 1.4).name("Right Limb").step(0.01);
-            GUIcontrols1.add(this.activeObjects["armLeftShoulderAxis"].rotation, 'x', -0.85, 1.4).name("Left Limb").step(0.01);
-            GUIcontrols1.add(this.joints, 'rightArm', -2.57, -1.22).name("Right Arm").step(0.01).onChange(this.rightArmRotate.bind(this));
-            GUIcontrols1.add(this.joints, 'leftArm', -2.57, -1.22).name("Left Arm").step(0.01).onChange(this.leftArmRotate.bind(this));
-            GUIcontrols1.add(this.joints, 'rightForearm', -0.5, 1.0).name("Right Forearm Tilt").step(0.01).onChange(this.rightForearmRotate.bind(this));
-            GUIcontrols1.add(this.joints, 'leftForearm', -0.5, 1.0).name("Left Forearm Tilt").step(0.01).onChange(this.leftForearmRotate.bind(this));
+            GUIcontrols1.add(this.model.rotation, 'z', this.jointLimits.baseYawMin, this.jointLimits.baseYawMax).name("Base Yaw").step(0.01).listen().onChange(this.baseRotation.bind(this));;
+            GUIcontrols1.add(this.activeObjects["valterBodyP1"].rotation, 'z', this.jointLimits.bodyYawMin, this.jointLimits.bodyYawMax).name("Body Yaw").step(0.01).onChange(this.baseToBodyCableSleeveAnimation.bind(this));
+            GUIcontrols1.add(this.activeObjects["bodyFrameAxisR"].rotation, 'x', this.jointLimits.bodyTiltMin, this.jointLimits.bodyTiltMax).name("Body Tilt").step(0.01).onChange(this.bodyToTorsoCableSleeveAnimation.bind(this));
+            GUIcontrols1.add(this.joints, 'rightShoulder', this.jointLimits.rightShoulderMin, this.jointLimits.rightShoulderMax).name("Right Shoulder").step(0.01).onChange(this.rightShoulderRotate.bind(this));
+            GUIcontrols1.add(this.joints, 'leftShoulder', this.jointLimits.leftShoulderMin, this.jointLimits.leftShoulderMax).name("Left Shoulder").step(0.01).onChange(this.leftShoulderRotate.bind(this));;
+            GUIcontrols1.add(this.activeObjects["armRightShoulderAxis"].rotation, 'x', this.jointLimits.rightLimbMin, this.jointLimits.rightLimbMax).name("Right Limb").step(0.01);
+            GUIcontrols1.add(this.activeObjects["armLeftShoulderAxis"].rotation, 'x', this.jointLimits.leftLimbMin, this.jointLimits.leftLimbMax).name("Left Limb").step(0.01);
+            GUIcontrols1.add(this.joints, 'rightArm', this.jointLimits.rightArmMin, this.jointLimits.rightArmMax).name("Right Arm").step(0.01).onChange(this.rightArmRotate.bind(this));
+            GUIcontrols1.add(this.joints, 'leftArm', this.jointLimits.leftArmMin, this.jointLimits.leftArmMax).name("Left Arm").step(0.01).onChange(this.leftArmRotate.bind(this));
+            GUIcontrols1.add(this.joints, 'rightForearm', this.jointLimits.rightForearmMin, this.jointLimits.rightForearmMax).name("Right Forearm Tilt").step(0.01).onChange(this.rightForearmRotate.bind(this));
+            GUIcontrols1.add(this.joints, 'leftForearm', this.jointLimits.leftForearmMin, this.jointLimits.leftForearmMax).name("Left Forearm Tilt").step(0.01).onChange(this.leftForearmRotate.bind(this));
 
-            GUIcontrols1.add(this.activeObjects["rightForearmYaw"].rotation, 'z', -0.25, 0.4).name("Right Forearm Yaw").step(0.01);
-            GUIcontrols1.add(this.activeObjects["leftForearmYaw"].rotation, 'z', -0.25, 0.4).name("Left Forearm Yaw").step(0.01);
+            GUIcontrols1.add(this.activeObjects["rightForearmYaw"].rotation, 'z', this.jointLimits.rightForearmYawMin, this.jointLimits.rightForearmYawMax).name("Right Forearm Yaw").step(0.01);
+            GUIcontrols1.add(this.activeObjects["leftForearmYaw"].rotation, 'z', this.jointLimits.leftForearmYawMin, this.jointLimits.leftForearmYawMax).name("Left Forearm Yaw").step(0.01);
 
-            GUIcontrols1.add(this.activeObjects["forearmFrameRight"].rotation, 'y', -3.14, 0.0).name("Right Forearm Roll").step(0.01);
-            GUIcontrols1.add(this.activeObjects["forearmFrameLeft"].rotation, 'y', -3.14, 0.0).name("Left Forearm Roll").step(0.01);
-            GUIcontrols1.add(this.activeObjects["headTiltFrame"].rotation, 'x', -2.85, -1.8).name("Head Tilt").step(0.01).onChange(this.headToBodyCableSleeveAnimation.bind(this));
-            GUIcontrols1.add(this.activeObjects["headYawFrame"].rotation, 'z', -4.42, -1.86).name("Head Yaw").step(0.01).onChange(this.headToBodyCableSleeveAnimation.bind(this));
+            GUIcontrols1.add(this.activeObjects["forearmFrameRight"].rotation, 'y', this.jointLimits.rightForearmRollMin, this.jointLimits.rightForearmRollMax).name("Right Forearm Roll").step(0.01);
+            GUIcontrols1.add(this.activeObjects["forearmFrameLeft"].rotation, 'y', this.jointLimits.leftForearmRollMin, this.jointLimits.leftForearmRollMax).name("Left Forearm Roll").step(0.01);
+            GUIcontrols1.add(this.activeObjects["headTiltFrame"].rotation, 'x', this.jointLimits.headTiltMin, this.jointLimits.headTiltMax).name("Head Tilt").step(0.01).onChange(this.headToBodyCableSleeveAnimation.bind(this));
+            GUIcontrols1.add(this.activeObjects["headYawFrame"].rotation, 'z', this.jointLimits.headYawMin, this.jointLimits.headYawMax).name("Head Yaw").step(0.01).onChange(this.headToBodyCableSleeveAnimation.bind(this));
 
-            GUIcontrols1.add(this.joints, 'leftPalmYaw',  -0.5, 0.5).name("Right Palm Yaw").step(0.01).onChange(this.rightPalmYaw.bind(this));
-            GUIcontrols1.add(this.joints, 'rightPalmYaw', -0.5, 0.5).name("Left Palm Yaw").step(0.01).onChange(this.leftPalmYaw.bind(this));
+            GUIcontrols1.add(this.joints, 'leftPalmYaw',  this.jointLimits.rightPalmYawMin, this.jointLimits.rightPalmYawMax).name("Right Palm Yaw").step(0.01).onChange(this.rightPalmYaw.bind(this));
+            GUIcontrols1.add(this.joints, 'rightPalmYaw', this.jointLimits.leftPalmYawMin, this.jointLimits.leftPalmYawMax).name("Left Palm Yaw").step(0.01).onChange(this.leftPalmYaw.bind(this));
 
             GUIcontrols1.add(this.handGrasping, 'right', 0.0, 1.0).name("Right Hand Grasping").step(0.01).onChange(this.rightHandGrasping.bind(this));
             GUIcontrols1.add(this.handGrasping, 'left', 0.0, 1.0).name("Left Hand Grapsing").step(0.01).onChange(this.leftHandGrasping.bind(this));
@@ -498,6 +587,7 @@ class Valter
             GUIcontrols1.add(this.guiControls, 'talk').name("Valter talks");
             GUIcontrols1.add(this.guiControls, 'navigate').name("Navigate");
             GUIcontrols1.add(this.guiControls, 'rightArmIK').name("Solve Right Arm IK");
+            GUIcontrols1.add(this.settings, 'annIK').name("ANN Right Arm IK");
             if (typeof executeScriptDialog !== 'undefined')
             {
                 GUIcontrols1.add(this.guiControls, 'executeScript').name("Execute Script");
@@ -2040,7 +2130,7 @@ class Valter
 
         var input = [eefPosN.x, eefPosN.y, eefPosN.z]
 
-console.log("input", input);
+// console.log("input", input);
 
         var output = [];
 
@@ -2055,17 +2145,19 @@ console.log("input", input);
                 {
                     sum += net.layers[l].weights[i][bi] * input[i];
                 }
-                output[bi] = (1 / (1 + Math.exp(-sum)));
-            }
-            if (net.layers[l].name == "hl1")
-            {
-                console.log(output);
+                if (net.layers[l].name != "outl")
+                {
+                    output[bi] = (1 / (1 + Math.exp(-sum)));
+                }
+                else
+                {
+                    output[bi] = sum;
+                }
             }
             input = output;
         }
 
-console.log("output", output);
-return;
+// console.log("output", output);
 
         // var jointAngles = function(output){
         //     var bodyYawMin = -0.750000;
@@ -2084,18 +2176,45 @@ return;
 
         var jointAngles = {'bodyYaw': output[0], 'rightLimb': output[1], 'rightForearm': output[2]}
 
-        console.log(jointAngles);
+        if (jointAngles.bodyYaw >= this.jointLimits.bodyYawMin && jointAngles.bodyYaw <= this.jointLimits.bodyYawMax)
+        {
+            this.activeObjects["valterBodyP1"].rotation.z  = jointAngles.bodyYaw;
+            this.baseToBodyCableSleeveAnimation();
+        }
 
-        var valterRef = this;
+        if (jointAngles.rightLimb >= this.jointLimits.rightLimbMin && jointAngles.rightLimb <= this.jointLimits.rightLimbMax)
+        {
+            this.activeObjects["armRightShoulderAxis"].rotation.x = jointAngles.rightLimb;
+        }
 
-        valterRef.scriptLines = [];
-        valterRef.scriptLines.push("BodyYaw_" +         (jointAngles.bodyYaw)                            + "_rad");
-        valterRef.scriptLines.push("RightForearm_" +    (jointAngles.rightForearm)                       + "_rad");
-        valterRef.scriptLines.push("RightLimb_" +       (jointAngles.rightLimb)                          + "_rad");
-        valterRef.scriptLines.push("RightForearmRoll_90");
+        if (jointAngles.rightForearm >= this.jointLimits.rightForearmMin && jointAngles.rightForearm <= this.jointLimits.rightForearmMax)
+        {
+            this.rightForearmRotate(jointAngles.rightForearm);
+        }
 
-        console.log(valterRef.scriptLines);
 
-        valterRef.scriptExecution();
+        // console.log(jointAngles);
+
+        // var valterRef = this;
+
+        // valterRef.scriptLines = [];
+        // valterRef.scriptLines.push("BodyYaw_" +         (jointAngles.bodyYaw)                            + "_rad");
+        // valterRef.scriptLines.push("RightForearm_" +    (jointAngles.rightForearm)                       + "_rad");
+        // valterRef.scriptLines.push("RightLimb_" +       (jointAngles.rightLimb)                          + "_rad");
+        // valterRef.scriptLines.push("RightForearmRoll_90");
+
+        // console.log(valterRef.scriptLines);
+
+        // valterRef.scriptExecution();
+    }
+
+    rightArmFollowManipulationObject()
+    {
+        var eefPos = new THREE.Vector3().setFromMatrixPosition(this.manipulationObject.matrixWorld);
+        // console.log("Global RArm EEF: ",  eefPos);
+        this.model.worldToLocal(eefPos);
+        eefPos.multiply(this.model.scale);
+        // console.log("Local RArm EEF: ",  eefPos);
+        this.rightArmIKANN(eefPos);
     }
 }
