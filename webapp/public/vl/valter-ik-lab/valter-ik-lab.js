@@ -171,7 +171,7 @@ function ValterLab(webGLContainer, executeScript)
         // self.Valter.activeObjects["rightForearmYaw"].rotation.z = -0.25;
         //rightForeArmRoll
         self.Valter.activeObjects["forearmFrameRight"].rotation.y = -1.57;
-        
+
         //bodyYaw
         self.Valter.activeObjects["valterBodyP1"].rotation.z = 0.0;//default: -0.750;
         // //bodyTilt
@@ -188,13 +188,14 @@ function ValterLab(webGLContainer, executeScript)
 
         // setTimeout(self.IKBruteforce.bind(self.Valter), 500);
 
+
         setTimeout(function(){
-            var localPos = new THREE.Vector3(2.569, 6.02, 13.134);
-            var eefPos = self.Valter.model.localToWorld(localPos);
+            var localPos = new THREE.Vector3(5.972, 5.046, 13.674);
+            var eefPos = self.Valter.model.localToWorld(localPos.clone());
             eefPos.multiplyScalar(1 / self.Valter.model.scale.x);
             self.Valter.manipulationObject.position.copy(eefPos);
             self.Valter.rightArmIKANN(localPos);
-        }, 500);
+        }, 1000);
 
     }
 

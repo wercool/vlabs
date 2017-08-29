@@ -68,6 +68,9 @@ hl3_b = tf.Variable(tf.random_normal([n_node_hl3]))
 outl_w = tf.Variable(tf.random_normal([n_node_hl2, n_joints]))
 outl_b = tf.Variable(tf.random_normal([n_joints]))
 
+# Add ops to save and restore all the variables.
+saver = tf.train.Saver()
+
 def neural_network_model(data):
     # hl1->hl2->outl
 
@@ -103,8 +106,8 @@ def train_neural_network(X):
 
     # https://github.com/tensorflow/tensorflow/issues/4074
     cost = tf.reduce_mean(tf.squared_difference(prediction, Y))
-    # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+    # optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
 
     # https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/3_NeuralNetworks/autoencoder.py
     # cost = tf.reduce_mean(tf.pow(Y - prediction, 2))
@@ -112,11 +115,19 @@ def train_neural_network(X):
     # optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
 
     satisfaction = 0
+    saver_cnt = 0
 
     with tf.Session() as sess:
+        # Restore variables from disk.
+        try:
+            saver.restore(sess, "valteriksolver.ckpt")
+            print("Model restored")
+        except Exception as e:
+            print "No model to restore"
+
         sess.run(tf.global_variables_initializer())
         for epoch in range(epochs):
-            # shuffle(trainIKSpace)
+            shuffle(trainIKSpace)
             epoch_loss = 0
             train_sample_idx = 0
             for _ in range(int(len(trainIKSpace) / batch_size)):
@@ -144,18 +155,24 @@ def train_neural_network(X):
             accuracy = sess.run(accuracy_model, feed_dict={X: test_batch_xs, Y: test_batch_ys})
             print("Epoch %d of %d, Loss: %f, Accuracy: %f" % (epoch + 1, epochs, epoch_loss, accuracy))
 
+            # saver_cnt += 1
+            # if (saver_cnt > 100):
+            #     save_path = saver.save(sess, "valteriksolver.ckpt");
+            #     saver_cnt = 0
+            #     print("Model saved");
+
             test_xs = np.zeros(shape=(1, 3))
             # SELECT CONCAT(eefX, ', ', eefY, ', ', eefZ) as eef, bodyYaw, rightLimb, rightForearm FROM rightArm WHERE id = 2000;
-            test_xs[0] = [6.823, 6.437, 18.123] 
+            test_xs[0] = [5.972, 5.046, 13.674] 
             result = sess.run(prediction, feed_dict={X: test_xs})
             print result
 
-            if accuracy > 0.99:
+            if accuracy > 0.97:
                 satisfaction += 1
             else:
                 satisfaction = 0
 
-            if (satisfaction > 10):
+            if (satisfaction > 5):
                 hl1_w_  = hl1_w.eval()
                 hl1_b_  = hl1_b.eval()
                 hl2_w_  = hl2_w.eval()
