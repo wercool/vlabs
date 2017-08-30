@@ -191,15 +191,15 @@ class ValterIKDB:
             result = self.query("SELECT * FROM rightArm")
             for row in result:
                 sample = []
-                sample.append(row[0])
-                sample.append(row[1])
-                sample.append(row[2])
-                sample.append(row[3])
-                sample.append(row[4])
-                # sample.append(row[5])
-                sample.append(row[6])
-                sample.append(row[7])
-                # sample.append(row[8])
+                sample.append(row[0])   # id
+                sample.append(row[1])   # eefX
+                sample.append(row[2])   # eefY
+                sample.append(row[3])   # eefZ
+                sample.append(row[4])   # bodyYaw
+                sample.append(row[5])   # bodyTilt
+                sample.append(row[6])   # rightLimb
+                sample.append(row[7])   # rightForearm
+                sample.append(row[8])   # rightShoulder
                 # sample.append(row[9])
                 fullSet.append(sample)
             return fullSet

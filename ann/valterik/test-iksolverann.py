@@ -8,11 +8,11 @@ n_node_hl1 = 30
 n_node_hl2 = 30
 n_node_hl3 = 30
 
-n_joints = 3
+n_joints = 5
 batch_size = 100
 
 X = tf.placeholder(tf.float32, [None, 3])
-Y = tf.placeholder(tf.float32, [None, 3])
+Y = tf.placeholder(tf.float32, [None, 5])
 
 
 hl1_w_ = np.loadtxt('./iksolver_ann_params/hl1_w.txt', delimiter=',')
@@ -52,8 +52,8 @@ prediction = neural_network_model(X)
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 test_xs = np.zeros(shape=(1, 3))
-# SELECT CONCAT(eefX, ', ', eefY, ', ', eefZ) as eef, bodyYaw, rightLimb, rightForearm FROM rightArm WHERE id = 2000;
-test_xs[0] = [5.972, 5.046, 13.674]
+# SELECT CONCAT(eefX, ', ', eefY, ', ', eefZ) as eef, bodyYaw, bodyTilt, rightLimb, rightForearm, rightShoulder FROM rightArm WHERE id = 2000;
+test_xs[0] = [-0.276, 4.210, 10.874]
 result, l2 = sess.run(prediction, feed_dict={X: test_xs})
 print result
 # print l2

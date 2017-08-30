@@ -8,8 +8,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 valterIKDB = ValterIKDB('')
 valterIKDB.dbConnect()
-valterIKDB.retrieveBounds()
-valterIKDB.printBounds()
+# valterIKDB.retrieveBounds()
+# valterIKDB.printBounds()
 
 
 # print valterIKDB.getNormalizedInput(1000)
@@ -35,14 +35,14 @@ n_node_hl1 = 30
 n_node_hl2 = 30
 n_node_hl3 = 30
 
-n_joints = 3
+n_joints = 5
 batch_size = 100
 
 X = tf.placeholder(tf.float32, [None, 3])
-Y = tf.placeholder(tf.float32, [None, 3])
+Y = tf.placeholder(tf.float32, [None, 5])
 
 test_batch_xs = np.zeros(shape=(len(testIKSpace), 3))
-test_batch_ys = np.zeros(shape=(len(testIKSpace), 3))
+test_batch_ys = np.zeros(shape=(len(testIKSpace), 5))
 
 for batch_test_sample_idx in range(len(testIKSpace)):
     test_batch_xs[batch_test_sample_idx] = [testIKSpace[batch_test_sample_idx][1], 
@@ -51,10 +51,9 @@ for batch_test_sample_idx in range(len(testIKSpace)):
 
     test_batch_ys[batch_test_sample_idx] = [testIKSpace[batch_test_sample_idx][4], 
                                             testIKSpace[batch_test_sample_idx][5], 
-                                            testIKSpace[batch_test_sample_idx][6]]
-                                            # testIKSpace[batch_test_sample_idx][7],
-                                            # testIKSpace[batch_test_sample_idx][8],
-                                            # testIKSpace[batch_test_sample_idx][9]]
+                                            testIKSpace[batch_test_sample_idx][6],
+                                            testIKSpace[batch_test_sample_idx][7],
+                                            testIKSpace[batch_test_sample_idx][8]]
 
 hl1_w = tf.Variable(tf.random_normal([3, n_node_hl1]))
 hl1_b = tf.Variable(tf.random_normal([n_node_hl1]))
@@ -97,7 +96,7 @@ def neural_network_model(data):
     return output
 
 def train_neural_network(X):
-    learning_rate = 0.001
+    learning_rate = 0.01
     epochs = 1000
 
     prediction = neural_network_model(X)
@@ -133,7 +132,7 @@ def train_neural_network(X):
             for _ in range(int(len(trainIKSpace) / batch_size)):
                 # prepare training samples batch
                 batch_xs = np.zeros(shape=(batch_size, 3))
-                batch_ys = np.zeros(shape=(batch_size, 3))
+                batch_ys = np.zeros(shape=(batch_size, 5))
 
                 for batch_sample_idx in range(batch_size):
                     batch_xs[batch_sample_idx] = [trainIKSpace[train_sample_idx][1], 
@@ -142,10 +141,9 @@ def train_neural_network(X):
 
                     batch_ys[batch_sample_idx] = [trainIKSpace[train_sample_idx][4], 
                                                   trainIKSpace[train_sample_idx][5], 
-                                                  trainIKSpace[train_sample_idx][6]]
-                                                  # trainIKSpace[train_sample_idx][7],
-                                                  # trainIKSpace[train_sample_idx][8],
-                                                  # trainIKSpace[train_sample_idx][9]]
+                                                  trainIKSpace[train_sample_idx][6],
+                                                  trainIKSpace[train_sample_idx][7],
+                                                  trainIKSpace[train_sample_idx][8]]
                     train_sample_idx = train_sample_idx + 1
                 _, c = sess.run([optimizer, cost], feed_dict={X: batch_xs, Y: batch_ys})
                 epoch_loss += c
@@ -162,17 +160,21 @@ def train_neural_network(X):
             #     print("Model saved");
 
             test_xs = np.zeros(shape=(1, 3))
-            # SELECT CONCAT(eefX, ', ', eefY, ', ', eefZ) as eef, bodyYaw, rightLimb, rightForearm FROM rightArm WHERE id = 2000;
-            test_xs[0] = [5.972, 5.046, 13.674] 
+            # SELECT CONCAT(eefX, ', ', eefY, ', ', eefZ) as eef, bodyYaw, bodyTilt, rightLimb, rightForearm, rightShoulder FROM rightArm WHERE id = 2000;
+            test_xs[0] = [-0.276, 4.210, 10.874] 
             result = sess.run(prediction, feed_dict={X: test_xs})
-            print result
 
-            if accuracy > 0.97:
+            print "[[ %.8f %.8f %.8f %.8f %.8f ]]" % (1.090, 0.000, -0.180, 0.397, 0.000)
+            print result
+            print "\n"
+
+            if accuracy > 0.95:
                 satisfaction += 1
             else:
                 satisfaction = 0
 
-            if (satisfaction > 5):
+            # if (satisfaction > 5) or (epoch > 995):
+            if (accuracy > 0.95):
                 hl1_w_  = hl1_w.eval()
                 hl1_b_  = hl1_b.eval()
                 hl2_w_  = hl2_w.eval()
@@ -180,12 +182,12 @@ def train_neural_network(X):
                 outl_w_ = outl_w.eval()
                 outl_b_ = outl_b.eval()
 
-                # np.savetxt('./iksolver_ann_params/hl1_w.txt',  hl1_w_, delimiter=',')
-                # np.savetxt('./iksolver_ann_params/hl1_b.txt',  hl1_b_, delimiter=',')
-                # np.savetxt('./iksolver_ann_params/hl2_w.txt',  hl2_w_, delimiter=',')
-                # np.savetxt('./iksolver_ann_params/hl2_b.txt',  hl2_b_, delimiter=',')
-                # np.savetxt('./iksolver_ann_params/outl_w.txt', outl_w_, delimiter=',')
-                # np.savetxt('./iksolver_ann_params/outl_b.txt', outl_b_, delimiter=',')
+                np.savetxt('./iksolver_ann_params/hl1_w.txt',  hl1_w_, delimiter=',')
+                np.savetxt('./iksolver_ann_params/hl1_b.txt',  hl1_b_, delimiter=',')
+                np.savetxt('./iksolver_ann_params/hl2_w.txt',  hl2_w_, delimiter=',')
+                np.savetxt('./iksolver_ann_params/hl2_b.txt',  hl2_b_, delimiter=',')
+                np.savetxt('./iksolver_ann_params/outl_w.txt', outl_w_, delimiter=',')
+                np.savetxt('./iksolver_ann_params/outl_b.txt', outl_b_, delimiter=',')
 
                 print "Satisfaction"
                 break
