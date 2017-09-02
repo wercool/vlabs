@@ -6,6 +6,8 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.contrib.rnn import LSTMCell, LSTMStateTuple
 
+import matplotlib.pyplot as plt
+
 import helpers #formatting data, generating sequence data
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -265,7 +267,7 @@ loss_track = []
 
 
 
-max_batches = 1001
+max_batches = 2001
 batches_in_epoch = 1000
 
 try:
@@ -288,8 +290,6 @@ try:
 except KeyboardInterrupt:
     print('training interrupted')
 
-
-import matplotlib.pyplot as plt
 
 plt.plot(loss_track)
 print('loss {:.4f} after {} examples (batch_size={})'.format(loss_track[-1], len(loss_track)*batch_size, batch_size))
