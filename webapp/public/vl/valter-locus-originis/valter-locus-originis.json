@@ -5,14 +5,15 @@
     "isPhysijsScene":       false,
     "showStatistics":       true,
     "showAxis":             false,
-    "showTooltips":         true,
+    "showTooltips":         false,
     "shadows":              true,
     "forceShadows":         false,
     "shadowsMapSize":       512,
     "antialias":            false,
     "canvasAlphaBuffer":    true,
     "advanceLighting":      false,
-    "advanceLighting1src":  true,
+    "advanceLighting1src":  false,
+    "bumpScaleFactor": 13.25,
     "castShadows":
     [
         "Lamp"

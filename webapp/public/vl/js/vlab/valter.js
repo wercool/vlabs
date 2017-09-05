@@ -9,6 +9,7 @@ class Valter
         this.model = undefined;
         this.initialModelPosition = pos;
         this.scale = scale;
+        this.scaleFactor = 13.25;
         this.valterJSON = "/vl/models/valter/valter.json";
         this.testMode = testMode;
         if (typeof executeScriptOnStart !== "undefined")
@@ -273,11 +274,12 @@ class Valter
         this.model = valterScene.children[0];
         if (typeof this.scale != "undefined")
         {
-            this.model.scale.set(this.scale.x, this.scale.y, this.scale.z);
+            this.model.scale.set(this.scale, this.scale, this.scale);
         }
         else
         {
-            this.model.scale.set(13.25, 13.25, 13.25);
+            this.scale = this.scaleFactor;
+            this.model.scale.set(this.scale, this.scale, this.scale);
         }
         this.model.position.copy(this.initialModelPosition);
         this.vlab.getVlabScene().add(this.model);
@@ -463,7 +465,7 @@ class Valter
             }
 
             //dummy manipulation object
-            var manipulationObjectGeometry = new THREE.SphereGeometry(0.25, 32, 32);
+            var manipulationObjectGeometry = new THREE.SphereGeometry(0.25 * this.scale / this.scaleFactor, 24, 24);
             var manipulationObjectMaterial = new THREE.MeshLambertMaterial({color: 0x00ff00});
             this.manipulationObject = new THREE.Mesh(manipulationObjectGeometry, manipulationObjectMaterial);
             this.manipulationObject.name = "manipulationObject";
@@ -502,7 +504,7 @@ class Valter
                 matrix.extractRotation(this.model.matrix);
                 var valterForwardDirection = new THREE.Vector3(0, 1, 0);
                 valterForwardDirection.applyMatrix4(matrix);
-                this.activeObjects["valterForwardDirectionVector"] = new THREE.ArrowHelper(valterForwardDirection, this.model.position, 10.0, 0x0000ff, 1.0, 0.3);
+                this.activeObjects["valterForwardDirectionVector"] = new THREE.ArrowHelper(valterForwardDirection, this.model.position, 10.0 * (this.scale / this.scaleFactor), 0x0000ff, 1.0 * (this.scale / this.scaleFactor), 0.3 * (this.scale / this.scaleFactor));
                 this.vlab.getVlabScene().add(this.activeObjects["valterForwardDirectionVector"]);
 
                 var manipulationObjectXZProjPos = this.manipulationObject.position.clone();
@@ -510,7 +512,7 @@ class Valter
                 var valterToManipulationObjectDirectionVector = this.model.position.clone().sub(manipulationObjectXZProjPos.clone());
                 var valterToManipulationObjectDirectionVectorLength = valterToManipulationObjectDirectionVector.clone().length();
                 valterToManipulationObjectDirectionVector.normalize();
-                this.activeObjects["valterToManipulationObjectDirectionVector"] = new THREE.ArrowHelper(valterToManipulationObjectDirectionVector, this.model.position, valterToManipulationObjectDirectionVectorLength, 0xffffff, 1.0, 0.3);
+                this.activeObjects["valterToManipulationObjectDirectionVector"] = new THREE.ArrowHelper(valterToManipulationObjectDirectionVector, this.model.position, valterToManipulationObjectDirectionVectorLength * (this.scale / this.scaleFactor), 0xffffff, 1.0 * (this.scale / this.scaleFactor), 0.3 * (this.scale / this.scaleFactor));
                 this.vlab.getVlabScene().add(this.activeObjects["valterToManipulationObjectDirectionVector"]);
 
                 // var rPalmPadPosition = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["rPalmPad"].matrixWorld);
@@ -766,14 +768,14 @@ class Valter
 
                 var manipulationObjectXZProjPos = this.manipulationObject.position.clone();
                 manipulationObjectXZProjPos.y = this.model.position.y;
-                if (this.model.position.distanceTo(manipulationObjectXZProjPos) > 1.0)
+                if (this.model.position.distanceTo(manipulationObjectXZProjPos) > 1.0 * (this.scale / this.scaleFactor))
                 {
                     var valterToManipulationObjectDirectionVector = this.model.position.clone().sub(manipulationObjectXZProjPos.clone());
                     var valterToManipulationObjectDirectionVectorLength = valterToManipulationObjectDirectionVector.clone().length();
                     valterToManipulationObjectDirectionVector.normalize().negate();
                     this.activeObjects["valterToManipulationObjectDirectionVector"].position.copy(this.model.position);
                     this.activeObjects["valterToManipulationObjectDirectionVector"].setDirection(valterToManipulationObjectDirectionVector);
-                    this.activeObjects["valterToManipulationObjectDirectionVector"].setLength(valterToManipulationObjectDirectionVectorLength, 1.0, 0.3);
+                    this.activeObjects["valterToManipulationObjectDirectionVector"].setLength(valterToManipulationObjectDirectionVectorLength, 1.0 * (this.scale / this.scaleFactor), 0.3 * (this.scale / this.scaleFactor));
                 }
 
                 // var rPalmPadPosition = new THREE.Vector3().setFromMatrixPosition(this.activeObjects["rPalmPad"].matrixWorld);
@@ -798,17 +800,17 @@ class Valter
         dir2.normalize();
 
         var pos1_1 = new THREE.Vector3();
-        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.25));
+        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.25 * (this.scale / this.scaleFactor)));
         var pos1_2 = new THREE.Vector3();
-        pos1_2.addVectors(pos1, dir1.clone().multiplyScalar(1.75));
+        pos1_2.addVectors(pos1, dir1.clone().multiplyScalar(1.75 * (this.scale / this.scaleFactor)));
         var pos2_1 = new THREE.Vector3();
-        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.25));
+        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.25 * (this.scale / this.scaleFactor)));
 
         var dir2_1 = pos2_1.clone().sub(pos1_2);
         dir2_1.normalize().negate();
 
         var pos2_2 = new THREE.Vector3();
-        pos2_2.addVectors(pos2_1, dir2_1.clone().multiplyScalar(1.0));
+        pos2_2.addVectors(pos2_1, dir2_1.clone().multiplyScalar(1.0 * (this.scale / this.scaleFactor)));
 
         var dir1_1 = pos1_1.clone().sub(pos2_2);
         dir1_1.normalize().negate();
@@ -848,7 +850,7 @@ class Valter
 
         path.type = 'chordal';
         path.closed = false;
-        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12, 8, false);
+        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12 * (this.scale / this.scaleFactor), 8, false);
 
         if (this.headToBodyCableSleeve != null)
         {
@@ -875,10 +877,10 @@ class Valter
         dir2.normalize();
 
         var pos1_1 = new THREE.Vector3();
-        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.25));
+        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.25 * (this.scale / this.scaleFactor)));
 
         var pos2_1 = new THREE.Vector3();
-        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.4));
+        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.4 * (this.scale / this.scaleFactor)));
 
         // var pos2_2 = new THREE.Vector3();
         // pos2_2.addVectors(pos2, dir2.clone().multiplyScalar(1.0));
@@ -916,7 +918,7 @@ class Valter
 
         path.type = 'chordal';
         path.closed = false;
-        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12, 8, false);
+        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12 * (this.scale / this.scaleFactor), 8, false);
 
         if (this.baseToBodyRCableSleeve != null)
         {
@@ -940,10 +942,10 @@ class Valter
         dir2.normalize();
 
         var pos1_1 = new THREE.Vector3();
-        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.3));
+        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.3 * (this.scale / this.scaleFactor)));
 
         var pos2_1 = new THREE.Vector3();
-        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.2));
+        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.2 * (this.scale / this.scaleFactor)));
 
         var path = new THREE.CatmullRomCurve3([
             pos1,
@@ -954,7 +956,7 @@ class Valter
 
         path.type = 'chordal';
         path.closed = false;
-        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12, 8, false);
+        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12 * (this.scale / this.scaleFactor), 8, false);
 
         if (this.baseToBodyRCableSleeve != null)
         {
@@ -981,10 +983,10 @@ class Valter
         dir2.normalize();
 
         var pos1_1 = new THREE.Vector3();
-        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.8));
+        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.8 * (this.scale / this.scaleFactor)));
 
         var pos2_1 = new THREE.Vector3();
-        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.25));
+        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.25 * (this.scale / this.scaleFactor)));
 
         var path = new THREE.CatmullRomCurve3([
             pos1,
@@ -995,7 +997,7 @@ class Valter
 
         path.type = 'chordal';
         path.closed = false;
-        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12, 8, false);
+        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12 * (this.scale / this.scaleFactor), 8, false);
 
         if (this.baseToBodyRCableSleeve != null)
         {
@@ -1019,10 +1021,10 @@ class Valter
         dir2.normalize();
 
         var pos1_1 = new THREE.Vector3();
-        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.75));
+        pos1_1.addVectors(pos1, dir1.clone().multiplyScalar(0.75 * (this.scale / this.scaleFactor)));
 
         var pos2_1 = new THREE.Vector3();
-        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.4));
+        pos2_1.addVectors(pos2, dir2.clone().multiplyScalar(0.4 * (this.scale / this.scaleFactor)));
 
         var path = new THREE.CatmullRomCurve3([
             pos1,
@@ -1033,7 +1035,7 @@ class Valter
 
         path.type = 'chordal';
         path.closed = false;
-        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12, 8, false);
+        var geometry = new THREE.TubeBufferGeometry(path, 22, 0.12 * (this.scale / this.scaleFactor), 8, false);
 
         if (this.bodyToTorsoLCableSleeve != null)
         {
@@ -1449,7 +1451,7 @@ class Valter
             {
                 self.activeObjects["smallWheelArmatureRF"].rotation.z += (rotVelAcc > 0 ? -speed : speed);
             }
-            if (Math.abs(self.activeObjects["smallWheelArmatureLF"].rotation.z) < maxRot * (rotVelAcc > 0 ? 0.5 : 1))
+            if (Math.abs(self.activeObjects["smallWheelArmatureLF"].rotation.z) < maxRot * (rotVelAcc > 0 ? 0.5 : 1.5))
             {
                 self.activeObjects["smallWheelArmatureLF"].rotation.z += (rotVelAcc > 0 ? -speed : speed);
             }
@@ -1457,7 +1459,7 @@ class Valter
             {
                 self.activeObjects["smallWheelArmatureRR"].rotation.z += (rotVelAcc > 0 ? speed : -speed) * 1.5;
             }
-            if (Math.abs(self.activeObjects["smallWheelArmatureLR"].rotation.z) < maxRot * (rotVelAcc > 0 ? 0.5 : 1))
+            if (Math.abs(self.activeObjects["smallWheelArmatureLR"].rotation.z) < maxRot * (rotVelAcc > 0 ? 0.5 : 1.5))
             {
                 self.activeObjects["smallWheelArmatureLR"].rotation.z += (rotVelAcc > 0 ? speed : -speed) * 1.5;
             }
@@ -1478,7 +1480,7 @@ class Valter
 
         var movementTween = new TWEEN.Tween(this.model.position);
         movementTween.easing(TWEEN.Easing.Cubic.InOut);
-        movementTween.to(manipulationObjectXZProjPos, 500 * (distance > 1 ? distance : 1));
+        movementTween.to(manipulationObjectXZProjPos, 400 * (distance > 1 ? distance : 1) / (this.scale / this.scaleFactor));
         movementTween.onComplete(function(){
             //self.say("Цель достигнута");
             console.log("Goal reached");
@@ -1489,30 +1491,30 @@ class Valter
             var curBasePosXZ = Math.sqrt(self.model.position.x * self.model.position.x + self.model.position.z * self.model.position.z);
             var movVelAcc = Math.abs(curBasePosXZ - prevBasePosXZ) * 0.85;
             prevBasePosXZ = Math.sqrt(self.model.position.clone().x * self.model.position.clone().x + self.model.position.clone().z * self.model.position.clone().z);
-            self.activeObjects["rightWheelDisk"].rotateZ(-movVelAcc);
-            self.activeObjects["leftWheelDisk"].rotateZ(movVelAcc);
+            self.activeObjects["rightWheelDisk"].rotateZ(-movVelAcc * (self.scaleFactor / self.scale));
+            self.activeObjects["leftWheelDisk"].rotateZ(movVelAcc * (self.scaleFactor / self.scale));
 
             var speed = Math.abs(movVelAcc / 2);
             if (Math.abs(self.activeObjects["smallWheelArmatureRF"].rotation.z) > 0)
             {
-                self.activeObjects["smallWheelArmatureRF"].rotation.z += (self.activeObjects["smallWheelArmatureRF"].rotation.z > 0 ? -speed : speed)
+                self.activeObjects["smallWheelArmatureRF"].rotation.z += (self.activeObjects["smallWheelArmatureRF"].rotation.z > 0 ? -speed : speed) * (self.scaleFactor / self.scale)
             }
             if (Math.abs(self.activeObjects["smallWheelArmatureLF"].rotation.z) > 0)
             {
-                self.activeObjects["smallWheelArmatureLF"].rotation.z += (self.activeObjects["smallWheelArmatureLF"].rotation.z > 0 ? -speed : speed)
+                self.activeObjects["smallWheelArmatureLF"].rotation.z += (self.activeObjects["smallWheelArmatureLF"].rotation.z > 0 ? -speed : speed) * (self.scaleFactor / self.scale)
             }
             if (Math.abs(self.activeObjects["smallWheelArmatureRR"].rotation.z) > 0)
             {
-                self.activeObjects["smallWheelArmatureRR"].rotation.z += (self.activeObjects["smallWheelArmatureRR"].rotation.z > 0 ? -speed : speed)
+                self.activeObjects["smallWheelArmatureRR"].rotation.z += (self.activeObjects["smallWheelArmatureRR"].rotation.z > 0 ? -speed : speed) * (self.scaleFactor / self.scale)
             }
             if (Math.abs(self.activeObjects["smallWheelArmatureLR"].rotation.z) > 0)
             {
-                self.activeObjects["smallWheelArmatureLR"].rotation.z += (self.activeObjects["smallWheelArmatureLR"].rotation.z > 0 ? -speed : speed)
+                self.activeObjects["smallWheelArmatureLR"].rotation.z += (self.activeObjects["smallWheelArmatureLR"].rotation.z > 0 ? -speed : speed) * (self.scaleFactor / self.scale)
             }
-            self.activeObjects["smallWheelLR"].rotateZ(movVelAcc / 6);
-            self.activeObjects["smallWheelRR"].rotateZ(movVelAcc / 6);
-            self.activeObjects["smallWheelLF"].rotateZ(movVelAcc / 6);
-            self.activeObjects["smallWheelRF"].rotateZ(movVelAcc / 6);
+            self.activeObjects["smallWheelLR"].rotateZ(movVelAcc * (self.scaleFactor / self.scale) / 4);
+            self.activeObjects["smallWheelRR"].rotateZ(movVelAcc * (self.scaleFactor / self.scale) / 4);
+            self.activeObjects["smallWheelLF"].rotateZ(movVelAcc * (self.scaleFactor / self.scale) / 4);
+            self.activeObjects["smallWheelRF"].rotateZ(movVelAcc * (self.scaleFactor / self.scale) / 4);
         });
         movementTween.start();
     }
@@ -2039,7 +2041,7 @@ class Valter
 
     rightArmIKANN(eefLocalPos)
     {
-        var eefPosN = eefLocalPos;
+        var eefPosN = eefLocalPos.multiplyScalar(this.scaleFactor / this.scale);
 
         var net = {"layers":[
             {

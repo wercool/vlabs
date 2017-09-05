@@ -17,14 +17,14 @@ function ValterLocusOriginis(webGLContainer, executeScript)
     var activeProperties = {};
 
     // this VLab constants
-    var origin = new THREE.Vector3(0.0, 3.0, 0.0);
+    var origin = new THREE.Vector3(0.0, 1.5, 0.0);
     var initialDefaultCameraPosVectorLength;
 
     self.Valter = null;
 
     var scenePostBuilt = function()
     {
-        self.initialCameraPos = new THREE.Vector3(0.0, 3.0, 5.0);
+        self.initialCameraPos = new THREE.Vector3(0.0, 1.5, 2.0);
 
         // PointerLockControls
         // self.pointerLockControlsEnable(self.initialCameraPos);
@@ -38,7 +38,7 @@ function ValterLocusOriginis(webGLContainer, executeScript)
         self.getVlabScene().add(light);
 
         // Valter
-        self.Valter = new Valter(self, new THREE.Vector3(0.0, 0.0, 0.0), true, executeScript, new THREE.Vector3(1.0, 1.0, 1.0));
+        self.Valter = new Valter(self, new THREE.Vector3(0.0, 0.0, 0.0), true, executeScript, 1.0);
 
         // this VLab constants
         initialDefaultCameraPosVectorLength = self.getDefaultCameraPosition().length();
@@ -48,11 +48,32 @@ function ValterLocusOriginis(webGLContainer, executeScript)
         // self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("rightWall"));
         // self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("frontWall"));
 
+        setTimeout(self.waitingForValterInitialization.bind(self.Valter), 250);
+
+
+    };
+
+    self.waitingForValterInitialization = function()
+    {
+        console.log("Wainting for Valter initialization...");
+        if (!self.Valter.initialized)
+        {
+            setTimeout(self.waitingForValterInitialization.bind(self.Valter), 250);
+            return;
+        }
+
         // actually start VLab
         self.setPhysijsScenePause(false);
         self.setSceneRenderPause(false);
 
-    };
+        //rightForeArmRoll
+        self.Valter.activeObjects["forearmFrameRight"].rotation.y = -1.57;
+
+        self.Valter.manipulationObject.position.z = 0.75;
+        self.Valter.manipulationObject.position.y = 1.25;
+        self.Valter.manipulationObjectControl.update();
+
+    }
 
     var simulationStep = function()
     {
