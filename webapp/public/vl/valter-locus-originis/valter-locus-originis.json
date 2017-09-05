@@ -1,0 +1,43 @@
+{
+    "presets": {"tetha": 0},
+    "title":                "Valter Lab",
+    "sceneFile":            "/vl/valter-locus-originis/scene/valter-locus-originis.dae",
+    "isPhysijsScene":       false,
+    "showStatistics":       true,
+    "showAxis":             false,
+    "showTooltips":         true,
+    "shadows":              true,
+    "forceShadows":         false,
+    "shadowsMapSize":       512,
+    "antialias":            false,
+    "canvasAlphaBuffer":    true,
+    "advanceLighting":      false,
+    "advanceLighting1src":  true,
+    "castShadows":
+    [
+        "Lamp"
+    ],
+    "receiveShadows":
+    [
+        "floor"
+    ],
+    "doubleSide":
+    [
+        
+    ],
+    "castShadowsExecptions":
+    [
+    ],
+    "receiveShadowsExecptions":
+    [
+    ],
+    "maps":
+    [
+    ],
+    "interactionHelpers":
+    {
+    },
+    "interactors":
+    {
+    }
+}

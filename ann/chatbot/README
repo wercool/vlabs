@@ -1,3 +1,4 @@
 1) download corpus from
 https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html
-
+2) exctract (1) do data/
+3) [reference] https://github.com/chiphuyen/stanford-tensorflow-tutorials/tree/master/assignments/chatbot

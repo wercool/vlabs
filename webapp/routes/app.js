@@ -21,4 +21,8 @@ router.get('/vlabs/toy-store', function(req, res, next) {
     res.render('vlabs/toy-store.hbs', {test: req.query.test});
 });
 
+router.get('/vlabs/valter-locus-originis', function(req, res, next) {
+    res.render('vlabs/valter-locus-originis.hbs', {test: req.query.test});
+});
+
 module.exports = router;

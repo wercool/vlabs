@@ -1,1 +1,4 @@
 /*.pyc
+/processed/
+/__pycache__/
+/checkpoints/

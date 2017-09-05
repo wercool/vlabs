@@ -1,6 +1,6 @@
 "use strict";
 
-function ToyStore(webGLContainer, executeScript)
+function ValterLocusOriginis(webGLContainer, executeScript)
 {
     var self = this;
 
@@ -17,14 +17,14 @@ function ToyStore(webGLContainer, executeScript)
     var activeProperties = {};
 
     // this VLab constants
-    var origin = new THREE.Vector3(0.0, 18.0, 0.0);
+    var origin = new THREE.Vector3(0.0, 3.0, 0.0);
     var initialDefaultCameraPosVectorLength;
 
     self.Valter = null;
 
     var scenePostBuilt = function()
     {
-        self.initialCameraPos = new THREE.Vector3(0.0, 21.0, 15.0);
+        self.initialCameraPos = new THREE.Vector3(0.0, 3.0, 5.0);
 
         // PointerLockControls
         // self.pointerLockControlsEnable(self.initialCameraPos);
@@ -38,15 +38,15 @@ function ToyStore(webGLContainer, executeScript)
         self.getVlabScene().add(light);
 
         // Valter
-        self.Valter = new Valter(self, new THREE.Vector3(-20.0, 0.0, -52.0), true, executeScript);
+        self.Valter = new Valter(self, new THREE.Vector3(0.0, 0.0, 0.0), true, executeScript, new THREE.Vector3(1.0, 1.0, 1.0));
 
         // this VLab constants
         initialDefaultCameraPosVectorLength = self.getDefaultCameraPosition().length();
 
-        self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("ceeling"));
-        self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("leftWall"));
-        self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("rightWall"));
-        self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("frontWall"));
+        // self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("ceeling"));
+        // self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("leftWall"));
+        // self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("rightWall"));
+        // self.addMeshToCollidableMeshList(self.getVlabScene().getObjectByName("frontWall"));
 
         // actually start VLab
         self.setPhysijsScenePause(false);
@@ -66,7 +66,7 @@ function ToyStore(webGLContainer, executeScript)
     };
 
     //this VLab is ready to be initialized
-    $.getJSON("/vl/toy-store/toy-store.json", function(jsonObj) {
+    $.getJSON("/vl/valter-locus-originis/valter-locus-originis.json", function(jsonObj) {
         VLab.apply(self, [jsonObj]);
         self.initialize(webGLContainer);
     });

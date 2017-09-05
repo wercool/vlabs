@@ -1,375 +1,247 @@
-#https://tutorials.botsfloor.com/how-to-build-your-first-chatbot-c84495d4622d
-#use python3
+from __future__ import division
+from __future__ import print_function
 
-import pandas as pd
-import numpy as np
-import tensorflow as tf
-import re
+import argparse
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
+import random
+import sys
 import time
 
-print ("TF version %s" % tf.__version__)
+import numpy as np
+import tensorflow as tf
 
-# Load the data
-lines = open('data/cornell movie-dialogs corpus/movie_lines.txt', encoding='utf-8', errors='ignore').read().split('\n')
-conv_lines = open('data/cornell movie-dialogs corpus/movie_conversations.txt', encoding='utf-8', errors='ignore').read().split('\n')
+from model import ChatBotModel
+import config
+import data
 
-# Create a dictionary to map each line's id with its text
-id2line = {}
-for line in lines:
-    _line = line.split(' +++$+++ ')
-    if len(_line) == 5:
-        id2line[_line[0]] = _line[4]
+def _get_random_bucket(train_buckets_scale):
+    """ Get a random bucket from which to choose a training sample """
+    rand = random.random()
+    return min([i for i in range(len(train_buckets_scale))
+                if train_buckets_scale[i] > rand])
 
+def _assert_lengths(encoder_size, decoder_size, encoder_inputs, decoder_inputs, decoder_masks):
+    """ Assert that the encoder inputs, decoder inputs, and decoder masks are
+    of the expected lengths """
+    if len(encoder_inputs) != encoder_size:
+        raise ValueError("Encoder length must be equal to the one in bucket,"
+                        " %d != %d." % (len(encoder_inputs), encoder_size))
+    if len(decoder_inputs) != decoder_size:
+        raise ValueError("Decoder length must be equal to the one in bucket,"
+                       " %d != %d." % (len(decoder_inputs), decoder_size))
+    if len(decoder_masks) != decoder_size:
+        raise ValueError("Weights length must be equal to the one in bucket,"
+                       " %d != %d." % (len(decoder_masks), decoder_size))
 
-# Create a list of all of the conversations' lines' ids.
-convs = [ ]
-for line in conv_lines[:-1]:
-    _line = line.split(' +++$+++ ')[-1][1:-1].replace("'","").replace(" ","")
-    convs.append(_line.split(','))
+def run_step(sess, model, encoder_inputs, decoder_inputs, decoder_masks, bucket_id, forward_only):
+    """ Run one step in training.
+    @forward_only: boolean value to decide whether a backward path should be created
+    forward_only is set to True when you just want to evaluate on the test set,
+    or when you want to the bot to be in chat mode. """
+    encoder_size, decoder_size = config.BUCKETS[bucket_id]
+    _assert_lengths(encoder_size, decoder_size, encoder_inputs, decoder_inputs, decoder_masks)
 
+    # input feed: encoder inputs, decoder inputs, target_weights, as provided.
+    input_feed = {}
+    for step in range(encoder_size):
+        input_feed[model.encoder_inputs[step].name] = encoder_inputs[step]
+    for step in range(decoder_size):
+        input_feed[model.decoder_inputs[step].name] = decoder_inputs[step]
+        input_feed[model.decoder_masks[step].name] = decoder_masks[step]
 
-# Sort the sentences into questions (inputs) and answers (targets)
-questions = []
-answers = []
+    last_target = model.decoder_inputs[decoder_size].name
+    input_feed[last_target] = np.zeros([model.batch_size], dtype=np.int32)
 
-for conv in convs:
-    for i in range(len(conv)-1):
-        questions.append(id2line[conv[i]])
-        answers.append(id2line[conv[i+1]])
+    # output feed: depends on whether we do a backward step or not.
+    if not forward_only:
+        output_feed = [model.train_ops[bucket_id],  # update op that does SGD.
+                       model.gradient_norms[bucket_id],  # gradient norm.
+                       model.losses[bucket_id]]  # loss for this batch.
+    else:
+        output_feed = [model.losses[bucket_id]]  # loss for this batch.
+        for step in range(decoder_size):  # output logits.
+            output_feed.append(model.outputs[bucket_id][step])
 
-limit = 0
-for i in range(limit, limit+5):
-    print("[Q]", questions[i])
-    print("[A]", answers[i])
-    print()
+    outputs = sess.run(output_feed, input_feed)
+    if not forward_only:
+        return outputs[1], outputs[2], None  # Gradient norm, loss, no outputs.
+    else:
+        return None, outputs[0], outputs[1:]  # No gradient norm, loss, outputs.
 
-print("...\n")
+def _get_buckets():
+    """ Load the dataset into buckets based on their lengths.
+    train_buckets_scale is the inverval that'll help us 
+    choose a random bucket later on.
+    """
+    test_buckets = data.load_data('test_ids.enc', 'test_ids.dec')
+    data_buckets = data.load_data('train_ids.enc', 'train_ids.dec')
+    train_bucket_sizes = [len(data_buckets[b]) for b in range(len(config.BUCKETS))]
+    print("Number of samples in each bucket:\n", train_bucket_sizes)
+    train_total_size = sum(train_bucket_sizes)
+    # list of increasing numbers from 0 to 1 that we'll use to select a bucket.
+    train_buckets_scale = [sum(train_bucket_sizes[:i + 1]) / train_total_size
+                           for i in range(len(train_bucket_sizes))]
+    print("Bucket scale:\n", train_buckets_scale)
+    return test_buckets, data_buckets, train_buckets_scale
 
-# Compare lengths of questions and answers
-print("[Q]", len(questions))
-print("[A]", len(answers))
+def _get_skip_step(iteration):
+    """ How many steps should the model train before it saves all the weights. """
+    if iteration < 100:
+        return 30
+    return 100
 
+def _check_restore_parameters(sess, saver):
+    """ Restore the previously trained parameters if there are any. """
+    ckpt = tf.train.get_checkpoint_state(os.path.dirname(config.CPT_PATH + '/checkpoint'))
+    if ckpt and ckpt.model_checkpoint_path:
+        print("Loading parameters for the Chatbot")
+        saver.restore(sess, ckpt.model_checkpoint_path)
+    else:
+        print("Initializing fresh parameters for the Chatbot")
 
-def clean_text(text):
-    '''Clean text by removing unnecessary characters and altering the format of words.'''
+def _eval_test_set(sess, model, test_buckets):
+    """ Evaluate on the test set. """
+    for bucket_id in range(len(config.BUCKETS)):
+        if len(test_buckets[bucket_id]) == 0:
+            print("  Test: empty bucket %d" % (bucket_id))
+            continue
+        start = time.time()
+        encoder_inputs, decoder_inputs, decoder_masks = data.get_batch(test_buckets[bucket_id], 
+                                                                        bucket_id,
+                                                                        batch_size=config.BATCH_SIZE)
+        _, step_loss, _ = run_step(sess, model, encoder_inputs, decoder_inputs, 
+                                   decoder_masks, bucket_id, True)
+        print('Test bucket {}: loss {}, time {}'.format(bucket_id, step_loss, time.time() - start))
 
-    text = text.lower()
+def train():
+    """ Train the bot """
+    test_buckets, data_buckets, train_buckets_scale = _get_buckets()
+    # in train mode, we need to create the backward path, so forwrad_only is False
+    model = ChatBotModel(False, config.BATCH_SIZE)
+    model.build_graph()
+
+    saver = tf.train.Saver()
+
+    with tf.Session() as sess:
+        print('Running session')
+        sess.run(tf.global_variables_initializer())
+        _check_restore_parameters(sess, saver)
+
+        iteration = model.global_step.eval()
+        total_loss = 0
+        while True:
+            skip_step = _get_skip_step(iteration)
+            bucket_id = _get_random_bucket(train_buckets_scale)
+            encoder_inputs, decoder_inputs, decoder_masks = data.get_batch(data_buckets[bucket_id], 
+                                                                           bucket_id,
+                                                                           batch_size=config.BATCH_SIZE)
+            start = time.time()
+            _, step_loss, _ = run_step(sess, model, encoder_inputs, decoder_inputs, decoder_masks, bucket_id, False)
+            total_loss += step_loss
+            iteration += 1
+
+            if iteration % skip_step == 0:
+                print('Iter {}: loss {}, time {}'.format(iteration, total_loss/skip_step, time.time() - start))
+                start = time.time()
+                total_loss = 0
+                saver.save(sess, os.path.join(config.CPT_PATH, 'chatbot'), global_step=model.global_step)
+                if iteration % (10 * skip_step) == 0:
+                    # Run evals on development set and print their loss
+                    _eval_test_set(sess, model, test_buckets)
+                    start = time.time()
+                sys.stdout.flush()
+
+def _get_user_input():
+    """ Get user's input, which will be transformed into encoder input later """
+    print("> ", end="")
+    sys.stdout.flush()
+    return sys.stdin.readline()
+
+def _find_right_bucket(length):
+    """ Find the proper bucket for an encoder input based on its length """
+    return min([b for b in range(len(config.BUCKETS))
+                if config.BUCKETS[b][0] >= length])
+
+def _construct_response(output_logits, inv_dec_vocab):
+    """ Construct a response to the user's encoder input.
+    @output_logits: the outputs from sequence to sequence wrapper.
+    output_logits is decoder_size np array, each of dim 1 x DEC_VOCAB
     
-    text = re.sub(r"i'm", "i am", text)
-    text = re.sub(r"he's", "he is", text)
-    text = re.sub(r"she's", "she is", text)
-    text = re.sub(r"it's", "it is", text)
-    text = re.sub(r"that's", "that is", text)
-    text = re.sub(r"what's", "that is", text)
-    text = re.sub(r"where's", "where is", text)
-    text = re.sub(r"how's", "how is", text)
-    text = re.sub(r"\'ll", " will", text)
-    text = re.sub(r"\'ve", " have", text)
-    text = re.sub(r"\'re", " are", text)
-    text = re.sub(r"\'d", " would", text)
-    text = re.sub(r"\'re", " are", text)
-    text = re.sub(r"won't", "will not", text)
-    text = re.sub(r"can't", "cannot", text)
-    text = re.sub(r"n't", " not", text)
-    text = re.sub(r"n'", "ng", text)
-    text = re.sub(r"'bout", "about", text)
-    text = re.sub(r"'til", "until", text)
-    text = re.sub(r"[-()\"#/@;:<>{}`+=~|.!?,]", "", text)
-    
-    return text
+    This is a greedy decoder - outputs are just argmaxes of output_logits.
+    """
+    print(output_logits[0])
 
-print("cleaning data...")
+    outputs = [int(np.argmax(logit, axis=1)) for logit in output_logits]
+    # If there is an EOS symbol in outputs, cut them at that point.
+    if config.EOS_ID in outputs:
+        outputs = outputs[:outputs.index(config.EOS_ID)]
+    # Print out sentence corresponding to outputs.
+    return " ".join([tf.compat.as_str(inv_dec_vocab[output]) for output in outputs])
 
-# Clean the data
-clean_questions = []
-for question in questions:
-    clean_questions.append(clean_text(question))
+def chat():
+    """ in test mode, we don't to create the backward path
+    """
+    _, enc_vocab = data.load_vocab(os.path.join(config.PROCESSED_PATH, 'vocab.enc'))
+    inv_dec_vocab, _ = data.load_vocab(os.path.join(config.PROCESSED_PATH, 'vocab.dec'))
 
-clean_answers = []    
-for answer in answers:
-    clean_answers.append(clean_text(answer))
+    model = ChatBotModel(True, batch_size=1)
+    model.build_graph()
 
+    saver = tf.train.Saver()
 
-# Take a look at some of the data to ensure that it has been cleaned well.
-limit = 0
-for i in range(limit, limit+5):
-    print("[cQ]", clean_questions[i])
-    print("[cA]", clean_answers[i])
-    print()
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        _check_restore_parameters(sess, saver)
+        output_file = open(os.path.join(config.PROCESSED_PATH, config.OUTPUT_FILE), 'a+')
+        # Decode from standard input.
+        max_length = config.BUCKETS[-1][0]
+        print('Welcome to TensorBro. Say something. Enter to exit. Max length is', max_length)
+        while True:
+            line = _get_user_input()
+            if len(line) > 0 and line[-1] == '\n':
+                line = line[:-1]
+            if line == '':
+                break
+            output_file.write('HUMAN ++++ ' + line + '\n')
+            # Get token-ids for the input sentence.
+            token_ids = data.sentence2id(enc_vocab, str(line))
+            if (len(token_ids) > max_length):
+                print('Max length I can handle is:', max_length)
+                line = _get_user_input()
+                continue
+            # Which bucket does it belong to?
+            bucket_id = _find_right_bucket(len(token_ids))
+            # Get a 1-element batch to feed the sentence to the model.
+            encoder_inputs, decoder_inputs, decoder_masks = data.get_batch([(token_ids, [])], 
+                                                                            bucket_id,
+                                                                            batch_size=1)
+            # Get output logits for the sentence.
+            _, _, output_logits = run_step(sess, model, encoder_inputs, decoder_inputs,
+                                           decoder_masks, bucket_id, True)
+            response = _construct_response(output_logits, inv_dec_vocab)
+            print(response)
+            output_file.write('BOT ++++ ' + response + '\n')
+        output_file.write('=============================================\n')
+        output_file.close()
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--mode', choices={'train', 'chat'},
+                        default='train', help="mode. if not specified, it's in the train mode")
+    args = parser.parse_args()
 
-# Find the length of sentences
-lengths = []
-for question in clean_questions:
-    lengths.append(len(question.split()))
-for answer in clean_answers:
-    lengths.append(len(answer.split()))
+    if not os.path.isdir(config.PROCESSED_PATH):
+        data.prepare_raw_data()
+        data.process_data()
+    print('Data ready!')
+    # create checkpoints folder if there isn't one already
+    data.make_dir(config.CPT_PATH)
 
-# Create a dataframe so that the values can be inspected
-lengths = pd.DataFrame(lengths, columns=['counts'])
+    if args.mode == 'train':
+        train()
+    elif args.mode == 'chat':
+        chat()
 
-print (lengths.describe())
-
-print ("percentiles (pn = n% of values less than result)")
-print("p50 = ", np.percentile(lengths, 50))
-print("p75 = ", np.percentile(lengths, 75))
-print("p85 = ", np.percentile(lengths, 85))
-print("p90 = ", np.percentile(lengths, 90))
-print("p95 = ", np.percentile(lengths, 95))
-print("p99 = ", np.percentile(lengths, 99))
-
-# Remove questions and answers that are shorter than 2 words and longer than 20 words.
-min_line_length = 2
-max_line_length = 20
-
-# Filter out the questions that are too short/long
-short_questions_temp = []
-short_answers_temp = []
-
-i = 0
-for question in clean_questions:
-    if len(question.split()) >= min_line_length and len(question.split()) <= max_line_length:
-        short_questions_temp.append(question)
-        short_answers_temp.append(clean_answers[i])
-    i += 1
-
-# Filter out the answers that are too short/long
-short_questions = []
-short_answers = []
-
-i = 0
-for answer in short_answers_temp:
-    if len(answer.split()) >= min_line_length and len(answer.split()) <= max_line_length:
-        short_answers.append(answer)
-        short_questions.append(short_questions_temp[i])
-    i += 1
-
-# Compare the number of lines we will use with the total number of lines.
-print()
-print("# of questions:", len(short_questions))
-print("# of answers:", len(short_answers))
-print("% of data used after preprocessing: {}%".format(round( (len(short_questions)/len(questions))*100, 4)))
-
-# Create a dictionary for the frequency of the vocabulary
-vocab = {}
-for question in short_questions:
-    for word in question.split():
-        if word not in vocab:
-            vocab[word] = 1
-        else:
-            vocab[word] += 1
-            
-for answer in short_answers:
-    for word in answer.split():
-        if word not in vocab:
-            vocab[word] = 1
-        else:
-            vocab[word] += 1
-
-# Remove rare words from the vocabulary.
-# We will aim to replace fewer than 5% of words with <UNK>
-# You will see this ratio soon.
-# print()
-# print ("rare words cleanup")
-threshold = 10
-count = 0
-for k,v in vocab.items():
-    if v >= threshold:
-        count += 1
-    # else:
-    #     print ("{:30} {}".format(k,v))
-
-print("Size of total vocab:", len(vocab))
-print("Size of vocab we will use:", count)
-
-# In case we want to use a different vocabulary sizes for the source and target text, 
-# we can set different threshold values.
-# Nonetheless, we will create dictionaries to provide a unique integer for each word.
-questions_vocab_to_int = {}
-
-word_num = 0
-for word, count in vocab.items():
-    if count >= threshold:
-        questions_vocab_to_int[word] = word_num
-        word_num += 1
-
-answers_vocab_to_int = {}
-
-word_num = 0
-for word, count in vocab.items():
-    if count >= threshold:
-        answers_vocab_to_int[word] = word_num
-        word_num += 1
-
-# Add the unique tokens (codes) to the vocabulary dictionaries.
-codes = ['<PAD>','<EOS>','<UNK>','<GO>']
-
-for code in codes:
-    questions_vocab_to_int[code] = len(questions_vocab_to_int)+1
-
-for code in codes:
-    answers_vocab_to_int[code] = len(answers_vocab_to_int)+1
-
-# Create dictionaries to map the unique integers to their respective words.
-# i.e. an inverse dictionary for vocab_to_int.
-questions_int_to_vocab = {v_i: v for v, v_i in questions_vocab_to_int.items()}
-answers_int_to_vocab = {v_i: v for v, v_i in answers_vocab_to_int.items()}
-
-# Check the length of the dictionaries.
-# print(len(questions_vocab_to_int))
-# print(len(questions_int_to_vocab))
-# print(len(answers_vocab_to_int))
-# print(len(answers_int_to_vocab))
-
-# Add the end of sentence token to the end of every answer.
-for i in range(len(short_answers)):
-    short_answers[i] += ' <EOS>'
-
-# Convert the text to integers. 
-# Replace any words that are not in the respective vocabulary with <UNK> 
-questions_int = []
-for question in short_questions:
-    ints = []
-    for word in question.split():
-        if word not in questions_vocab_to_int:
-            ints.append(questions_vocab_to_int['<UNK>'])
-        else:
-            ints.append(questions_vocab_to_int[word])
-    questions_int.append(ints)
-
-answers_int = []
-for answer in short_answers:
-    ints = []
-    for word in answer.split():
-        if word not in answers_vocab_to_int:
-            ints.append(answers_vocab_to_int['<UNK>'])
-        else:
-            ints.append(answers_vocab_to_int[word])
-    answers_int.append(ints)
-
-# Check the lengths
-# print(len(questions_int))
-# print(len(answers_int))
-
-# Calculate what percentage of all words have been replaced with <UNK>
-word_count = 0
-unk_count = 0
-
-for question in questions_int:
-    for word in question:
-        if word == questions_vocab_to_int["<UNK>"]:
-            unk_count += 1
-        word_count += 1
-    
-for answer in answers_int:
-    for word in answer:
-        if word == answers_vocab_to_int["<UNK>"]:
-            unk_count += 1
-        word_count += 1
-
-unk_ratio = round(unk_count/word_count,4)*100
-
-print("Total number of words:", word_count)
-print("Number of times <UNK> is used:", unk_count)
-print("Percent of words that are <UNK>: {}%".format(round(unk_ratio, 3)))
-
-# Sort questions and answers by the length of questions.
-# This will reduce the amount of padding during training
-# Which should speed up training and help to reduce the loss
-
-sorted_questions = []
-sorted_answers = []
-
-for length in range(1, max_line_length+1):
-    for i in enumerate(questions_int):
-        if len(i[1]) == length:
-            sorted_questions.append(questions_int[i[0]])
-            sorted_answers.append(answers_int[i[0]])
-
-print(len(sorted_questions))
-print(len(sorted_answers))
-print()
-for i in range(3):
-    print(sorted_questions[i])
-    print(sorted_answers[i])
-    print()
-
-def model_inputs():
-    '''Create palceholders for inputs to the model'''
-    input_data = tf.placeholder(tf.int32, [None, None], name='input')
-    targets = tf.placeholder(tf.int32, [None, None], name='targets')
-    lr = tf.placeholder(tf.float32, name='learning_rate')
-    keep_prob = tf.placeholder(tf.float32, name='keep_prob')
-
-    return input_data, targets, lr, keep_prob
-
-def process_encoding_input(target_data, vocab_to_int, batch_size):
-    '''Remove the last word id from each batch and concat the <GO> to the begining of each batch'''
-    ending = tf.strided_slice(target_data, [0, 0], [batch_size, -1], [1, 1])
-    dec_input = tf.concat([tf.fill([batch_size, 1], vocab_to_int['<GO>']), ending], 1)
-
-    return dec_input
-
-def encoding_layer(rnn_inputs, rnn_size, num_layers, keep_prob, sequence_length):
-    '''Create the encoding layer'''
-    lstm = tf.contrib.rnn.BasicLSTMCell(rnn_size)
-    drop = tf.contrib.rnn.DropoutWrapper(lstm, input_keep_prob = keep_prob)
-    enc_cell = tf.contrib.rnn.MultiRNNCell([drop] * num_layers)
-    _, enc_state = tf.nn.bidirectional_dynamic_rnn(cell_fw = enc_cell,
-                                                   cell_bw = enc_cell,
-                                                   sequence_length = sequence_length,
-                                                   inputs = rnn_inputs, 
-                                                   dtype=tf.float32)
-    return enc_state
-
-def decoding_layer_train(encoder_state, dec_cell, dec_embed_input, sequence_length, decoding_scope,
-                         output_fn, keep_prob, batch_size):
-    '''Decode the training data'''
-
-    attention_states = tf.zeros([batch_size, 1, dec_cell.output_size])
-    
-    att_keys, att_vals, att_score_fn, att_construct_fn =             tf.contrib.seq2seq.prepare_attention(attention_states,
-                                                 attention_option="bahdanau",
-                                                 num_units=dec_cell.output_size)
-
-    train_decoder_fn = tf.contrib.seq2seq.attention_decoder_fn_train(encoder_state[0],
-                                                                     att_keys,
-                                                                     att_vals,
-                                                                     att_score_fn,
-                                                                     att_construct_fn,
-                                                                     name = "attn_dec_train")
-    train_pred, _, _ = tf.contrib.seq2seq.dynamic_rnn_decoder(dec_cell, 
-                                                              train_decoder_fn, 
-                                                              dec_embed_input, 
-                                                              sequence_length, 
-                                                              scope=decoding_scope)
-    train_pred_drop = tf.nn.dropout(train_pred, keep_prob)
-    return output_fn(train_pred_drop)
-
-def decoding_layer_infer(encoder_state, dec_cell, dec_embeddings, start_of_sequence_id, end_of_sequence_id,
-                         maximum_length, vocab_size, decoding_scope, output_fn, keep_prob, batch_size):
-    '''Decode the prediction data'''
-    
-    attention_states = tf.zeros([batch_size, 1, dec_cell.output_size])
-    
-    att_keys, att_vals, att_score_fn, att_construct_fn =             tf.contrib.seq2seq.prepare_attention(attention_states,
-                                                 attention_option="bahdanau",
-                                                 num_units=dec_cell.output_size)
-    
-    infer_decoder_fn = tf.contrib.seq2seq.attention_decoder_fn_inference(output_fn, 
-                                                                         encoder_state[0], 
-                                                                         att_keys, 
-                                                                         att_vals, 
-                                                                         att_score_fn, 
-                                                                         att_construct_fn, 
-                                                                         dec_embeddings,
-                                                                         start_of_sequence_id, 
-                                                                         end_of_sequence_id, 
-                                                                         maximum_length, 
-                                                                         vocab_size, 
-                                                                         name = "attn_dec_inf")
-    infer_logits, _, _ = tf.contrib.seq2seq.dynamic_rnn_decoder(dec_cell, 
-                                                                infer_decoder_fn, 
-                                                                scope=decoding_scope)
-    
-    return infer_logits
+if __name__ == '__main__':
+    main()

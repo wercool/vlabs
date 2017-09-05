@@ -2,12 +2,13 @@
 
 class Valter
 {
-    constructor (vlab, pos, testMode, executeScriptOnStart)
+    constructor (vlab, pos, testMode, executeScriptOnStart, scale)
     {
         this.vlab = vlab;
         this.initialized = false;
         this.model = undefined;
         this.initialModelPosition = pos;
+        this.scale = scale;
         this.valterJSON = "/vl/models/valter/valter.json";
         this.testMode = testMode;
         if (typeof executeScriptOnStart !== "undefined")
@@ -270,7 +271,14 @@ class Valter
             }
         });
         this.model = valterScene.children[0];
-        this.model.scale.set(13.25, 13.25, 13.25);
+        if (typeof this.scale != "undefined")
+        {
+            this.model.scale.set(this.scale.x, this.scale.y, this.scale.z);
+        }
+        else
+        {
+            this.model.scale.set(13.25, 13.25, 13.25);
+        }
         this.model.position.copy(this.initialModelPosition);
         this.vlab.getVlabScene().add(this.model);
 
