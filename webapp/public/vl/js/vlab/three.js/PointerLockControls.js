@@ -37,6 +37,7 @@ THREE.PointerLockControls = function (vlab, camera)
     // var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
     // var obstacleAvoidanceGizmo = new THREE.Mesh(sphereGeometry, wireMaterial);
     var obstacleAvoidanceGizmo = new THREE.Mesh(sphereGeometry);
+    obstacleAvoidanceGizmo.scale.multiplyScalar(((scope.vlab.vlabNature.scaleFactor != undefined) ? scope.vlab.vlabNature.scaleFactor : 1));
     obstacleAvoidanceGizmo.visible = false;
     obstacleAvoidanceGizmo.name = "obstacleAvoidanceGizmo";
 
@@ -209,10 +210,10 @@ THREE.PointerLockControls = function (vlab, camera)
             velocity.x -= velocity.x * 10 * delta;
             velocity.z -= velocity.z * 10 * delta;
 
-            if ( moveForward )  velocity.z -= 4 * delta;
-            if ( moveBackward ) velocity.z += 4 * delta;
-            if ( moveLeft )     velocity.x -= 4 * delta;
-            if ( moveRight )    velocity.x += 4 * delta;
+            if ( moveForward )  velocity.z -= 4 * delta * ((scope.vlab.vlabNature.scaleFactor != undefined) ? scope.vlab.vlabNature.scaleFactor : 1);
+            if ( moveBackward ) velocity.z += 4 * delta * ((scope.vlab.vlabNature.scaleFactor != undefined) ? scope.vlab.vlabNature.scaleFactor : 1);
+            if ( moveLeft )     velocity.x -= 4 * delta * ((scope.vlab.vlabNature.scaleFactor != undefined) ? scope.vlab.vlabNature.scaleFactor : 1);
+            if ( moveRight )    velocity.x += 4 * delta * ((scope.vlab.vlabNature.scaleFactor != undefined) ? scope.vlab.vlabNature.scaleFactor : 1);
 
             var curStepPosition = this.getObstacleAvoidanceObject().position.clone();
             this.getObstacleAvoidanceObject().translateX(velocity.x);

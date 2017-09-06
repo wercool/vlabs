@@ -6,14 +6,24 @@
     "showStatistics":       true,
     "showAxis":             false,
     "showTooltips":         false,
-    "shadows":              true,
+    "shadows":              false,
     "forceShadows":         false,
     "shadowsMapSize":       512,
     "antialias":            false,
     "canvasAlphaBuffer":    true,
     "advanceLighting":      false,
     "advanceLighting1src":  false,
-    "bumpScaleFactor": 13.25,
+    "scaleFactor":          0.075471698,
+    "altBumpMapScales": {
+        "capMaterial": -0.0012, "caseMaterial": 0.0035, "valterBodyP1Material": -0.002,
+        "valterBodyP2Material": 0.0035, "bodyKinectFrameMaterial": 0.000075,
+        "bodyFrameMaterial": 0.0015, "shoulderFrameMaterial": 0.0035,
+        "headFrameMaterial": 0.0015, "headFrameOuterMaterial": 0.001, "earMaterial": 0.0015,
+        "m6BoltHeadMaterial": 0.0015, "manLink2Material": 0.0015
+    },
+    "bodyKinectItersectObjects": [
+        "rWall", "Cube1", "Cube2", "Cube3", "Cube4"
+    ],
     "castShadows":
     [
         "Lamp"

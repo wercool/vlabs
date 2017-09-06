@@ -4,6 +4,7 @@ class Valter
 {
     constructor (vlab, pos, testMode, executeScriptOnStart, scale)
     {
+        var self = this;
         this.vlab = vlab;
         this.initialized = false;
         this.model = undefined;
@@ -144,8 +145,6 @@ class Valter
 
         this.mouthPanelFrames = [];
 
-        var self = this;
-
         this.guiControls = {
             say:function(){
                 var textToSay = prompt("Text to say", "Привет!");
@@ -180,6 +179,11 @@ class Valter
         // initialize with argument 'true': no random choices
         this.eliza = new ElizaBot(true);
 
+        this.bodyKinectPCLEnabled = false;
+        //relative to valterBodyP1
+        this.bodyKinectLaserOrigin = new THREE.Vector3(0.0426914, 0.2174475, 0.3071102);
+        this.bodyKinectPCLOriginObject3D = undefined;
+
         addEventListener("simulationStep", this.simulationStep.bind(this), false);
     }
 
@@ -190,6 +194,7 @@ class Valter
 
     initialize(valterScene)
     {
+        var ValterRef = this;
         valterScene.traverse(function(obj)
         {
             obj.castShadow = false;
@@ -198,6 +203,24 @@ class Valter
             {
                 obj.material.side = THREE.DoubleSide;
             }
+
+            // alt material bump map scaling
+            if (typeof ValterRef.vlab.vlabNature.altBumpMapScales != "undefined")
+            {
+                if (typeof obj.material != "undefined")
+                {
+                    if (obj.material.bumpMap != undefined)
+                    {
+                        if (ValterRef.vlab.vlabNature.altBumpMapScales[obj.material.name] != undefined)
+                        {
+                            obj.material.bumpScale = ValterRef.vlab.vlabNature.altBumpMapScales[obj.material.name];
+                        }
+                    }
+                }
+            }
+
+
+
             var shadowCasted = [
                                 "ValterBase", "baseFrame", "rightWheel", "rightWheelDiskBack", "leftWheel", "leftWheelDiskBack",
                                 "manGripperFrame", "valterBodyP1", "valterBodyP2", "bodyFrame", "bodyFrameL", "bodyFrameR",
@@ -567,11 +590,11 @@ class Valter
 
 
             var GUIcontrols1 = new dat.GUI();
-            GUIcontrols1.add(this.model.rotation, 'z', this.jointLimits.baseYawMin, this.jointLimits.baseYawMax).name("Base Yaw").step(0.01).listen().onChange(this.baseRotation.bind(this));;
+            GUIcontrols1.add(this.model.rotation, 'z', this.jointLimits.baseYawMin, this.jointLimits.baseYawMax).name("Base Yaw").step(0.01).listen().onChange(this.baseRotation.bind(this));
             GUIcontrols1.add(this.activeObjects["valterBodyP1"].rotation, 'z', this.jointLimits.bodyYawMin, this.jointLimits.bodyYawMax).name("Body Yaw").step(0.01).onChange(this.baseToBodyCableSleeveAnimation.bind(this));
             GUIcontrols1.add(this.activeObjects["bodyFrameAxisR"].rotation, 'x', this.jointLimits.bodyTiltMin, this.jointLimits.bodyTiltMax).name("Body Tilt").step(0.01).onChange(this.bodyToTorsoCableSleeveAnimation.bind(this));
             GUIcontrols1.add(this.joints, 'rightShoulder', this.jointLimits.rightShoulderMin, this.jointLimits.rightShoulderMax).name("Right Shoulder").step(0.01).onChange(this.rightShoulderRotate.bind(this));
-            GUIcontrols1.add(this.joints, 'leftShoulder', this.jointLimits.leftShoulderMin, this.jointLimits.leftShoulderMax).name("Left Shoulder").step(0.01).onChange(this.leftShoulderRotate.bind(this));;
+            GUIcontrols1.add(this.joints, 'leftShoulder', this.jointLimits.leftShoulderMin, this.jointLimits.leftShoulderMax).name("Left Shoulder").step(0.01).onChange(this.leftShoulderRotate.bind(this));
             GUIcontrols1.add(this.activeObjects["armRightShoulderAxis"].rotation, 'x', this.jointLimits.rightLimbMin, this.jointLimits.rightLimbMax).name("Right Limb").step(0.01);
             GUIcontrols1.add(this.activeObjects["armLeftShoulderAxis"].rotation, 'x', this.jointLimits.leftLimbMin, this.jointLimits.leftLimbMax).name("Left Limb").step(0.01);
             GUIcontrols1.add(this.joints, 'rightArm', this.jointLimits.rightArmMin, this.jointLimits.rightArmMax).name("Right Arm").step(0.01).onChange(this.rightArmRotate.bind(this));
@@ -747,6 +770,8 @@ class Valter
     {
         if (this.initialized)
         {
+            var valterRef = this;
+
             if (this.prevValterBasePosition.distanceTo(this.activeObjects["ValterBase"].position) > 0.0001)
             {
                 this.prevValterBasePosition.copy(this.activeObjects["ValterBase"].position);
@@ -785,6 +810,11 @@ class Valter
                 // this.activeObjects["valterBaseToRightPalmPadDirectionVector"].position.copy(this.model.position);
                 // this.activeObjects["valterBaseToRightPalmPadDirectionVector"].setDirection(valterBaseToRightPalmPadDirectionVector);
                 // this.activeObjects["valterBaseToRightPalmPadDirectionVector"].setLength(valterBaseToRightPalmPadDirectionVectorLength, 1.0, 0.3);
+            }
+
+            if (this.bodyKinectPCLEnabled)
+            {
+                valterRef.bodyKinectPCL();
             }
         }
     }
@@ -1430,6 +1460,10 @@ class Valter
 
     baseRotation(valterTargetZRotation)
     {
+        if (!this.navigating)
+        {
+            return;
+        }
         var self = this;
         var speed = Math.abs(this.model.rotation.z - valterTargetZRotation);
         var rotationTween = new TWEEN.Tween(this.model.rotation);
@@ -1491,8 +1525,9 @@ class Valter
             var curBasePosXZ = Math.sqrt(self.model.position.x * self.model.position.x + self.model.position.z * self.model.position.z);
             var movVelAcc = Math.abs(curBasePosXZ - prevBasePosXZ) * 0.85;
             prevBasePosXZ = Math.sqrt(self.model.position.clone().x * self.model.position.clone().x + self.model.position.clone().z * self.model.position.clone().z);
-            self.activeObjects["rightWheelDisk"].rotateZ(-movVelAcc * (self.scaleFactor / self.scale));
-            self.activeObjects["leftWheelDisk"].rotateZ(movVelAcc * (self.scaleFactor / self.scale));
+            var scaleImpact = (self.scaleFactor != self.scale) ? 1.15 * (self.scaleFactor / self.scale) : 1;
+            self.activeObjects["rightWheelDisk"].rotateZ(-movVelAcc * scaleImpact);
+            self.activeObjects["leftWheelDisk"].rotateZ(movVelAcc * scaleImpact);
 
             var speed = Math.abs(movVelAcc / 2);
             if (Math.abs(self.activeObjects["smallWheelArmatureRF"].rotation.z) > 0)
@@ -2198,5 +2233,95 @@ class Valter
         eefPos.multiply(this.model.scale);
         // console.log("Local RArm EEF: ",  eefPos);
         this.rightArmIKANN(eefPos);
+    }
+
+    bodyKinectPCL()
+    {
+        if (this.bodyKinectPCLOriginObject3D == undefined)
+        {
+            this.bodyKinectPCLOriginObject3D = new THREE.Object3D();
+            this.bodyKinectPCLOriginObject3D.position.copy(this.bodyKinectLaserOrigin);
+            this.activeObjects["valterBodyP1"].add(this.bodyKinectPCLOriginObject3D);
+
+            this.activeObjects["valterBodyP1"].updateMatrixWorld();
+
+            var bodyKinectPCLOrigin = new THREE.Vector3().setFromMatrixPosition(this.bodyKinectPCLOriginObject3D.matrixWorld);
+
+            var matrix = new THREE.Matrix4();
+            matrix.extractRotation(this.activeObjects["valterBodyP1"].matrixWorld);
+
+            this.activeObjects["bodyKinectPCLLines"] = [];
+            this.activeObjects["bodyKinectPCLRaycasters"] = [];
+            var dx = -1.0;
+            for (var i = 0; i < 200; i++)
+            {
+                var bodyKinectPCLBaseDirection = new THREE.Vector3(dx, 1.0, 0);
+                bodyKinectPCLBaseDirection.applyMatrix4(matrix);
+                dx += 0.01;
+
+                this.activeObjects["bodyKinectPCLLines"][i] = new THREE.ArrowHelper(bodyKinectPCLBaseDirection, bodyKinectPCLOrigin, 3.0, 0xffffff, 0.0001, 0.0001);
+                this.vlab.getVlabScene().add(this.activeObjects["bodyKinectPCLLines"][i]);
+
+                this.activeObjects["bodyKinectPCLRaycasters"][i] = new THREE.Raycaster();
+                this.activeObjects["bodyKinectPCLRaycasters"][i].set(bodyKinectPCLOrigin, bodyKinectPCLBaseDirection);
+            }
+
+            this.activeObjects["bodyKinectItersectObjects"] = [];
+            for (var objId in this.vlab.vlabNature.bodyKinectItersectObjects)
+            {
+                this.activeObjects["bodyKinectItersectObjects"][objId] = this.vlab.getVlabScene().getObjectByName(this.vlab.vlabNature.bodyKinectItersectObjects[objId])
+            }
+
+            var pclMaterial = new THREE.PointsMaterial({
+              color: 0x00ff00,
+              size: 0.02
+            });
+            this.activeObjects["bodyKinectItersectPCLGeometry"] = new THREE.Geometry();
+            this.activeObjects["bodyKinectItersectPCL"] = new THREE.Points(this.activeObjects["bodyKinectItersectPCLGeometry"], pclMaterial);
+            this.vlab.getVlabScene().add(this.activeObjects["bodyKinectItersectPCL"]);
+        }
+        else
+        {
+            this.activeObjects["valterBodyP1"].updateMatrixWorld();
+            var bodyKinectPCLOrigin = new THREE.Vector3().setFromMatrixPosition(this.bodyKinectPCLOriginObject3D.matrixWorld);
+            // this.model.worldToLocal(bodyKinectPCLOrigin);
+            // console.log(bodyKinectPCLOrigin);
+
+            var matrix = new THREE.Matrix4();
+            matrix.extractRotation(this.activeObjects["valterBodyP1"].matrixWorld);
+
+            this.activeObjects["bodyKinectItersectPCLGeometry"].dispose();
+            this.activeObjects["bodyKinectItersectPCLGeometry"] = new THREE.Geometry();
+
+            var dx = -1.0;
+            for (var i = 0; i < 200; i++)
+            {
+                var bodyKinectPCLBaseDirection = new THREE.Vector3(dx, 1.0, 0);
+                bodyKinectPCLBaseDirection.applyMatrix4(matrix);
+                dx += 0.01;
+
+                this.activeObjects["bodyKinectPCLLines"][i].position.copy(bodyKinectPCLOrigin);
+                this.activeObjects["bodyKinectPCLLines"][i].setDirection(bodyKinectPCLBaseDirection);
+
+                this.activeObjects["bodyKinectPCLRaycasters"][i].set(bodyKinectPCLOrigin, bodyKinectPCLBaseDirection);
+
+                var intersects = this.activeObjects["bodyKinectPCLRaycasters"][i].intersectObjects(this.activeObjects["bodyKinectItersectObjects"]);
+                if (intersects.length > 0)
+                {
+                    var minDistanceId = 0;
+                    var distance = Infinity;
+                    for (var ri = 0; ri < intersects.length; ri++)
+                    {
+                        if (intersects[ri].distance < distance)
+                        {
+                            minDistanceId = ri;
+                            distance = intersects[ri].distance;
+                        }
+                    }
+                    this.activeObjects["bodyKinectItersectPCLGeometry"].vertices.push(intersects[minDistanceId].point);
+                }
+            }
+            this.activeObjects["bodyKinectItersectPCL"].geometry = this.activeObjects["bodyKinectItersectPCLGeometry"];
+        }
     }
 }

@@ -73,6 +73,8 @@ function ValterLocusOriginis(webGLContainer, executeScript)
         self.Valter.manipulationObject.position.y = 1.25;
         self.Valter.manipulationObjectControl.update();
 
+        self.Valter.bodyKinectPCLEnabled = true;
+
     }
 
     var simulationStep = function()
