@@ -31,23 +31,20 @@ function ValterANNNavigation(webGLContainer)
         // OrbitControls
         self.orbitControlsEnable(self.initialCameraPos, origin, false, true, true);
 
-        var light = new THREE.AmbientLight(0xecf5ff, 0.05); // soft white light
-        self.getVlabScene().add(light);
-
-        var light = new THREE.HemisphereLight(0xecf5ff, 0x000000, 0.15);
+        var light = new THREE.AmbientLight(0xecf5ff, 0.01); // soft white light
         self.getVlabScene().add(light);
 
         // Valters
-        var num = 50;
-        var x = -3.0;
-        var dx = (x*-1*2) / num;
-        for (var i = 0; i < num; i++)
-        {
-            self.Valters[i] = new ValterExtrSimplified(self, new THREE.Vector3(x, 0.0, 0.0), i, false);
-            x += dx;
-        }
+        // var num = 50;
+        // var x = -3.0;
+        // var dx = (x*-1*2) / num;
+        // for (var i = 0; i < num; i++)
+        // {
+        //     self.Valters[i] = new ValterExtrSimplified(self, new THREE.Vector3(x, 0.0, 0.0), i, false);
+        //     x += dx;
+        // }
 
-        // self.Valters[0] = new ValterExtrSimplified(self, new THREE.Vector3(0.0, 0.0, 0.0), 0, true);
+        self.Valters[0] = new ValterExtrSimplified(self, new THREE.Vector3(0.0, 0.0, 0.0), 0, true);
 
         // this VLab constants
         initialDefaultCameraPosVectorLength = self.getDefaultCameraPosition().length();
@@ -67,10 +64,12 @@ function ValterANNNavigation(webGLContainer)
             return;
         }
 
+        self.Valters[0].manipulationObject.position.copy(new THREE.Vector3(0.0, 2.0, 0.0));
+        self.Valters[0].manipulationObjectControl.update();
+
         // actually start VLab
         self.setPhysijsScenePause(false);
         self.setSceneRenderPause(false);
-
     }
 
     var simulationStep = function()

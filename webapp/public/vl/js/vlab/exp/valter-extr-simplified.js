@@ -44,8 +44,20 @@ class ValterExtrSimplified
 
         this.model = valterScene.children[0];
 
+        /**********************************************************/
+        /**********************************************************/
+        /***********************SPECIFIC***************************/
+        /**********************************************************/
+        /**********************************************************/
+        /**********************************************************/
         this.model.name += "_" + ValterRef.id;
         this.model.children[0].name += "_" + ValterRef.id;
+        /**********************************************************/
+        /**********************************************************/
+        /**********************************************************/
+        /**********************************************************/
+        /**********************************************************/
+        /**********************************************************/
 
         this.model.position.copy(this.initialModelPosition);
         this.vlab.getVlabScene().add(this.model);
@@ -54,6 +66,14 @@ class ValterExtrSimplified
 
         this.activeObjects[this.baseName] = this.vlab.getVlabScene().getObjectByName(this.baseName);
         this.activeObjects[this.bodyName] = this.vlab.getVlabScene().getObjectByName(this.bodyName);
+
+
+        var manipulationObjectGeometry = new THREE.SphereGeometry(0.025, 24, 24);
+        var manipulationObjectMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00});
+        this.manipulationObject = new THREE.Mesh(manipulationObjectGeometry, manipulationObjectMaterial);
+        this.manipulationObject.name = "manipulationObject";
+        this.manipulationObject.position.copy(new THREE.Vector3(0.0, 0.0, 0.0));
+
 
         if (this.drawHelpers)
         {
@@ -79,6 +99,26 @@ class ValterExtrSimplified
             control.attach(this.model);
             control.setSize(1.0);
             this.vlab.getVlabScene().add(control);
+
+            //dummy manipulation object
+
+            this.vlab.getVlabScene().add(this.manipulationObject);
+
+            this.manipulationObjectControl = new THREE.TransformControls(this.vlab.getDefaultCamera(), this.vlab.WebGLRenderer.domElement);
+            this.manipulationObjectControl.addEventListener("change", function(){
+                                                            if (this.vlab.pressedKey != null)
+                                                            {
+                                                                if (this.vlab.pressedKey == 17) //ctrlKey
+                                                                {
+                                                                    console.log(this.manipulationObject.position.x.toFixed(5),
+                                                                                this.manipulationObject.position.y.toFixed(5),
+                                                                                this.manipulationObject.position.z.toFixed(5));
+                                                                }
+                                                            }
+                                                        }.bind(this));
+            this.manipulationObjectControl.attach(this.manipulationObject);
+            this.manipulationObjectControl.setSize(1.0);
+            this.vlab.getVlabScene().add(this.manipulationObjectControl);
         }
 
 
