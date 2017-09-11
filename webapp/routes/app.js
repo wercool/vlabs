@@ -25,4 +25,8 @@ router.get('/vlabs/valter-locus-originis', function(req, res, next) {
     res.render('vlabs/valter-locus-originis.hbs', {test: req.query.test});
 });
 
+router.get('/vlabs/valter-navigation-ann', function(req, res, next) {
+    res.render('vlabs/valter-navigation-ann.hbs', {test: req.query.test});
+});
+
 module.exports = router;

@@ -1,0 +1,44 @@
+{
+    "presets": {"tetha": 0},
+    "title":                "Valter ANN Navigation Lab",
+    "sceneFile":            "/vl/valter-navigation-ann/scene/valter-navigation-ann.dae",
+    "isPhysijsScene":       false,
+    "showStatistics":       true,
+    "showAxis":             false,
+    "showTooltips":         false,
+    "shadows":              false,
+    "forceShadows":         false,
+    "shadowsMapSize":       512,
+    "antialias":            false,
+    "canvasAlphaBuffer":    true,
+    "advanceLighting":      false,
+    "advanceLighting1src":  false,
+    "bodyKinectItersectObjects": [
+        "rWall", "Cube1", "Cube2", "Cube3", "Cube4"
+    ],
+    "castShadows":
+    [
+    ],
+    "receiveShadows":
+    [
+    ],
+    "doubleSide":
+    [
+        
+    ],
+    "castShadowsExecptions":
+    [
+    ],
+    "receiveShadowsExecptions":
+    [
+    ],
+    "maps":
+    [
+    ],
+    "interactionHelpers":
+    {
+    },
+    "interactors":
+    {
+    }
+}

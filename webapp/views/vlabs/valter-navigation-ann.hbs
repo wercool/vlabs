@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Valter ANN Navigation Lab</title>
+    <link rel="stylesheet" type="text/css" href="/vl/css/important.css">
+    <link rel="stylesheet" href="/vl/js/jquery-ui/jquery-ui.css">
+    <!-- Include this VLab specific styles -->
+    <link rel="stylesheet" type="text/css" href="/vl/ph-mpd-fcm/css/ph-mpd-fcm.css">
+</head
+<body>
+    <!-- Include jQuery -->
+    <script src="/vl/js/jquery-1.8.2.min.js"></script>
+    <!-- Include jQuery UI-->
+    <script src="/vl/js/jquery-ui/jquery-ui.min.js"></script>
+    <!-- Include jQuery Popup Overlay -->
+    <script src="/vl/js/jquery.popupoverlay.js"></script>
+    <!-- Tween.js -->
+    <script src="/vl/js/Tween.js"></script>
+
+    <!-- WebGL includes -->
+    <script src="/vl/js/three.js/build/three.min.js"></script>
+    <script src="/vl/js/stats.js/build/stats.min.js"></script>
+    <script src="/vl/js/three.js/examples/js/controls/TransformControls.js"></script>
+
+    <!-- Include VLab generic modules -->
+    <script src="/vl/js/physi.js"></script>
+    <script src="/vl/js/utils.js"></script>
+    <script src="/vl/js/dat.gui/build/dat.gui.min.js"></script>
+    <script src="/vl/js/vlab/three.js/ColladaLoader.js"></script>
+    <script src="/vl/js/vlab/three.js/OrbitControls.js"></script>
+    <script src="/vl/js/vlab/three.js/PointerLockControls.js"></script>
+    <script src="/vl/js/vlab/vlab.js"></script>
+
+    <!-- Valter -->
+    <script src="/vl/js/vlab/exp/valter-extr-simplified.js"></script>
+
+    <!-- Include this VLab specific modules -->
+    <script src="/vl/valter-navigation-ann/valter-navigation-ann.js"></script>
+
+    <div id="webGLContainer" class="webGLContainer"></div>
+    <div id="notificationPopup"></div>
+    <div id="canvases" style="display:hidden;"></canvas>
+
+    <script>
+        var ValterANNNavigationRef;
+
+        $(document).ready(function() {
+            $("#notificationPopup").popup({
+                opacity: 0.2
+            });
+
+           ValterANNNavigationRef = new ValterANNNavigation("webGLContainer");
+
+        });
+
+    </script>
+
+</body>
+</html>

@@ -2274,7 +2274,7 @@ class Valter
 
             var pclMaterial = new THREE.PointsMaterial({
               color: 0x00ff00,
-              size: 0.02
+              size: 0.05
             });
             this.activeObjects["bodyKinectItersectPCLGeometry"] = new THREE.Geometry();
             this.activeObjects["bodyKinectItersectPCL"] = new THREE.Points(this.activeObjects["bodyKinectItersectPCLGeometry"], pclMaterial);
@@ -2284,9 +2284,7 @@ class Valter
         {
             this.activeObjects["valterBodyP1"].updateMatrixWorld();
             var bodyKinectPCLOrigin = new THREE.Vector3().setFromMatrixPosition(this.bodyKinectPCLOriginObject3D.matrixWorld);
-            // this.model.worldToLocal(bodyKinectPCLOrigin);
-            // console.log(bodyKinectPCLOrigin);
-
+ 
             var matrix = new THREE.Matrix4();
             matrix.extractRotation(this.activeObjects["valterBodyP1"].matrixWorld);
 
@@ -2297,7 +2295,7 @@ class Valter
             for (var i = 0; i < 200; i++)
             {
                 var bodyKinectPCLBaseDirection = new THREE.Vector3(dx, 1.0, 0);
-                bodyKinectPCLBaseDirection.applyMatrix4(matrix);
+                bodyKinectPCLBaseDirection.applyMatrix4(matrix).normalize();
                 dx += 0.01;
 
                 this.activeObjects["bodyKinectPCLLines"][i].position.copy(bodyKinectPCLOrigin);
@@ -2308,17 +2306,31 @@ class Valter
                 var intersects = this.activeObjects["bodyKinectPCLRaycasters"][i].intersectObjects(this.activeObjects["bodyKinectItersectObjects"]);
                 if (intersects.length > 0)
                 {
-                    var minDistanceId = 0;
-                    var distance = Infinity;
-                    for (var ri = 0; ri < intersects.length; ri++)
+                    if (intersects[0].distance < 4.0)
                     {
-                        if (intersects[ri].distance < distance)
+                        if (intersects[0].distance > 0.8)
                         {
-                            minDistanceId = ri;
-                            distance = intersects[ri].distance;
+                            this.activeObjects["bodyKinectPCLLines"][i].setLength(intersects[0].distance, 0.0001, 0.0001);
+                            this.activeObjects["bodyKinectPCLLines"][i].setColor(new THREE.Color(0xffffff));
+
+                            this.activeObjects["bodyKinectItersectPCLGeometry"].vertices.push(intersects[0].point);
+                        }
+                        else
+                        {
+                            this.activeObjects["bodyKinectPCLLines"][i].setLength(intersects[0].distance, 0.0001, 0.0001);
+                            this.activeObjects["bodyKinectPCLLines"][i].setColor(new THREE.Color(0xbdbdbd));
                         }
                     }
-                    this.activeObjects["bodyKinectItersectPCLGeometry"].vertices.push(intersects[minDistanceId].point);
+                    else
+                    {
+                        this.activeObjects["bodyKinectPCLLines"][i].setLength(4.0, 0.0001, 0.0001);
+                        this.activeObjects["bodyKinectPCLLines"][i].setColor(new THREE.Color(0xfffc00));
+                    }
+                }
+                else
+                {
+                    this.activeObjects["bodyKinectPCLLines"][i].setLength(4.0, 0.0001, 0.0001);
+                    this.activeObjects["bodyKinectPCLLines"][i].setColor(new THREE.Color(0xfffc00));
                 }
             }
             this.activeObjects["bodyKinectItersectPCL"].geometry = this.activeObjects["bodyKinectItersectPCLGeometry"];
