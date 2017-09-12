@@ -36,7 +36,7 @@ function ValterANNNavigation(webGLContainer)
         self.getVlabScene().add(light);
 
         // Valters
-        var num = 1;
+        var num = 20;
         var x = 0.0;
         var dx = (x*-1*2) / num;
         for (var i = 0; i < num; i++)
@@ -124,9 +124,12 @@ function ValterANNNavigation(webGLContainer)
         self.poseTarget.rotation.y = THREE.Math.degToRad(0.0);
         self.poseTargetControl.update();
 
+        self.epochFinished = false;
+        self.epochStep = 0;
+
         for (var valterRef of self.Valters)
         {
-            valterRef.baseMovementPresets.speedMultiplier = 0.01;
+            valterRef.baseMovementPresets.speedMultiplier = 0.0001;
 
             valterRef.initNavANN();
 
@@ -146,34 +149,79 @@ function ValterANNNavigation(webGLContainer)
 
     var simulationStep = function()
     {
-        for (var valterRef of self.Valters)
+        if (!self.epochFinished)
         {
-            if (!valterRef.killed)
+            var survived = [];
+            for (var valterRef of self.Valters)
             {
-                valterRef.BBox.setFromObject(valterRef.model);
-                valterRef.BBoxHelper.update();
-                for (var collisionObjBBox of self.collisionObjectsBBoxes)
+                if (!valterRef.killed)
                 {
-                    if (valterRef.BBox.intersectsBox(collisionObjBBox))
+                    valterRef.BBox.setFromObject(valterRef.model);
+                    valterRef.BBoxHelper.update();
+                    for (var collisionObjBBox of self.collisionObjectsBBoxes)
                     {
-                        valterRef.killed = true;
-                        valterRef.BBoxHelper.material.color = new THREE.Color(0xff0000);
-                        valterRef.model.visible = true;
-                        valterRef.model.material.color = new THREE.Color(0x000000);
-                        valterRef.activeObjects[valterRef.baseName].material.color = new THREE.Color(0x000000);
-                        valterRef.activeObjects[valterRef.bodyName].material.color = new THREE.Color(0x000000);
+                        if (valterRef.BBox.intersectsBox(collisionObjBBox))
+                        {
+                            valterRef.killed = true;
+                            valterRef.BBoxHelper.material.color = new THREE.Color(0x000000);
+                        }
                     }
+
+                    valterRef.updateValterToTargetPoseDirectionVector();
+                    valterRef.bodyKinectPCL();
+
+                    var navANNInput = valterRef.activeObjects["bodyKinectPCLPointsDistances"];
+                    navANNInput.push(valterRef.valterToTargetPoseDirectionVectorLength);
+                    var cmdVel = valterRef.navANNFeedForward(navANNInput);
+
+                    var linVel = cmdVel[0] + getRandomArbitrary(-0.01, 0.01)
+                    var rotVel = cmdVel[1] + getRandomArbitrary(-0.01, 0.01)
+
+                    valterRef.setCmdVel(linVel, rotVel);
+                    // valterRef.setCmdVel(0.01, getRandomArbitrary(-0.02, 0.02));
+                    // valterRef.setCmdVel(0.01, 0.0);
+
+                    survived.push(valterRef);
+                }
+            }
+
+            self.epochStep++;
+
+            if ((survived.length <= Math.round(self.Valters.length * 0.1) + 1) || self.epochStep > 100)
+            {
+                self.epochStep = 0;
+                self.epochFinished = true;
+
+                console.log(survived.length + " left");
+                for (var survivedValterRef of survived)
+                {
+                    // console.log(valterRef.navANN);
+                    // console.log(survivedValterRef.valterToTargetPoseDirectionVectorLength);
+                    
+                    survivedValterRef.navANN.mutate();
                 }
 
-                valterRef.updateValterToTargetPoseDirectionVector();
-                valterRef.bodyKinectPCL();
+                for (var valterRef of self.Valters)
+                {
+                    var randSurvivedId = getRandomInt(0, survived.length - 1);
 
-                var navANNInput = valterRef.activeObjects["bodyKinectPCLPointsDistances"];
-                navANNInput.push(valterRef.valterToTargetPoseDirectionVectorLength);
-                valterRef.navANNFeedForward(navANNInput);
+                    valterRef.navANN = survived[randSurvivedId].navANN;
 
-                valterRef.setCmdVel(0.01, getRandomArbitrary(-0.02, 0.02));
-                // valterRef.setCmdVel(0.01, 0.0);
+
+                    valterRef.killed = false;
+                    valterRef.model.position.copy(valterRef.initialModelPosition);
+                    valterRef.model.rotation.z = valterRef.initialModelRotation;
+
+                    valterRef.BBoxHelper.material.color = valterRef.model.material.color;
+
+                    valterRef.BBox.setFromObject(valterRef.model);
+                    valterRef.BBoxHelper.update();
+
+                    valterRef.updateValterToTargetPoseDirectionVector();
+                    valterRef.bodyKinectPCL();
+                }
+
+                self.epochFinished = false;
             }
         }
     };

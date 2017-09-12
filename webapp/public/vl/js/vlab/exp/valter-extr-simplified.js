@@ -10,6 +10,7 @@ class ValterExtrSimplified
         this.initialized = false;
         this.model = undefined;
         this.initialModelPosition = pos;
+        this.initialModelRotation = undefined;
         this.valterJSON = "/vl/models/valter/valter-extr-simplified.json";
 
         this.killed = false;
@@ -71,8 +72,26 @@ class ValterExtrSimplified
                     "neurons": 2,
                     "biases":[],
                     "weights":[]
+            }],
+            mutate: function()
+            {
+                var mutationScale = 0.1;
+                var mutationStrength = 1.0;
+
+                for (var l in this.layers)
+                {
+                    var layerBiasesMutedNum = Math.round(this.layers[l].biases.length * mutationScale) + 1;
+
+                    for (var bm = 0; bm < layerBiasesMutedNum; bm++)
+                    {
+                        var randBiasId = getRandomInt(0, this.layers[l].neurons - 1);
+                        this.layers[l].biases[randBiasId] += getRandomArbitrary(-1*mutationStrength, mutationStrength);
+                    }
+
+                    // console.log(this.layers[l].name, neuronBiasesToMutate);
+                }
             }
-        ]};
+        };
     }
 
     sceneLoading(bytes)
@@ -103,6 +122,7 @@ class ValterExtrSimplified
         /**********************************************************/
 
         this.model.position.copy(this.initialModelPosition);
+        this.initialModelRotation = this.model.rotation.z;
         this.vlab.getVlabScene().add(this.model);
 
         this.model.visible = false;
@@ -387,11 +407,13 @@ class ValterExtrSimplified
 
     initNavANN()
     {
+        var randRange = 1.0;
+
         for (var l = 0; l < this.navANN.layers.length; l++)
         {
             for (var b = 0; b < this.navANN.layers[l].neurons; b++)
             {
-                this.navANN.layers[l].biases[b] = getRandomArbitrary(-1.0, 1.0);
+                this.navANN.layers[l].biases[b] = getRandomArbitrary(-1*randRange, randRange);
             }
 
 
@@ -402,7 +424,7 @@ class ValterExtrSimplified
                     this.navANN.layers[l].weights[i] = [];
                     for (var b = 0; b < this.navANN.layers[l].neurons; b++)
                     {
-                        this.navANN.layers[l].weights[i][b] = getRandomArbitrary(-1.0, 1.0);
+                        this.navANN.layers[l].weights[i][b] = getRandomArbitrary(-1*randRange, randRange);
                     }
                 }
             }
@@ -413,16 +435,43 @@ class ValterExtrSimplified
                     this.navANN.layers[l].weights[i] = [];
                     for (var b = 0; b < this.navANN.layers[l].neurons; b++)
                     {
-                        this.navANN.layers[l].weights[i][b] = getRandomArbitrary(-1.0, 1.0);
+                        this.navANN.layers[l].weights[i][b] = getRandomArbitrary(-1*randRange, randRange);
                     }
                 }
             }
         }
-        console.log(this.navANN);
+        // console.log(this.navANN);
     }
 
     navANNFeedForward(input)
     {
-        // console.log(input[input.length - 1]);
+        var output = [];
+
+        var net = this.navANN;
+
+        // http://harthur.github.io/brain/
+        for (var l = 0; l < net.layers.length; l++)
+        {
+            output = [];
+            for (var bi = 0; bi < net.layers[l].biases.length; bi++)
+            {
+                var sum = net.layers[l].biases[bi];
+                for (var i = 0; i < input.length; i++)
+                {
+                    sum += net.layers[l].weights[i][bi] * input[i];
+                }
+                if (net.layers[l].name != "outl")
+                {
+                    output[bi] = (1 / (1 + Math.exp(-sum)));
+                }
+                else
+                {
+                    output[bi] = sum;
+                }
+            }
+            input = output;
+        }
+
+        return output;
     }
 }

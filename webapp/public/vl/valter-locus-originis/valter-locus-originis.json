@@ -22,7 +22,7 @@
         "m6BoltHeadMaterial": 0.0015, "manLink2Material": 0.0015
     },
     "bodyKinectItersectObjects": [
-        "rWall", "Cube1", "Cube2", "Cube3", "Cube4"
+        "rWall", "lWall", "Cube1", "Cube2", "Cube3", "Cube4", "Cube5"
     ],
     "castShadows":
     [
