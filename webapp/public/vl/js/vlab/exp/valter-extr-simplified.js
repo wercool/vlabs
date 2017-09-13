@@ -14,6 +14,9 @@ class ValterExtrSimplified
         this.valterJSON = "/vl/models/valter/valter-extr-simplified.json";
 
         this.killed = false;
+        this.backMovement = 0;
+        this.inPlaceRotation = 0;
+        this.prevRotDirection = 1;
 
         this.BBox = undefined;
         this.BBoxHelper = undefined;
@@ -43,17 +46,14 @@ class ValterExtrSimplified
             "minAllowedDuty": 10,
             "leftMotorDuty": 10,
             "rightMotorDuty": 10,
-            //******************************************************************************************experimental timings based
-            //robot spins 2*pi at the duty of [maxAllowedDuty = 35] about [st] seconds, so the maxAngVel = (2*pi)/st (rad/sec)
-            "maxAngVel": ((2 * Math.PI) / 10.7), //0.587196262
-            //robot linear speed at the duty of [maxAllowedDuty = 35] maxLinVel = x(m/s)
-            "maxLinVel": 0.12,
+            "maxLinVel": 0.15,
+            "maxAngVel": 0.45,
             "lengthBetweenTwoWheels": 0.385,
-            "speedMultiplier": 0.0005,
+            "speedMultiplier": 1.0,
         };
 
         self.navANN = {
-            "inNeurons": 201,
+            "inNeurons": 206,
             "layers":[
             {
                     "name":"hl1",
@@ -73,22 +73,48 @@ class ValterExtrSimplified
                     "biases":[],
                     "weights":[]
             }],
-            mutate: function()
+            deepCopy: function(refNavANN)
             {
-                var mutationScale = 0.1;
-                var mutationStrength = 1.0;
-
                 for (var l in this.layers)
                 {
-                    var layerBiasesMutedNum = Math.round(this.layers[l].biases.length * mutationScale) + 1;
+                    for (var bi = 0; bi < this.layers[l].biases.length; bi++)
+                    {
+                        this.layers[l].biases[bi] = refNavANN.layers[l].biases[bi];
+                    }
+                    for (var wni = 0; wni < this.layers[l].weights.length; wni++)
+                    {
+                        for (var wi = 0; wi < this.layers[l].weights[wni].length; wi++)
+                        {
+                            this.layers[l].weights[wni][wi] = refNavANN.layers[l].weights[wni][wi];
+                        }
+                    }
+                }
+            },
+            mutate: function(mutationScale=0.1, mutationStrength=0.1)
+            {
+                for (var l in this.layers)
+                {
+                    var layerBiasesMutedNum = Math.round(this.layers[l].biases.length * mutationScale);
 
                     for (var bm = 0; bm < layerBiasesMutedNum; bm++)
                     {
                         var randBiasId = getRandomInt(0, this.layers[l].neurons - 1);
-                        this.layers[l].biases[randBiasId] += getRandomArbitrary(-1*mutationStrength, mutationStrength);
+                        this.layers[l].biases[randBiasId] = getRandomArbitrary(-1*mutationStrength, mutationStrength);
                     }
 
-                    // console.log(this.layers[l].name, neuronBiasesToMutate);
+                    var layerNeuronWeightsMutatedNum = Math.round(this.layers[l].weights.length * mutationScale);
+                    for (var wni = 0; wni < layerNeuronWeightsMutatedNum; wni++)
+                    {
+                        var randNeuronWeightsId = getRandomInt(0, this.layers[l].weights.length - 1);
+                        var neuronWeightsMutatedNum = Math.round(this.layers[l].weights[randNeuronWeightsId].length * mutationScale);
+                        for (var wi = 0; wi < neuronWeightsMutatedNum; wi++)
+                        {
+                            var randWeightId = getRandomInt(0, this.layers[l].weights[randNeuronWeightsId].length - 1);
+                            this.layers[l].weights[randNeuronWeightsId][randWeightId] = getRandomArbitrary(-1*mutationStrength, mutationStrength);
+                        }
+                    }
+
+                    // console.log(this.layers[l].name, layerNeuronWeightsMutatedNum);
                 }
             }
         };
@@ -381,9 +407,9 @@ class ValterExtrSimplified
         var leftMotorDuty  = linVelDuty - angVelDuty;
         var rightMotorDuty = linVelDuty + angVelDuty;
 
-        var vz  = ((rightMotorDuty + leftMotorDuty) / 2);
+        var vz  = ((rightMotorDuty + leftMotorDuty) / 2) * this.baseMovementPresets.speedMultiplier;
         var vx  = 0;
-        var vth = ((rightMotorDuty - leftMotorDuty) / this.baseMovementPresets.lengthBetweenTwoWheels);
+        var vth = ((rightMotorDuty - leftMotorDuty) / this.baseMovementPresets.lengthBetweenTwoWheels) * this.baseMovementPresets.speedMultiplier;
 
         var curPos = this.model.position.clone();
         var curRot = this.model.rotation.clone();
@@ -392,9 +418,9 @@ class ValterExtrSimplified
         var curPositionZ = curPos.z;
         var curTh = curRot.z;
 
-        var delta_z = (vz * Math.cos(curTh)) * this.baseMovementPresets.speedMultiplier;
-        var delta_x = (vz * Math.sin(curTh)) * this.baseMovementPresets.speedMultiplier;
-        var delta_th = vth * this.baseMovementPresets.speedMultiplier;
+        var delta_z = (vz * Math.cos(curTh));
+        var delta_x = (vz * Math.sin(curTh));
+        var delta_th = vth;
 
         curPositionZ    -= delta_z;
         curPositionX    -= delta_x;
@@ -407,7 +433,7 @@ class ValterExtrSimplified
 
     initNavANN()
     {
-        var randRange = 1.0;
+        var randRange = 0.5;
 
         for (var l = 0; l < this.navANN.layers.length; l++)
         {
