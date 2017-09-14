@@ -40,6 +40,7 @@ class ValterExtrSimplified
         addEventListener("simulationStep", this.simulationStep.bind(this), false);
 
         this.drawHelpers = drawHelpers;
+        this.drawPCL = true;
 
         self.baseMovementPresets = {
             "maxAllowedDuty": 35,
@@ -53,7 +54,7 @@ class ValterExtrSimplified
         };
 
         self.navANN = {
-            "inNeurons": 206,
+            "inNeurons": 207,
             "layers":[
             {
                     "name":"hl1",
@@ -63,7 +64,7 @@ class ValterExtrSimplified
             },
             {
                     "name":"hl2",
-                    "neurons": 50,
+                    "neurons": 20,
                     "biases":[],
                     "weights":[]
             },
@@ -73,6 +74,7 @@ class ValterExtrSimplified
                     "biases":[],
                     "weights":[]
             }],
+            "survived": 0,
             deepCopy: function(refNavANN)
             {
                 for (var l in this.layers)
@@ -190,9 +192,9 @@ class ValterExtrSimplified
         // {
             var matrix = new THREE.Matrix4();
             matrix.extractRotation(this.model.matrix);
-            var valterForwardDirection = new THREE.Vector3(0, 1, 0);
-            valterForwardDirection.applyMatrix4(matrix);
-            this.activeObjects["valterForwardDirectionVector"] = new THREE.ArrowHelper(valterForwardDirection, this.model.position, 1.5, 0x0000ff, 0.1, 0.05);
+            this.valterForwardDirection = new THREE.Vector3(0, 1, 0);
+            this.valterForwardDirection.applyMatrix4(matrix);
+            this.activeObjects["valterForwardDirectionVector"] = new THREE.ArrowHelper(this.valterForwardDirection, this.model.position, 1.5, 0x0000ff, 0.1, 0.05);
             this.vlab.getVlabScene().add(this.activeObjects["valterForwardDirectionVector"]);
         // }
 
@@ -224,16 +226,12 @@ class ValterExtrSimplified
             if (this.initialized)
             {
                 var valterRef = this;
-
-                // if (this.drawHelpers)
-                // {
-                    var matrix = new THREE.Matrix4();
-                    matrix.extractRotation(this.model.matrix);
-                    var valterForwardDirection = new THREE.Vector3(0, 1, 0);
-                    valterForwardDirection.applyMatrix4(matrix);
-                    this.activeObjects["valterForwardDirectionVector"].setDirection(valterForwardDirection);
-                    this.activeObjects["valterForwardDirectionVector"].position.copy(this.model.position.clone());
-                // }
+                var matrix = new THREE.Matrix4();
+                matrix.extractRotation(this.model.matrix);
+                this.valterForwardDirection = new THREE.Vector3(0, 1, 0);
+                this.valterForwardDirection.applyMatrix4(matrix);
+                this.activeObjects["valterForwardDirectionVector"].setDirection(this.valterForwardDirection);
+                this.activeObjects["valterForwardDirectionVector"].position.copy(this.model.position.clone());
             }
         }
     }
@@ -244,10 +242,10 @@ class ValterExtrSimplified
         valterXZPos.y = 0.0;
         var targetPoseXZPos = this.vlab.poseTarget.position.clone();
         targetPoseXZPos.y = 0.0;
-        var valterToTargetPoseDirectionVector = targetPoseXZPos.sub(valterXZPos);
-        this.valterToTargetPoseDirectionVectorLength = valterToTargetPoseDirectionVector.clone().length();
-        valterToTargetPoseDirectionVector.normalize();
-        this.activeObjects["valterToTargetPoseDirectionVector"] = new THREE.ArrowHelper(valterToTargetPoseDirectionVector, this.model.position, this.valterToTargetPoseDirectionVectorLength, 0xffffff, 0.1, 0.05);
+        this.valterToTargetPoseDirectionVector = targetPoseXZPos.sub(valterXZPos);
+        this.valterToTargetPoseDirectionVectorLength = this.valterToTargetPoseDirectionVector.clone().length();
+        this.valterToTargetPoseDirectionVector.normalize();
+        this.activeObjects["valterToTargetPoseDirectionVector"] = new THREE.ArrowHelper(this.valterToTargetPoseDirectionVector, this.model.position, this.valterToTargetPoseDirectionVectorLength, this.model.material.color, 0.1, 0.05);
         this.vlab.getVlabScene().add(this.activeObjects["valterToTargetPoseDirectionVector"]);
     }
 
@@ -257,12 +255,12 @@ class ValterExtrSimplified
         valterXZPos.y = 0.0;
         var targetPoseXZPos = this.vlab.poseTarget.position.clone();
         targetPoseXZPos.y = 0.0;
-        var valterToTargetPoseDirectionVector = targetPoseXZPos.sub(valterXZPos);
-        this.valterToTargetPoseDirectionVectorLength = valterToTargetPoseDirectionVector.clone().length();
-        valterToTargetPoseDirectionVector.normalize();
+        this.valterToTargetPoseDirectionVector = targetPoseXZPos.sub(valterXZPos);
+        this.valterToTargetPoseDirectionVectorLength = this.valterToTargetPoseDirectionVector.clone().length();
+        this.valterToTargetPoseDirectionVector.normalize();
         this.activeObjects["valterToTargetPoseDirectionVector"].position.copy(valterXZPos);
         this.activeObjects["valterToTargetPoseDirectionVector"].setLength(this.valterToTargetPoseDirectionVectorLength, 0.1, 0.05);
-        this.activeObjects["valterToTargetPoseDirectionVector"].setDirection(valterToTargetPoseDirectionVector);
+        this.activeObjects["valterToTargetPoseDirectionVector"].setDirection(this.valterToTargetPoseDirectionVector);
     }
 
     bodyKinectPCL()
@@ -309,13 +307,16 @@ class ValterExtrSimplified
                 this.activeObjects["bodyKinectItersectObjects"][objId] = this.vlab.getVlabScene().getObjectByName(this.vlab.vlabNature.bodyKinectItersectObjects[objId])
             }
 
-            var pclMaterial = new THREE.PointsMaterial({
-              color: this.model.material.color,
-              size: 0.05
-            });
-            this.activeObjects["bodyKinectItersectPCLGeometry"] = new THREE.Geometry();
-            this.activeObjects["bodyKinectItersectPCL"] = new THREE.Points(this.activeObjects["bodyKinectItersectPCLGeometry"], pclMaterial);
-            this.vlab.getVlabScene().add(this.activeObjects["bodyKinectItersectPCL"]);
+            if (this.drawPCL)
+            {
+                var pclMaterial = new THREE.PointsMaterial({
+                  color: this.model.material.color,
+                  size: 0.05
+                });
+                this.activeObjects["bodyKinectItersectPCLGeometry"] = new THREE.Geometry();
+                this.activeObjects["bodyKinectItersectPCL"] = new THREE.Points(this.activeObjects["bodyKinectItersectPCLGeometry"], pclMaterial);
+                this.vlab.getVlabScene().add(this.activeObjects["bodyKinectItersectPCL"]);
+            }
 
             this.bodyKinectPCL();
         }
@@ -327,8 +328,11 @@ class ValterExtrSimplified
             var matrix = new THREE.Matrix4();
             matrix.extractRotation(this.activeObjects[this.bodyName].matrixWorld);
 
-            this.activeObjects["bodyKinectItersectPCLGeometry"].dispose();
-            this.activeObjects["bodyKinectItersectPCLGeometry"] = new THREE.Geometry();
+            if (this.drawPCL)
+            {
+                this.activeObjects["bodyKinectItersectPCLGeometry"].dispose();
+                this.activeObjects["bodyKinectItersectPCLGeometry"] = new THREE.Geometry();
+            }
 
             this.activeObjects["bodyKinectPCLPointsDistances"] = [];
 
@@ -360,7 +364,10 @@ class ValterExtrSimplified
                                 this.activeObjects["bodyKinectPCLLines"][i].setColor(new THREE.Color(0xffffff));
                             }
 
-                            this.activeObjects["bodyKinectItersectPCLGeometry"].vertices.push(intersects[0].point);
+                            if (this.drawPCL)
+                            {
+                                this.activeObjects["bodyKinectItersectPCLGeometry"].vertices.push(intersects[0].point);
+                            }
                         }
                         else
                         {
@@ -395,7 +402,11 @@ class ValterExtrSimplified
                     this.activeObjects["bodyKinectPCLPointsDistances"][i] = 4.0;
                 }
             }
-            this.activeObjects["bodyKinectItersectPCL"].geometry = this.activeObjects["bodyKinectItersectPCLGeometry"];
+
+            if (this.drawPCL)
+            {
+                this.activeObjects["bodyKinectItersectPCL"].geometry = this.activeObjects["bodyKinectItersectPCLGeometry"];
+            }
         }
     }
 
@@ -433,7 +444,7 @@ class ValterExtrSimplified
 
     initNavANN()
     {
-        var randRange = 0.5;
+        var randRange = 0.1;
 
         for (var l = 0; l < this.navANN.layers.length; l++)
         {
