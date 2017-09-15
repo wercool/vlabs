@@ -393,14 +393,13 @@ function ValterANNNavigation(webGLContainer)
 
                         //child navANNs
                         valterRef.navANN.deepCopy(self.Valters[randParentId].navANN);
-                        valterRef.navANN.mutate(0.01, 0.01 / goodHistory);
+                        valterRef.navANN.mutate(0.05, 0.01 / goodHistory);
                     }
                     else
                     {
                         //parent navANNs
-                        valterRef.navANN.mutate(0.05, 0.01 / goodHistory);
+                        valterRef.navANN.mutate(0.01, 0.01 / goodHistory);
                     }
-
 
                     if (!valterRef.killed)
                     {
@@ -443,19 +442,24 @@ function ValterANNNavigation(webGLContainer)
                         {
                             continue;
                         }
-                        intersectObj.position.x = getRandomArbitrary(-2.5, 2.5);
-                        intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
-
-                        // intersectObj.position.x += getRandomArbitrary(-0.1, 0.1);
+                        // intersectObj.position.x = getRandomArbitrary(-2.5, 2.5);
                         // intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
+
+                        intersectObj.position.x += getRandomArbitrary(-0.1, 0.1);
+                        intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
 
                         intersectObj.BBox.setFromObject(intersectObj);;
                         intersectObj.BBoxHelper.update();
                     }
                 }
 
-                self.poseTarget.position.x = getRandomArbitrary(-1.8, 1.8);
+                // self.poseTarget.position.x = getRandomArbitrary(-1.8, 1.8);
+                // self.poseTarget.position.z += getRandomArbitrary(-0.1, 0.1);
+
+                self.poseTarget.position.x += getRandomArbitrary(-0.1, 0.1);
                 self.poseTarget.position.z += getRandomArbitrary(-0.1, 0.1);
+
+
                 self.poseTargetControl.update();
 
                 self.epochStep = 0;
