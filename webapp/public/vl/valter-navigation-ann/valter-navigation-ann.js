@@ -36,7 +36,7 @@ function ValterANNNavigation(webGLContainer)
         self.getVlabScene().add(light);
 
         // Valters
-        var num = 10;
+        var num = 16;
         var x = 0.0;
         var dx = (x*-1*2) / num;
         for (var i = 0; i < num; i++)
@@ -300,6 +300,11 @@ function ValterANNNavigation(webGLContainer)
                     //     killedOnInplaceRotation++;
                     // }
                     // valterRef.prevRotDirection = curRotDir;
+
+                    if (valterRef.model.position.z > self.poseTarget.position.z + 2.0)
+                    {
+                        valterRef.killed = true;
+                    }
 
                     if (valterRef.killed) 
                     {
