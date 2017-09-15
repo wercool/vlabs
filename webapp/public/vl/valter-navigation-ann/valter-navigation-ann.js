@@ -36,7 +36,7 @@ function ValterANNNavigation(webGLContainer)
         self.getVlabScene().add(light);
 
         // Valters
-        var num = 25;
+        var num = 10;
         var x = 0.0;
         var dx = (x*-1*2) / num;
         for (var i = 0; i < num; i++)
@@ -51,7 +51,7 @@ function ValterANNNavigation(webGLContainer)
         {
             var intersectObj = self.getVlabScene().getObjectByName(intersectObjName);
 
-            if (intersectObjName.indexOf("Cube") > -1)
+            if (false)//(intersectObjName.indexOf("Cube") > -1)
             {
                 intersectObj.visible = false;
             }
@@ -138,11 +138,29 @@ function ValterANNNavigation(webGLContainer)
         self.epochStep = 0;
         self.epoch = 0;
 
+        var storedLength = 0;
+        for(var i =0; i < localStorage.length; i++)
+        {
+            if (localStorage.key(i).indexOf("navANN") > -1)
+            {
+                storedLength++;
+            }
+        }
+
         for (var valterRef of self.Valters)
         {
             valterRef.baseMovementPresets.speedMultiplier = 0.001;
 
-            valterRef.initNavANN();
+            if (storedLength > 0)
+            {
+                valterRef.initNavANN();
+                var savedNavANN = JSON.parse(localStorage.getItem("navANN-" + getRandomInt(0, storedLength- 1)))
+                valterRef.navANN.deepCopy(savedNavANN);
+            }
+            else
+            {
+                valterRef.initNavANN();
+            }
 
             valterRef.BBoxHelper = new THREE.BoxHelper(valterRef.model, valterRef.model.material.color);
             self.getVlabScene().add(valterRef.BBoxHelper);
@@ -229,8 +247,8 @@ function ValterANNNavigation(webGLContainer)
                     navANNInput.push(self.poseTarget.position.x);
                     var cmdVel = valterRef.navANNFeedForward(navANNInput);
 
-                    var linVel = cmdVel[0] + getRandomArbitrary(-0.01, -0.01);
-                    var rotVel = cmdVel[1] + getRandomArbitrary(-0.01, -0.01);
+                    var linVel = cmdVel[0] + getRandomArbitrary(-0.01, 0.01);
+                    var rotVel = cmdVel[1] + getRandomArbitrary(-0.01, 0.01);
 
 // console.log(linVel, rotVel);
 // consoleClearCnt++;
@@ -251,11 +269,11 @@ function ValterANNNavigation(webGLContainer)
                         }
                     }
 
-                    if (Math.abs(linVel) > valterRef.baseMovementPresets.maxLinVel || Math.abs(rotVel) > valterRef.baseMovementPresets.maxAngVel)
-                    {
-                        valterRef.killed = true;
-                        killedOnSpeedLimit++;
-                    }
+                    // if (Math.abs(linVel) > valterRef.baseMovementPresets.maxLinVel || Math.abs(rotVel) > valterRef.baseMovementPresets.maxAngVel)
+                    // {
+                    //     valterRef.killed = true;
+                    //     killedOnSpeedLimit++;
+                    // }
 
                     // if (linVel < 0)
                     // {
@@ -313,7 +331,7 @@ function ValterANNNavigation(webGLContainer)
 
 
             // if ((survivedNum <= Math.round(self.Valters.length * 0.01)) || self.epochStep > 1000)
-            if (self.epochStep > 1000 || survivedNum == 0)
+            if (self.epochStep > 400 || survivedNum == 0)
             {
                 console.clear();
 
@@ -339,12 +357,7 @@ function ValterANNNavigation(webGLContainer)
                     for (var si = 0; si < selectedNum; si++)
                     {
                         var valterRefToStore = self.Valters[si];
-                        var annToStore = {
-                            "distance": valterRefToStore.valterToTargetPoseDirectionVectorLength,
-                            "survived": valterRefToStore.navANN.survived,
-                            "ann": JSON.stringify(valterRefToStore.navANN)
-                        };
-                        localStorage.setItem("navANN-" + si, JSON.stringify(annToStore));
+                        localStorage.setItem("navANN-" + si, JSON.stringify(valterRefToStore.navANN));
                     }
 
                 }
@@ -375,12 +388,12 @@ function ValterANNNavigation(webGLContainer)
 
                         //child navANNs
                         valterRef.navANN.deepCopy(self.Valters[randParentId].navANN);
-                        valterRef.navANN.mutate(0.01 / goodHistory, 0.01 / goodHistory);
+                        valterRef.navANN.mutate(0.01, 0.01 / goodHistory);
                     }
                     else
                     {
                         //parent navANNs
-                        valterRef.navANN.mutate(0.001 / goodHistory, 0.001 / goodHistory);
+                        valterRef.navANN.mutate(0.05, 0.01 / goodHistory);
                     }
 
 
@@ -421,15 +434,15 @@ function ValterANNNavigation(webGLContainer)
                     {
                         var intersectObj = self.getVlabScene().getObjectByName(intersectObjName);
 
-                        if (intersectObjName.indexOf("Cube") > -1)
+                        if (false)//(intersectObjName.indexOf("Cube") > -1)
                         {
                             continue;
                         }
-                        // intersectObj.position.x += getRandomArbitrary(-2.5, 2.5);
-                        // intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
-
-                        intersectObj.position.x += getRandomArbitrary(-0.1, 0.1);
+                        intersectObj.position.x = getRandomArbitrary(-2.5, 2.5);
                         intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
+
+                        // intersectObj.position.x += getRandomArbitrary(-0.1, 0.1);
+                        // intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
 
                         intersectObj.BBox.setFromObject(intersectObj);;
                         intersectObj.BBoxHelper.update();
@@ -437,7 +450,7 @@ function ValterANNNavigation(webGLContainer)
                 }
 
                 self.poseTarget.position.x = getRandomArbitrary(-1.8, 1.8);
-                self.poseTarget.position.z += getRandomArbitrary(-0.5, 0.5);
+                self.poseTarget.position.z += getRandomArbitrary(-0.1, 0.1);
                 self.poseTargetControl.update();
 
                 self.epochStep = 0;

@@ -64,7 +64,7 @@ class ValterExtrSimplified
             },
             {
                     "name":"hl2",
-                    "neurons": 20,
+                    "neurons": 50,
                     "biases":[],
                     "weights":[]
             },
