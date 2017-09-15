@@ -128,6 +128,7 @@ function ValterANNNavigation(webGLContainer)
         self.poseTargetControl.update();
 
         self.epochFinished = false;
+        self.epochStep = 0;
         self.epoch = 0;
 
         for (var valterRef of self.Valters)
@@ -188,6 +189,7 @@ function ValterANNNavigation(webGLContainer)
     {
         if (!self.epochFinished)
         {
+            self.epochStep++;
             var survivedNum = 0;
 
             for (var valterRef of self.Valters)
@@ -254,7 +256,7 @@ function ValterANNNavigation(webGLContainer)
                     {
                         valterRef.inPlaceRotation += 1 - Math.abs(linVel / 2);
                     }
-                    if (valterRef.inPlaceRotation > 200)
+                    if (valterRef.inPlaceRotation > 400)
                     {
                         valterRef.killed = true;
                         killedOnInplaceRotation++;
@@ -290,7 +292,7 @@ function ValterANNNavigation(webGLContainer)
 
 
 
-            if ((survivedNum <= Math.round(self.Valters.length * 0.15)))
+            if ((survivedNum <= Math.round(self.Valters.length * 0.15)) || self.epochStep > 2000)
             {
                 console.clear();
 
@@ -321,6 +323,8 @@ function ValterANNNavigation(webGLContainer)
 
                     console.log("%c" + pad("   ", valterRef.id, true) + " " + pad("     ", !valterRef.killed, true) + " " + valterRef.navANN.survived +" " + valterRef.valterToTargetPoseDirectionVectorLength.toFixed(5), "color: #" + valterRef.model.material.color.getHexString());
 
+                    var goodHistory = (valterRef.navANN.survived > 0) ? valterRef.navANN.survived : 1
+
                     if (survivedNum > 0)
                     {
                         if (v_id > selectedNum - 1)
@@ -329,12 +333,12 @@ function ValterANNNavigation(webGLContainer)
 
                             //child navANNs
                             valterRef.navANN.deepCopy(self.Valters[randParentId].navANN);
-                            valterRef.navANN.mutate(0.01, 0.01);
+                            valterRef.navANN.mutate(0.01 / goodHistory, 0.01 / goodHistory);
                         }
                         else
                         {
                             //parent navANNs
-                            valterRef.navANN.mutate(0.001, 0.001);
+                            valterRef.navANN.mutate(0.001 / goodHistory, 0.001 / goodHistory);
                         }
                     }
                     else
@@ -391,6 +395,7 @@ function ValterANNNavigation(webGLContainer)
                 self.poseTarget.position.x = getRandomArbitrary(-1.8, 1.8);
                 self.poseTargetControl.update();
 
+                self.epochStep = 0;
                 killedOnHit = 0;
                 killedOnSpeedLimit = 0;
                 killedOnBackMovement = 0;
