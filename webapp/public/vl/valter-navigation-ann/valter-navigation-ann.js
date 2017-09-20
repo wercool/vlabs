@@ -269,11 +269,11 @@ function ValterANNNavigation(webGLContainer)
                         }
                     }
 
-                    // if (Math.abs(linVel) > valterRef.baseMovementPresets.maxLinVel || Math.abs(rotVel) > valterRef.baseMovementPresets.maxAngVel)
-                    // {
-                    //     valterRef.killed = true;
-                    //     killedOnSpeedLimit++;
-                    // }
+                    if (Math.abs(linVel) > valterRef.baseMovementPresets.maxLinVel || Math.abs(rotVel) > valterRef.baseMovementPresets.maxAngVel)
+                    {
+                        valterRef.killed = true;
+                        killedOnSpeedLimit++;
+                    }
 
                     // if (linVel < 0)
                     // {
@@ -442,22 +442,22 @@ function ValterANNNavigation(webGLContainer)
                         {
                             continue;
                         }
-                        // intersectObj.position.x = getRandomArbitrary(-2.5, 2.5);
-                        // intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
-
-                        intersectObj.position.x += getRandomArbitrary(-0.1, 0.1);
+                        intersectObj.position.x = getRandomArbitrary(-2.5, 2.5);
                         intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
+
+                        // intersectObj.position.x += getRandomArbitrary(-0.1, 0.1);
+                        // intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
 
                         intersectObj.BBox.setFromObject(intersectObj);;
                         intersectObj.BBoxHelper.update();
                     }
                 }
 
-                // self.poseTarget.position.x = getRandomArbitrary(-1.8, 1.8);
+                self.poseTarget.position.x = getRandomArbitrary(-1.8, 1.8);
                 // self.poseTarget.position.z += getRandomArbitrary(-0.1, 0.1);
 
-                self.poseTarget.position.x += getRandomArbitrary(-0.1, 0.1);
-                self.poseTarget.position.z += getRandomArbitrary(-0.1, 0.1);
+                // self.poseTarget.position.x += getRandomArbitrary(-0.1, 0.1);
+                // self.poseTarget.position.z += getRandomArbitrary(-0.1, 0.1);
 
 
                 self.poseTargetControl.update();
