@@ -336,7 +336,7 @@ function ValterANNNavigation(webGLContainer)
 
 
             // if ((survivedNum <= Math.round(self.Valters.length * 0.01)) || self.epochStep > 1000)
-            if (self.epochStep > 400 || survivedNum == 0)
+            if (self.epochStep > 1000 || survivedNum == 0)
             {
                 console.clear();
 
