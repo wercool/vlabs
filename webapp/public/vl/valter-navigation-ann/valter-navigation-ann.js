@@ -69,6 +69,27 @@ function ValterANNNavigation(webGLContainer)
             }
         }
 
+        for (var intersectObjName of self.vlabNature.bodyKinectItersectObjects)
+        {
+            if(intersectObjName.indexOf("Cube") > -1)
+            {
+                var intersectObj = self.getVlabScene().getObjectByName(intersectObjName);
+
+                if (false)//(intersectObjName.indexOf("Cube") > -1)
+                {
+                    continue;
+                }
+                intersectObj.position.x = getRandomArbitrary(-2.5, 2.5);
+                intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
+
+                // intersectObj.position.x += getRandomArbitrary(-0.1, 0.1);
+                // intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
+
+                intersectObj.BBox.setFromObject(intersectObj);;
+                intersectObj.BBoxHelper.update();
+            }
+        }
+
         setTimeout(self.waitingForValterInitialization, 250);
     };
 
@@ -432,35 +453,34 @@ function ValterANNNavigation(webGLContainer)
                     valterRef.bodyKinectPCL();
                 }
 
-                for (var intersectObjName of self.vlabNature.bodyKinectItersectObjects)
-                {
-                    if(intersectObjName.indexOf("Cube") > -1)
-                    {
-                        var intersectObj = self.getVlabScene().getObjectByName(intersectObjName);
+                // for (var intersectObjName of self.vlabNature.bodyKinectItersectObjects)
+                // {
+                //     if(intersectObjName.indexOf("Cube") > -1)
+                //     {
+                //         var intersectObj = self.getVlabScene().getObjectByName(intersectObjName);
 
-                        if (false)//(intersectObjName.indexOf("Cube") > -1)
-                        {
-                            continue;
-                        }
-                        intersectObj.position.x = getRandomArbitrary(-2.5, 2.5);
-                        intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
+                //         if (false)//(intersectObjName.indexOf("Cube") > -1)
+                //         {
+                //             continue;
+                //         }
+                //         intersectObj.position.x = getRandomArbitrary(-2.5, 2.5);
+                //         intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
 
-                        // intersectObj.position.x += getRandomArbitrary(-0.1, 0.1);
-                        // intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
+                //         // intersectObj.position.x += getRandomArbitrary(-0.1, 0.1);
+                //         // intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
 
-                        intersectObj.BBox.setFromObject(intersectObj);;
-                        intersectObj.BBoxHelper.update();
-                    }
-                }
+                //         intersectObj.BBox.setFromObject(intersectObj);;
+                //         intersectObj.BBoxHelper.update();
+                //     }
+                // }
 
-                self.poseTarget.position.x = getRandomArbitrary(-1.8, 1.8);
+                // self.poseTarget.position.x = getRandomArbitrary(-1.8, 1.8);
                 // self.poseTarget.position.z += getRandomArbitrary(-0.1, 0.1);
 
                 // self.poseTarget.position.x += getRandomArbitrary(-0.1, 0.1);
                 // self.poseTarget.position.z += getRandomArbitrary(-0.1, 0.1);
 
-
-                self.poseTargetControl.update();
+                // self.poseTargetControl.update();
 
                 self.epochStep = 0;
                 killedOnHit = 0;
