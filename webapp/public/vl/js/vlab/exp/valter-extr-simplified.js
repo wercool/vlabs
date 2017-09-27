@@ -14,9 +14,6 @@ class ValterExtrSimplified
         this.valterJSON = "/vl/models/valter/valter-extr-simplified.json";
 
         this.killed = false;
-        this.backMovement = 0;
-        this.inPlaceRotation = 0;
-        this.prevRotDirection = 1;
 
         this.BBox = undefined;
         this.BBoxHelper = undefined;
@@ -58,7 +55,7 @@ class ValterExtrSimplified
             "layers":[
             {
                     "name":"hl1",
-                    "neurons": 50,
+                    "neurons": 100,
                     "biases":[],
                     "weights":[]
             },
@@ -433,8 +430,13 @@ class ValterExtrSimplified
         var delta_x = (vz * Math.sin(curTh));
         var delta_th = vth;
 
-        curPositionZ    -= delta_z;
-        curPositionX    -= delta_x;
+        var nearToTargetSpeedDamping = 1;
+        if (this.valterToTargetPoseDirectionVectorLength < 2.0)
+        {
+            nearToTargetSpeedDamping = this.valterToTargetPoseDirectionVectorLength / 2.0;
+        }
+        curPositionZ    -= delta_z * nearToTargetSpeedDamping;
+        curPositionX    -= delta_x * nearToTargetSpeedDamping;
         curTh           += delta_th;
 
         this.model.position.z = curPositionZ;
