@@ -389,7 +389,7 @@ function ValterANNNavigation(webGLContainer)
 
 
             // if ((survivedNum <= Math.round(self.Valters.length * 0.01)) || self.epochStep > 1000)
-            if (self.epochStep > 2 / valterRef.baseMovementPresets.speedMultiplier || survivedNum == 0)
+            if (self.epochStep > 3 / valterRef.baseMovementPresets.speedMultiplier || survivedNum == 0)
             {
                 console.clear();
 
