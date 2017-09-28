@@ -15,6 +15,16 @@ class ValterExtrSimplified
 
         this.killed = false;
 
+        this.successDiff = Infinity;
+
+        this.backMovement = 0;
+        this.inPlaceRotation = 0;
+        this.prevRotDirection = 1;
+
+        this.curLinVel = 0.0;
+        this.curRotVel = 0.0;
+
+
         this.BBox = undefined;
         this.BBoxHelper = undefined;
 
@@ -254,10 +264,23 @@ class ValterExtrSimplified
         targetPoseXZPos.y = 0.0;
         this.valterToTargetPoseDirectionVector = targetPoseXZPos.sub(valterXZPos);
         this.valterToTargetPoseDirectionVectorLength = this.valterToTargetPoseDirectionVector.clone().length();
-        this.valterToTargetPoseDirectionVector.normalize();
-        this.activeObjects["valterToTargetPoseDirectionVector"].position.copy(valterXZPos);
-        this.activeObjects["valterToTargetPoseDirectionVector"].setLength(this.valterToTargetPoseDirectionVectorLength, 0.1, 0.05);
-        this.activeObjects["valterToTargetPoseDirectionVector"].setDirection(this.valterToTargetPoseDirectionVector);
+        if (this.valterToTargetPoseDirectionVectorLength > 0.1)
+        {
+            this.valterToTargetPoseDirectionVector.normalize();
+            this.activeObjects["valterToTargetPoseDirectionVector"].position.copy(valterXZPos);
+            this.activeObjects["valterToTargetPoseDirectionVector"].setLength(this.valterToTargetPoseDirectionVectorLength, 0.1, 0.05);
+            this.activeObjects["valterToTargetPoseDirectionVector"].setDirection(this.valterToTargetPoseDirectionVector);
+        }
+
+        if (this.valterToTargetPoseDirectionVectorLength < 2.0)
+        {
+            this.successDiff = this.valterToTargetPoseDirectionVectorLength + Math.abs(this.curLinVel) + Math.abs(this.curRotVel);
+        }
+        else
+        {
+            this.successDiff = this.valterToTargetPoseDirectionVectorLength;
+        }
+
     }
 
     bodyKinectPCL()
@@ -409,6 +432,9 @@ class ValterExtrSimplified
 
     setCmdVel(linVel, angVel)
     {
+        this.curLinVel = linVel;
+        this.curRotVel = angVel;
+
         var angVelDuty = (angVel * this.baseMovementPresets.maxAllowedDuty) / this.baseMovementPresets.maxAngVel;
         var linVelDuty = (linVel * this.baseMovementPresets.maxAllowedDuty) / this.baseMovementPresets.maxLinVel;
 
@@ -430,13 +456,8 @@ class ValterExtrSimplified
         var delta_x = (vz * Math.sin(curTh));
         var delta_th = vth;
 
-        var nearToTargetSpeedDamping = 1;
-        if (this.valterToTargetPoseDirectionVectorLength < 2.0)
-        {
-            nearToTargetSpeedDamping = this.valterToTargetPoseDirectionVectorLength / 2.0;
-        }
-        curPositionZ    -= delta_z * nearToTargetSpeedDamping;
-        curPositionX    -= delta_x * nearToTargetSpeedDamping;
+        curPositionZ    -= delta_z;
+        curPositionX    -= delta_x;
         curTh           += delta_th;
 
         this.model.position.z = curPositionZ;

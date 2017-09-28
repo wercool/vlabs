@@ -75,7 +75,7 @@ function ValterANNNavigation(webGLContainer)
             {
                 var intersectObj = self.getVlabScene().getObjectByName(intersectObjName);
 
-                if (false)//(intersectObjName.indexOf("Cube") > -1)
+                if (!intersectObj.visible)
                 {
                     continue;
                 }
@@ -237,10 +237,33 @@ function ValterANNNavigation(webGLContainer)
       return 0;
     }
 
+    var sortBySuccessDiff = function(a,b)
+    {
+      if (a.successDiff > b.successDiff)
+        return 1;
+      if (a.successDiff < b.successDiff)
+        return -1;
+      return 0;
+    }
+
+    var sortByAliveBySuccessDiff = function(a, b)
+    {
+      if (a.killed > b.killed)
+        return 1;
+      if (a.killed < b.killed)
+        return -1;
+      if (a.successDiff > b.successDiff)
+        return 1;
+      if (a.successDiff < b.successDiff)
+        return -1;
+      return 0;
+    }
+
     var consoleClearCnt = 0;
 
     var killedOnHit = 0;
     var killedOnSpeedLimit = 0;
+    var killedOnInplaceRotation = 0;
 
     var simulationStep = function()
     {
@@ -301,6 +324,35 @@ function ValterANNNavigation(webGLContainer)
                         killedOnSpeedLimit++;
                     }
 
+                    // if (linVel < 0)
+                    // {
+                    //     valterRef.backMovement += 1;
+                    // }
+                    // if (valterRef.backMovement > 200)
+                    // {
+                    //     valterRef.killed = true;
+                    //     killedOnBackMovement++;
+                    // }
+
+                    if (Math.abs(rotVel) > 0.1)
+                    {
+                        var curRotDir = (rotVel > 0) ? 1 : 0;
+                        if (curRotDir != valterRef.prevRotDirection)
+                        {
+                            valterRef.inPlaceRotation = 0;
+                        }
+                        else
+                        {
+                            valterRef.inPlaceRotation += 1 - Math.abs(linVel / 2);
+                        }
+                        if (valterRef.inPlaceRotation > 50)
+                        {
+                            valterRef.killed = true;
+                            killedOnInplaceRotation++;
+                        }
+                        valterRef.prevRotDirection = curRotDir;
+                    }
+
 
                     // if (valterRef.model.position.z > self.poseTarget.position.z + 2.0)
                     // {
@@ -347,9 +399,9 @@ function ValterANNNavigation(webGLContainer)
                 console.log("Survived: ", survivedNum, " / ", self.Valters.length);
                 console.log("Killed on Hit             : ", killedOnHit, " / ", self.Valters.length);
                 console.log("Killed on Speed Limit     : ", killedOnSpeedLimit, " / ", self.Valters.length);
+                console.log("Killed on Inplace Rotation: ", killedOnInplaceRotation, " / ", self.Valters.length);
 
 
-// self.Valters.sort(sortBySurvived);
 
                 var selectedNum = Math.round(self.Valters.length * 0.25);
                 // var selectedNum = 2;
@@ -374,11 +426,13 @@ function ValterANNNavigation(webGLContainer)
                 {
                     if (survivedNum > 0)
                     {
-                        self.Valters.sort(sortByAliveByDistance);
+                        // self.Valters.sort(sortByAliveByDistance);
+                        self.Valters.sort(sortByAliveBySuccessDiff);
                     }
                     else
                     {
-                        self.Valters.sort(sortByDistance);
+                        // self.Valters.sort(sortByDistance);
+                        self.Valters.sort(sortBySuccessDiff);
                     }
                 }
 
@@ -387,7 +441,12 @@ function ValterANNNavigation(webGLContainer)
                 {
                     var valterRef = self.Valters[v_id];
 
-                    console.log("%c" + pad("   ", valterRef.id, true) + " " + pad("     ", !valterRef.killed, true) + " " + valterRef.navANN.survived +" " + valterRef.valterToTargetPoseDirectionVectorLength.toFixed(5), "color: #" + valterRef.model.material.color.getHexString());
+                    console.log("%c" + pad("   ", valterRef.id, true) 
+                               + " " + pad("     ", !valterRef.killed, true) 
+                               + " " + valterRef.navANN.survived
+                               +" d:" + valterRef.valterToTargetPoseDirectionVectorLength.toFixed(5)
+                               +" sd:" + valterRef.successDiff.toFixed(5),
+                               "color: #" + valterRef.model.material.color.getHexString());
 
                     var goodHistory = (valterRef.navANN.survived > 0 && survivedNum != self.Valters.length) ? valterRef.navANN.survived : 1;
 
@@ -441,11 +500,11 @@ function ValterANNNavigation(webGLContainer)
                         if(intersectObjName.indexOf("Cube") > -1)
                         {
                             var intersectObj = self.getVlabScene().getObjectByName(intersectObjName);
-
-                            if (false)//(intersectObjName.indexOf("Cube") > -1)
+                            if (!intersectObj.visible)
                             {
                                 continue;
                             }
+
                             intersectObj.position.x = getRandomArbitrary(-2.5, 2.5);
                             intersectObj.position.z += getRandomArbitrary(-0.1, 0.1);
 
@@ -469,6 +528,7 @@ function ValterANNNavigation(webGLContainer)
                 self.epochStep = 0;
                 killedOnHit = 0;
                 killedOnSpeedLimit = 0;
+                killedOnInplaceRotation = 0;
 
                 self.epochFinished = false;
             }
