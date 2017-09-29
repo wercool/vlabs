@@ -14,7 +14,30 @@
     "advanceLighting":      false,
     "advanceLighting1src":  false,
     "bodyKinectItersectObjects": [
-        "backWall", "frontWall", "rWall", "lWall", "Cube1", "Cube2", "Cube3", "Cube4", "Cube5"
+        "wall1", 
+        "wall2", 
+        "wall3", 
+        "wall4", 
+        "wall5", 
+        "wall6", 
+        "wall7", 
+        "wall8", 
+        "wall9", 
+        "wall10", 
+        "wall11", 
+        "wall12", 
+        "wall13", 
+        "wall14", 
+        "wall15", 
+        "wall16", 
+        "wall17", 
+        "wall18", 
+        "Cube1", 
+        "Cube2",
+        "Cube3", 
+        "Cube4", 
+        "Cube5",
+        "Cube6"
     ],
     "castShadows":
     [

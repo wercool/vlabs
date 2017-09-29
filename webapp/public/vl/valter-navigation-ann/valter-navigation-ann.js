@@ -36,12 +36,13 @@ function ValterANNNavigation(webGLContainer)
         self.getVlabScene().add(light);
 
         // Valters
-        var num = 25;
+        var num = 15;
         var x = 0.0;
         var dx = (x*-1*2) / num;
         for (var i = 0; i < num; i++)
         {
-            self.Valters[i] = new ValterExtrSimplified(self, new THREE.Vector3(x, 0.0, -3.5), i, false);
+            // self.Valters[i] = new ValterExtrSimplified(self, new THREE.Vector3(x, 0.0, -3.5), i, false);
+            self.Valters[i] = new ValterExtrSimplified(self, new THREE.Vector3(getRandomArbitrary(-1.0, 1.0), 0.0, getRandomArbitrary(-3.5, -3.0)), i, false);
             x += dx;
         }
 
@@ -151,13 +152,21 @@ function ValterANNNavigation(webGLContainer)
         self.poseTargetControl.setSize(1.0);
         self.getVlabScene().add(self.poseTargetControl);
 
-        self.poseTarget.position.copy(new THREE.Vector3(0.0, 0.1, 9.0));
+        //big room
+        self.poseTarget.position.copy(new THREE.Vector3(15.0, 0.1, 10.0));
+        //small room
+        self.poseTarget.position.copy(new THREE.Vector3(-10.0, 0.1, -3.8));
+        //end of long room
+        self.poseTarget.position.copy(new THREE.Vector3(0.54, 0.1, 9.5));
+
         self.poseTarget.rotation.y = THREE.Math.degToRad(0.0);
         self.poseTargetControl.update();
 
         self.epochFinished = false;
         self.epochStep = 0;
         self.epoch = 0;
+
+        self.restoredFromStorage = false;
 
         var storedLength = 0;
         for(var i =0; i < localStorage.length; i++)
@@ -177,6 +186,7 @@ function ValterANNNavigation(webGLContainer)
                 valterRef.initNavANN();
                 var savedNavANN = JSON.parse(localStorage.getItem("navANN-" + getRandomInt(0, storedLength- 1)))
                 valterRef.navANN.deepCopy(savedNavANN);
+                self.restoredFromStorage = true;
             }
             else
             {
@@ -389,7 +399,7 @@ function ValterANNNavigation(webGLContainer)
 
 
             // if ((survivedNum <= Math.round(self.Valters.length * 0.01)) || self.epochStep > 1000)
-            if (self.epochStep > 3 / valterRef.baseMovementPresets.speedMultiplier || survivedNum == 0)
+            if (self.epochStep > 4 / valterRef.baseMovementPresets.speedMultiplier || survivedNum == 0)
             {
                 console.clear();
 
@@ -406,10 +416,11 @@ function ValterANNNavigation(webGLContainer)
                 var selectedNum = Math.round(self.Valters.length * 0.25);
                 // var selectedNum = 2;
 
-                if (survivedHistory > Math.round(self.Valters.length * 0.75) && survivedNum > Math.round(self.Valters.length * 0.5))
+                if (survivedHistory > Math.round(self.Valters.length * 0.25) && survivedNum > Math.round(self.Valters.length * 0.25))
                 {
                     // self.Valters.sort(sortBySurvivedByDistance);
-                    self.Valters.sort(sortByAliveByDistance);
+                    // self.Valters.sort(sortByAliveByDistance);
+                     self.Valters.sort(sortByAliveBySuccessDiff);
 
                     for (var si = 0; si < selectedNum; si++)
                     {
@@ -424,15 +435,22 @@ function ValterANNNavigation(webGLContainer)
                 }
                 else
                 {
-                    if (survivedNum > 0)
+                    if (self.epoch < 100 && !self.restoredFromStorage)
                     {
-                        // self.Valters.sort(sortByAliveByDistance);
-                        self.Valters.sort(sortByAliveBySuccessDiff);
+                        self.Valters.sort(sortByDistance);
                     }
                     else
                     {
-                        // self.Valters.sort(sortByDistance);
-                        self.Valters.sort(sortBySuccessDiff);
+                        if (survivedNum > 0)
+                        {
+                            // self.Valters.sort(sortByAliveByDistance);
+                            self.Valters.sort(sortByAliveBySuccessDiff);
+                        }
+                        else
+                        {
+                            // self.Valters.sort(sortByDistance);
+                            self.Valters.sort(sortBySuccessDiff);
+                        }
                     }
                 }
 
@@ -493,7 +511,7 @@ function ValterANNNavigation(webGLContainer)
                     valterRef.bodyKinectPCL();
                 }
 
-                if (survivedHistory > Math.round(self.Valters.length * 0.5) && survivedNum > Math.round(self.Valters.length * 0.5))
+                if (survivedHistory > Math.round(self.Valters.length * 0.25) && survivedNum > Math.round(self.Valters.length * 0.25))
                 {
                     for (var intersectObjName of self.vlabNature.bodyKinectItersectObjects)
                     {
@@ -523,7 +541,28 @@ function ValterANNNavigation(webGLContainer)
                 // self.poseTarget.position.x += getRandomArbitrary(-0.1, 0.1);
                 // self.poseTarget.position.z += getRandomArbitrary(-0.1, 0.1);
 
-                // self.poseTargetControl.update();
+
+                var posId = getRandomInt(0, 2);
+                switch (posId)
+                {
+                    case 0:
+                        //big room
+                        self.poseTarget.position.copy(new THREE.Vector3(15.0, 0.1, 10.0));
+                    break;
+                    case 1:
+                        //small room
+                        self.poseTarget.position.copy(new THREE.Vector3(-10.0, 0.1, -3.8));
+                    break;
+                    case 2:
+                        //end of long room
+                        self.poseTarget.position.copy(new THREE.Vector3(0.54, 0.1, 9.5));
+                    break;
+                }
+
+                self.poseTarget.position.x += getRandomArbitrary(-0.4, 0.4);
+                self.poseTarget.position.z += getRandomArbitrary(-0.4, 0.4);
+
+                self.poseTargetControl.update();
 
                 self.epochStep = 0;
                 killedOnHit = 0;
