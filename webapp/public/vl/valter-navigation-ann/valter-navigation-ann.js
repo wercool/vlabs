@@ -36,7 +36,7 @@ function ValterANNNavigation(webGLContainer)
         self.getVlabScene().add(light);
 
         // Valters
-        var num = 15;
+        var num = 20;
         var x = 0.0;
         var dx = (x*-1*2) / num;
         for (var i = 0; i < num; i++)
@@ -154,10 +154,10 @@ function ValterANNNavigation(webGLContainer)
 
         //big room
         self.poseTarget.position.copy(new THREE.Vector3(15.0, 0.1, 10.0));
-        //small room
-        self.poseTarget.position.copy(new THREE.Vector3(-10.0, 0.1, -3.8));
-        //end of long room
-        self.poseTarget.position.copy(new THREE.Vector3(0.54, 0.1, 9.5));
+        // //small room
+        // self.poseTarget.position.copy(new THREE.Vector3(-10.0, 0.1, -3.8));
+        // //end of long room
+        // self.poseTarget.position.copy(new THREE.Vector3(0.54, 0.1, 9.5));
 
         self.poseTarget.rotation.y = THREE.Math.degToRad(0.0);
         self.poseTargetControl.update();
@@ -542,22 +542,24 @@ function ValterANNNavigation(webGLContainer)
                 // self.poseTarget.position.z += getRandomArbitrary(-0.1, 0.1);
 
 
-                var posId = getRandomInt(0, 2);
-                switch (posId)
-                {
-                    case 0:
-                        //big room
-                        self.poseTarget.position.copy(new THREE.Vector3(15.0, 0.1, 10.0));
-                    break;
-                    case 1:
-                        //small room
-                        self.poseTarget.position.copy(new THREE.Vector3(-10.0, 0.1, -3.8));
-                    break;
-                    case 2:
-                        //end of long room
-                        self.poseTarget.position.copy(new THREE.Vector3(0.54, 0.1, 9.5));
-                    break;
-                }
+                // var posId = getRandomInt(0, 1);
+                // switch (posId)
+                // {
+                //     case 0:
+                //         //big room
+                //         self.poseTarget.position.copy(new THREE.Vector3(15.0, 0.1, 10.0));
+                //     break;
+                //     case 1:
+                //         //end of long room
+                //         self.poseTarget.position.copy(new THREE.Vector3(0.54, 0.1, 9.5));
+                //     break;
+                //     case 2:
+                //         //small room
+                //         self.poseTarget.position.copy(new THREE.Vector3(-10.0, 0.1, -3.8));
+                //     break;
+                // }
+
+                self.poseTarget.position.copy(new THREE.Vector3(15.0, 0.1, 10.0));
 
                 self.poseTarget.position.x += getRandomArbitrary(-0.4, 0.4);
                 self.poseTarget.position.z += getRandomArbitrary(-0.4, 0.4);

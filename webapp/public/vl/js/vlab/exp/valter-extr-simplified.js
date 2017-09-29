@@ -76,6 +76,12 @@ class ValterExtrSimplified
                     "weights":[]
             },
             {
+                    "name":"hl3",
+                    "neurons": 20,
+                    "biases":[],
+                    "weights":[]
+            },
+            {
                     "name":"outl",
                     "neurons": 2,
                     "biases":[],
