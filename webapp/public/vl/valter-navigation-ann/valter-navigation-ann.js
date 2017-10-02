@@ -41,8 +41,8 @@ function ValterANNNavigation(webGLContainer)
         var dx = (x*-1*2) / num;
         for (var i = 0; i < num; i++)
         {
-            // self.Valters[i] = new ValterExtrSimplified(self, new THREE.Vector3(x, 0.0, -3.5), i, false);
-            self.Valters[i] = new ValterExtrSimplified(self, new THREE.Vector3(getRandomArbitrary(-1.0, 1.0), 0.0, getRandomArbitrary(-3.5, -3.0)), i, false);
+            self.Valters[i] = new ValterExtrSimplified(self, new THREE.Vector3(x, 0.0, -3.5), i, false);
+            // self.Valters[i] = new ValterExtrSimplified(self, new THREE.Vector3(getRandomArbitrary(-1.0, 1.0), 0.0, getRandomArbitrary(-3.5, -3.0)), i, false);
             x += dx;
         }
 
@@ -153,11 +153,11 @@ function ValterANNNavigation(webGLContainer)
         self.getVlabScene().add(self.poseTargetControl);
 
         //big room
-        self.poseTarget.position.copy(new THREE.Vector3(15.0, 0.1, 10.0));
+        // self.poseTarget.position.copy(new THREE.Vector3(15.0, 0.1, 10.0));
         // //small room
         // self.poseTarget.position.copy(new THREE.Vector3(-10.0, 0.1, -3.8));
         // //end of long room
-        // self.poseTarget.position.copy(new THREE.Vector3(0.54, 0.1, 9.5));
+        self.poseTarget.position.copy(new THREE.Vector3(0.54, 0.1, 9.5));
 
         self.poseTarget.rotation.y = THREE.Math.degToRad(0.0);
         self.poseTargetControl.update();
@@ -413,7 +413,7 @@ function ValterANNNavigation(webGLContainer)
 
 
 
-                var selectedNum = Math.round(self.Valters.length * 0.25);
+                var selectedNum = Math.round(self.Valters.length * 0.05);
                 // var selectedNum = 2;
 
                 if (survivedHistory > Math.round(self.Valters.length * 0.25) && survivedNum > Math.round(self.Valters.length * 0.25))
@@ -474,12 +474,12 @@ function ValterANNNavigation(webGLContainer)
 
                         //child navANNs
                         valterRef.navANN.deepCopy(self.Valters[randParentId].navANN);
-                        valterRef.navANN.mutate(0.05, 0.1 / goodHistory);
+                        valterRef.navANN.mutate(0.01, 1.0 / goodHistory);
                     }
                     else
                     {
                         //parent navANNs
-                        valterRef.navANN.mutate(0.01, 0.01 / goodHistory);
+                        //valterRef.navANN.mutate(0.01, 0.01 / goodHistory);
                     }
 
                     if (!valterRef.killed)
@@ -559,10 +559,10 @@ function ValterANNNavigation(webGLContainer)
                 //     break;
                 // }
 
-                self.poseTarget.position.copy(new THREE.Vector3(15.0, 0.1, 10.0));
+                // self.poseTarget.position.copy(new THREE.Vector3(0.54, 0.1, 9.5));
 
-                self.poseTarget.position.x += getRandomArbitrary(-0.4, 0.4);
-                self.poseTarget.position.z += getRandomArbitrary(-0.4, 0.4);
+                // self.poseTarget.position.x += getRandomArbitrary(-0.4, 0.4);
+                // self.poseTarget.position.z += getRandomArbitrary(-0.4, 0.4);
 
                 self.poseTargetControl.update();
 
