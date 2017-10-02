@@ -474,7 +474,7 @@ function ValterANNNavigation(webGLContainer)
 
                         //child navANNs
                         valterRef.navANN.deepCopy(self.Valters[randParentId].navANN);
-                        valterRef.navANN.mutate(0.01, 1.0 / goodHistory);
+                        valterRef.navANN.mutate(0.1, 1.0 / goodHistory);
                     }
                     else
                     {
