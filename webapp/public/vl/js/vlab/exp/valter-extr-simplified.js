@@ -20,6 +20,9 @@ class ValterExtrSimplified
         this.backMovement = 0;
         this.inPlaceRotation = 0;
         this.prevRotDirection = 1;
+        this.prevPathLength = 0.0;
+        this.initialX = 0.0;
+        this.initialZ = 0.0;
 
         this.curLinVel = 0.0;
         this.curRotVel = 0.0;
@@ -230,6 +233,9 @@ class ValterExtrSimplified
         var self = this;
 
         this.initialized = true;
+
+        this.initialX = this.model.position.x;
+        this.initialZ = this.model.position.z;
     }
 
     simulationStep(event)

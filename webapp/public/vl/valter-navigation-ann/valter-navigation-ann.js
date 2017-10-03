@@ -344,7 +344,7 @@ function ValterANNNavigation(webGLContainer)
                     //     killedOnBackMovement++;
                     // }
 
-                    if (Math.abs(rotVel) > 0.1)
+                    if (Math.abs(rotVel) > 0.01)
                     {
                         var curRotDir = (rotVel > 0) ? 1 : 0;
                         if (curRotDir != valterRef.prevRotDirection)
@@ -355,10 +355,16 @@ function ValterANNNavigation(webGLContainer)
                         {
                             valterRef.inPlaceRotation += 1 - Math.abs(linVel / 2);
                         }
-                        if (valterRef.inPlaceRotation > 50)
+                        if (valterRef.inPlaceRotation > 10)
                         {
-                            valterRef.killed = true;
-                            killedOnInplaceRotation++;
+                            if (valterRef.prevPathLength < 1.5)
+                            {
+                                valterRef.killed = true;
+                            }
+                            else
+                            {
+                                valterRef.inPlaceRotation = 0;
+                            }
                         }
                         valterRef.prevRotDirection = curRotDir;
                     }
@@ -388,10 +394,11 @@ function ValterANNNavigation(webGLContainer)
             {
                 if (valterRef.navANN.survived > 5)
                 survivedHistory += 1;
+
+                var pathLength = Math.sqrt(Math.pow((valterRef.model.position.x - valterRef.initialX), 2) + Math.pow((valterRef.model.position.z - valterRef.initialZ), 2));
+
+                valterRef.prevPathLength = pathLength;
             }
-
-
-
 
 
 
@@ -413,7 +420,7 @@ function ValterANNNavigation(webGLContainer)
 
 
 
-                var selectedNum = Math.round(self.Valters.length * 0.05);
+                var selectedNum = Math.round(self.Valters.length * 0.25);
                 // var selectedNum = 2;
 
                 if (survivedHistory > Math.round(self.Valters.length * 0.25) && survivedNum > Math.round(self.Valters.length * 0.25))
