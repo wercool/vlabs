@@ -19,6 +19,7 @@ class ValterExtrSimplified
 
         this.backMovement = 0;
         this.inPlaceRotation = 0;
+        this.stuckedIn = 0;
         this.prevRotDirection = 1;
         this.prevPathLength = 0.0;
         this.initialX = 0.0;
@@ -72,18 +73,18 @@ class ValterExtrSimplified
                     "biases":[],
                     "weights":[]
             },
-            {
-                    "name":"hl2",
-                    "neurons": 50,
-                    "biases":[],
-                    "weights":[]
-            },
-            {
-                    "name":"hl3",
-                    "neurons": 20,
-                    "biases":[],
-                    "weights":[]
-            },
+            // {
+            //         "name":"hl2",
+            //         "neurons": 25,
+            //         "biases":[],
+            //         "weights":[]
+            // },
+            // {
+            //         "name":"hl3",
+            //         "neurons": 15,
+            //         "biases":[],
+            //         "weights":[]
+            // },
             {
                     "name":"outl",
                     "neurons": 2,

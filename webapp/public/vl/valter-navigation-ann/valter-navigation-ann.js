@@ -274,6 +274,8 @@ function ValterANNNavigation(webGLContainer)
     var killedOnHit = 0;
     var killedOnSpeedLimit = 0;
     var killedOnInplaceRotation = 0;
+    var killedOnBackMovement = 0;
+    var killedOnStuckedIn = 0;
 
     var simulationStep = function()
     {
@@ -334,15 +336,15 @@ function ValterANNNavigation(webGLContainer)
                         killedOnSpeedLimit++;
                     }
 
-                    // if (linVel < 0)
-                    // {
-                    //     valterRef.backMovement += 1;
-                    // }
-                    // if (valterRef.backMovement > 200)
-                    // {
-                    //     valterRef.killed = true;
-                    //     killedOnBackMovement++;
-                    // }
+                    if (linVel < -0.1)
+                    {
+                        valterRef.backMovement += 1;
+                    }
+                    if (valterRef.backMovement > 100)
+                    {
+                        valterRef.killed = true;
+                        killedOnBackMovement++;
+                    }
 
                     if (Math.abs(rotVel) > 0.01)
                     {
@@ -369,6 +371,16 @@ function ValterANNNavigation(webGLContainer)
                         valterRef.prevRotDirection = curRotDir;
                     }
 
+                    if (Math.abs(linVel) < 0.01 && valterRef.valterToTargetPoseDirectionVectorLength > 2.0)
+                    {
+                        valterRef.stuckedIn += 1;
+                        if (valterRef.stuckedIn > 50)
+                        {
+                            valterRef.killed = true;
+                            killedOnStuckedIn++;
+                        }
+                    }
+
 
                     // if (valterRef.model.position.z > self.poseTarget.position.z + 2.0)
                     // {
@@ -392,7 +404,7 @@ function ValterANNNavigation(webGLContainer)
             var survivedHistory = 0;
             for (var valterRef of self.Valters)
             {
-                if (valterRef.navANN.survived > 5)
+                if (valterRef.navANN.survived > 2)
                 survivedHistory += 1;
 
                 var pathLength = Math.sqrt(Math.pow((valterRef.model.position.x - valterRef.initialX), 2) + Math.pow((valterRef.model.position.z - valterRef.initialZ), 2));
@@ -417,7 +429,19 @@ function ValterANNNavigation(webGLContainer)
                 console.log("Killed on Hit             : ", killedOnHit, " / ", self.Valters.length);
                 console.log("Killed on Speed Limit     : ", killedOnSpeedLimit, " / ", self.Valters.length);
                 console.log("Killed on Inplace Rotation: ", killedOnInplaceRotation, " / ", self.Valters.length);
+                console.log("Killed on Back Movement: ", killedOnBackMovement, " / ", self.Valters.length);
+                console.log("Killed on Stucked In: ", killedOnStuckedIn, " / ", self.Valters.length);
+                console.log("Survived threshold: ", survivedNum, " / ", Math.round(self.Valters.length * 0.25));
+                console.log("Survived history threshold: ", survivedHistory, " / ", Math.round(self.Valters.length * 0.25));
 
+
+                for (var valterRef of self.Valters)
+                {
+                    if (valterRef.valterToTargetPoseDirectionVectorLength > 1.0)
+                    {
+                        valterRef.killed = true;
+                    }
+                }
 
 
                 var selectedNum = Math.round(self.Valters.length * 0.25);
@@ -481,12 +505,15 @@ function ValterANNNavigation(webGLContainer)
 
                         //child navANNs
                         valterRef.navANN.deepCopy(self.Valters[randParentId].navANN);
-                        valterRef.navANN.mutate(0.1, 1.0 / goodHistory);
+                        valterRef.navANN.mutate(0.05, 0.01 / goodHistory);
                     }
                     else
                     {
                         //parent navANNs
-                        //valterRef.navANN.mutate(0.01, 0.01 / goodHistory);
+                        if (survivedNum == 0)
+                        {
+                            valterRef.navANN.mutate(0.1, 0.01 / goodHistory);
+                        }
                     }
 
                     if (!valterRef.killed)
@@ -518,7 +545,7 @@ function ValterANNNavigation(webGLContainer)
                     valterRef.bodyKinectPCL();
                 }
 
-                if (survivedHistory > Math.round(self.Valters.length * 0.25) && survivedNum > Math.round(self.Valters.length * 0.25))
+                if (survivedHistory > Math.round(self.Valters.length * 0.15) && survivedNum > Math.round(self.Valters.length * 0.15))
                 {
                     for (var intersectObjName of self.vlabNature.bodyKinectItersectObjects)
                     {
@@ -539,6 +566,23 @@ function ValterANNNavigation(webGLContainer)
                             intersectObj.BBox.setFromObject(intersectObj);;
                             intersectObj.BBoxHelper.update();
                         }
+                    }
+
+                    var posId = getRandomInt(0, 2);
+                    switch (posId)
+                    {
+                        case 0:
+                            //big room
+                            self.poseTarget.position.copy(new THREE.Vector3(15.0, 0.1, 10.0));
+                        break;
+                        case 1:
+                            //end of long room
+                            self.poseTarget.position.copy(new THREE.Vector3(0.54, 0.1, 9.5));
+                        break;
+                        case 2:
+                            //small room
+                            self.poseTarget.position.copy(new THREE.Vector3(-10.0, 0.1, -3.8));
+                        break;
                     }
                 }
 
@@ -577,6 +621,8 @@ function ValterANNNavigation(webGLContainer)
                 killedOnHit = 0;
                 killedOnSpeedLimit = 0;
                 killedOnInplaceRotation = 0;
+                killedOnBackMovement = 0;
+                killedOnStuckedIn = 0;
 
                 self.epochFinished = false;
             }
