@@ -155,9 +155,9 @@ function ValterANNNavigation(webGLContainer)
         //big room
         // self.poseTarget.position.copy(new THREE.Vector3(15.0, 0.1, 10.0));
         // //small room
-        // self.poseTarget.position.copy(new THREE.Vector3(-10.0, 0.1, -3.8));
+        self.poseTarget.position.copy(new THREE.Vector3(-10.0, 0.1, -3.8));
         // //end of long room
-        self.poseTarget.position.copy(new THREE.Vector3(0.54, 0.1, 9.5));
+        // self.poseTarget.position.copy(new THREE.Vector3(0.54, 0.1, 9.5));
 
         self.poseTarget.rotation.y = THREE.Math.degToRad(0.0);
         self.poseTargetControl.update();
@@ -291,12 +291,18 @@ function ValterANNNavigation(webGLContainer)
                     valterRef.updateValterToTargetPoseDirectionVector();
                     valterRef.bodyKinectPCL();
 
-                    var navANNInput = valterRef.activeObjects["bodyKinectPCLPointsDistances"];
+                    var distances = valterRef.activeObjects["bodyKinectPCLPointsDistances"];
+                    // var normalizedDistances = [];
+                    // for (var distance of distances)
+                    // {
+                    //     normalizedDistances.push(distance / 4.0);
+                    // }
+                    var navANNInput = distances;
                     navANNInput.push(valterRef.valterToTargetPoseDirectionVectorLength);
-                    navANNInput.push(valterRef.valterToTargetPoseDirectionVector.angleTo(valterRef.valterForwardDirection));
-                    navANNInput.push(valterRef.model.position.z);
-                    navANNInput.push(valterRef.model.position.x);
-                    navANNInput.push(valterRef.model.rotation.z);
+                    // navANNInput.push(valterRef.valterToTargetPoseDirectionVector.angleTo(valterRef.valterForwardDirection));
+                    // navANNInput.push(valterRef.model.position.z);
+                    // navANNInput.push(valterRef.model.position.x);
+                    // navANNInput.push(valterRef.model.rotation.z);
                     navANNInput.push(self.poseTarget.position.z);
                     navANNInput.push(self.poseTarget.position.x);
 
@@ -340,7 +346,7 @@ function ValterANNNavigation(webGLContainer)
                     {
                         valterRef.backMovement += 1;
                     }
-                    if (valterRef.backMovement > 100)
+                    if (valterRef.backMovement > 50)
                     {
                         valterRef.killed = true;
                         killedOnBackMovement++;
@@ -357,7 +363,7 @@ function ValterANNNavigation(webGLContainer)
                         {
                             valterRef.inPlaceRotation += 1 - Math.abs(linVel / 2);
                         }
-                        if (valterRef.inPlaceRotation > 10)
+                        if (valterRef.inPlaceRotation > 5)
                         {
                             if (valterRef.prevPathLength < 1.5)
                             {
@@ -381,7 +387,6 @@ function ValterANNNavigation(webGLContainer)
                         }
                     }
 
-
                     // if (valterRef.model.position.z > self.poseTarget.position.z + 2.0)
                     // {
                     //     valterRef.killed = true;
@@ -404,7 +409,7 @@ function ValterANNNavigation(webGLContainer)
             var survivedHistory = 0;
             for (var valterRef of self.Valters)
             {
-                if (valterRef.navANN.survived > 2)
+                if (valterRef.navANN.survived > 1)
                 survivedHistory += 1;
 
                 var pathLength = Math.sqrt(Math.pow((valterRef.model.position.x - valterRef.initialX), 2) + Math.pow((valterRef.model.position.z - valterRef.initialZ), 2));
@@ -431,8 +436,9 @@ function ValterANNNavigation(webGLContainer)
                 console.log("Killed on Inplace Rotation: ", killedOnInplaceRotation, " / ", self.Valters.length);
                 console.log("Killed on Back Movement: ", killedOnBackMovement, " / ", self.Valters.length);
                 console.log("Killed on Stucked In: ", killedOnStuckedIn, " / ", self.Valters.length);
-                console.log("Survived threshold: ", survivedNum, " / ", Math.round(self.Valters.length * 0.25));
-                console.log("Survived history threshold: ", survivedHistory, " / ", Math.round(self.Valters.length * 0.25));
+                console.log("---------------------");
+                console.log("Survived threshold: ", survivedNum, " / ", Math.round(self.Valters.length * 0.1));
+                console.log("Survived history threshold: ", survivedHistory, " / ", Math.round(self.Valters.length * 0.1));
 
 
                 for (var valterRef of self.Valters)
@@ -440,14 +446,15 @@ function ValterANNNavigation(webGLContainer)
                     if (valterRef.valterToTargetPoseDirectionVectorLength > 1.0)
                     {
                         valterRef.killed = true;
+                        survivedNum--;
                     }
                 }
 
 
-                var selectedNum = Math.round(self.Valters.length * 0.25);
+                var selectedNum = Math.round(self.Valters.length * 0.15);
                 // var selectedNum = 2;
 
-                if (survivedHistory > Math.round(self.Valters.length * 0.25) && survivedNum > Math.round(self.Valters.length * 0.25))
+                if (survivedHistory > Math.round(self.Valters.length * 0.1) && survivedNum > Math.round(self.Valters.length * 0.1))
                 {
                     // self.Valters.sort(sortBySurvivedByDistance);
                     // self.Valters.sort(sortByAliveByDistance);
@@ -499,21 +506,27 @@ function ValterANNNavigation(webGLContainer)
 
                     var goodHistory = (valterRef.navANN.survived > 0 && survivedNum != self.Valters.length) ? valterRef.navANN.survived : 1;
 
-                    if (v_id > selectedNum - 1)
+                    if (survivedNum > 0)
                     {
-                        var randParentId = getRandomInt(0, selectedNum- 1);
+                        if (v_id > selectedNum - 1)
+                        {
+                            var randParentId = getRandomInt(0, selectedNum - 1);
 
-                        //child navANNs
-                        valterRef.navANN.deepCopy(self.Valters[randParentId].navANN);
-                        valterRef.navANN.mutate(0.05, 0.01 / goodHistory);
+                            //child navANNs
+                            valterRef.navANN.deepCopy(self.Valters[randParentId].navANN);
+                            valterRef.navANN.mutate(0.01, 0.01 / goodHistory);
+                        }
+                        else
+                        {
+                            //parent navANNs
+                            valterRef.navANN.mutate(0.001, 0.01 / goodHistory);
+                        }
                     }
                     else
                     {
-                        //parent navANNs
-                        if (survivedNum == 0)
-                        {
-                            valterRef.navANN.mutate(0.1, 0.01 / goodHistory);
-                        }
+                        var randParentId = getRandomInt(0, 1);
+                        valterRef.navANN.deepCopy(self.Valters[randParentId].navANN);
+                        valterRef.navANN.mutate(0.02, 1,0 / goodHistory);
                     }
 
                     if (!valterRef.killed)
@@ -528,7 +541,13 @@ function ValterANNNavigation(webGLContainer)
                     valterRef.killed = false;
                     valterRef.model.position.copy(valterRef.initialModelPosition);
                     valterRef.model.rotation.z = valterRef.initialModelRotation;
-                    // valterRef.model.rotation.z = getRandomArbitrary(-3.14, 0);
+
+
+                    valterRef.model.position.x += getRandomArbitrary(-0.25, 0.25); 
+                    valterRef.model.position.z += getRandomArbitrary(-0.25, 0.25); 
+                    valterRef.model.rotation.z += getRandomArbitrary(-0.1, 0.1);
+
+
 
                     valterRef.activeObjects["valterToTargetPoseDirectionVector"].setColor(new THREE.Color(valterRef.model.material.color));
 
@@ -545,7 +564,7 @@ function ValterANNNavigation(webGLContainer)
                     valterRef.bodyKinectPCL();
                 }
 
-                if (survivedHistory > Math.round(self.Valters.length * 0.15) && survivedNum > Math.round(self.Valters.length * 0.15))
+                if (survivedHistory > Math.round(self.Valters.length * 0.1) && survivedNum > Math.round(self.Valters.length * 0.1))
                 {
                     for (var intersectObjName of self.vlabNature.bodyKinectItersectObjects)
                     {

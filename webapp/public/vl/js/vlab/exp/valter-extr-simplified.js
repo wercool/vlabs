@@ -65,7 +65,7 @@ class ValterExtrSimplified
         };
 
         self.navANN = {
-            "inNeurons": 207,
+            "inNeurons": 203,
             "layers":[
             {
                     "name":"hl1",
@@ -75,13 +75,13 @@ class ValterExtrSimplified
             },
             // {
             //         "name":"hl2",
-            //         "neurons": 25,
+            //         "neurons": 20,
             //         "biases":[],
             //         "weights":[]
             // },
             // {
             //         "name":"hl3",
-            //         "neurons": 15,
+            //         "neurons": 4,
             //         "biases":[],
             //         "weights":[]
             // },
@@ -480,7 +480,7 @@ class ValterExtrSimplified
 
     initNavANN()
     {
-        var randRange = 0.1;
+        var randRange = 0.01;
 
         for (var l = 0; l < this.navANN.layers.length; l++)
         {

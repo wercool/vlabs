@@ -35,7 +35,7 @@ models.sequelize.sync({force: config.sequelizeSyncForce})
     {
         models.Role.create({ title: 'Administrator' }).then(function(role){
             administratorRole = role;
-            models.User.create({ email: 'maska@mail.ru', password: '123', firstname: 'Alexey', lastname: 'Maistrenko', activated: true, blocked: false }).then(function(user){
+            models.User.create({ email: 'maskame@gmail.com', password: '123', firstname: 'Alexey', lastname: 'Maistrenko', activated: true, blocked: false }).then(function(user){
                 user.addRole(administratorRole.id);
             })
         });
