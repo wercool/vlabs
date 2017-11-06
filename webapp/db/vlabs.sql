@@ -1,5 +1,6 @@
 DROP DATABASE IF EXISTS vlabs;
 CREATE DATABASE vlabs CHARACTER SET utf8;
+DROP USER 'vlabs'@'localhost';
 CREATE USER 'vlabs'@'localhost' IDENTIFIED BY 'vlabs';
 GRANT ALL PRIVILEGES ON vlabs.* TO 'vlabs'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
